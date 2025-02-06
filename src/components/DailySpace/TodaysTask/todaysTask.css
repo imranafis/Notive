@@ -1,0 +1,38 @@
+.todaysTask {
+  width: 100%;
+  height: 100%;
+
+  .actionPanel-todaysTask {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    /* background-color: blue; */
+    border-right: 2px solid gray;
+
+    .actionBtn {
+      font-size: 1.25rem;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    &.unactive {
+      display: none;
+    }
+  }
+
+  .contentPanel-todaysTask {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+
+    &.active {
+      display: flex;
+    }
+  }
+}

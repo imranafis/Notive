@@ -1,0 +1,56 @@
+.dailySpace {
+  width: 100%;
+  height: 100%;
+
+
+
+  .actionPanel-dailySpace{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    width: 45%;
+    height: 100%;
+    border-right: 2px solid gray;
+
+
+    .displayDate{
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 4rem;
+    }
+
+    .taskBar{
+      display: flex;
+      align-items: center;
+      gap: 20px;
+
+      .taskPlus{
+        cursor: pointer;
+        &:hover{
+          font-size: 1.3rem;
+          font-weight: 600;
+        }
+      }
+      
+      .icon {
+        font-size: 1.2rem;
+        
+       
+      }
+    }
+  }
+
+  .contentPanel-dailySpace{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    left: 45%;
+    width: 55%;
+    height: 100%;
+    /* background-color: green; */
+  }
+}

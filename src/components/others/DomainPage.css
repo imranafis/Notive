@@ -1,0 +1,233 @@
+:root {
+  --primary: rgb(247, 119, 84);
+  --small: rgb(255, 188, 128);
+  --medium: rgb(255, 159, 69);
+  --large: rgb(247, 110, 17);
+  --light: #eee;
+  --dark: #313154;
+  --gray: #888;
+  --danger: #f32424;
+  --greenS: rgb(130, 205, 72);
+  --greenM: rgb(85, 180, 54);
+  --greenL: rgb(56, 146, 56);
+  --highLighter: rgb(191, 191, 191);
+
+  --btn: rgb(51, 177, 202);
+  --textBtn: rgb(34, 107, 135);
+  --formBtn: rgb(12, 177, 180);
+
+  --shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+  --small-glow: 0px 0px 4px rgba(255, 188, 128, 0.75);
+  --medium-glow: 0px 0px 4px rgba(255, 159, 69, 0.75);
+  --large-glow: 0px 0px 4px rgb(247, 110, 17, 0.75);
+  --greenS-glow: 0px 0px 4px rgba(130, 205, 72, 0.75);
+  --greenM-glow: 0px 0px 4px rgba(85, 180, 54, 0.75);
+  --greenL-glow: 0px 0px 4px rgba(56, 146, 56, 0.75);
+
+  --side-panel: rgb(251, 251, 250);
+  --main-panel: rgb(255, 255, 255);
+
+  font-family: "Montserrat", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* color-scheme: light dark; */
+  color: rgba(255, 255, 255, 0.87);
+  /* background-color: #242424; */
+
+  /* font-synthesis: none; */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-color-scheme: light) {
+  /* :root {
+          color: #213547;
+          background-color: #ffffff;
+        }
+        a:hover {
+          color: #747bff;
+        }
+        button {
+          background-color: #f9f9f9;
+        } */
+}
+
+* {
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+  font-family: "Montserrat", sans-serif;
+}
+
+input:not([type="radio"]):not([type="checkbox"]),
+button {
+  appearance: none;
+  border: none;
+  outline: none;
+  background: none;
+  cursor: initial;
+}
+
+/* input[type="checkbox"]:checked {
+              border-color: green;
+            } */
+
+input[type="radio"],
+input[type="checkbox"] {
+  display: none;
+}
+
+html,
+body {
+  margin: 0;
+  /* width: 100%;
+      height: 100%;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center; */
+  /* background: var(--light); */
+  /* color: var(--dark); */
+}
+a {
+  all: unset; /* This removes all styles */
+  display: inline; /* You might want to add this back, depending on your use case */
+}
+
+.domain-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; /* Align items at the start */
+  position: absolute;
+  top: 7%; /* Below the header */
+  left: 0;
+  width: 50%;
+  height: 93%;
+  background-color: rgb(243, 242, 242);
+}
+
+.domain-panel .domainContainer {
+  padding: 0rem 3rem 0rem 3rem;
+}
+.domain-panel .welcome-domain {
+  display: block;
+  align-items: start;
+  font-size: 1.15rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
+
+.domainAnimation-panel {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  top: 7%;
+  left: 50%;
+  width: 50%;
+  height: 93%;
+  background-color: rgb(201, 201, 201);
+}
+.domainOptions {
+  display: block;
+  align-items: start;
+  justify-content: start;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+}
+
+.domainOptions label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: start;
+  padding: 1rem;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.domainOptions .bubble {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid var(--small);
+  box-shadow: var(--small-glow);
+}
+
+.domainOptions .bubble.medium {
+  border-color: var(--medium);
+  box-shadow: var(--medium-glow);
+}
+
+.domainOptions .bubble.large {
+  border-color: var(--large);
+  box-shadow: var(--large-glow);
+}
+
+.domainOptions .bubble::after {
+  content: "";
+  display: block;
+  opacity: 0;
+  width: 0px;
+  height: 0px;
+  background-color: var(--small);
+  box-shadow: var(--small-glow);
+  border-radius: 50%;
+  transition: 0.2s ease-in-out;
+}
+
+.domainOptions .bubble.medium::after {
+  background-color: var(--medium);
+  box-shadow: var(--medium-glow);
+}
+
+.domainOptions .bubble.large::after {
+  background-color: var(--large);
+  box-shadow: var(--large-glow);
+}
+
+.domainOptions label input:checked ~ .bubble::after {
+  width: 10px;
+  height: 10px;
+  opacity: 1;
+  align-items: center;
+}
+
+.domain-panel .Go {
+  display: block;
+  text-align: center;
+  width: 6rem;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  padding: 0.75rem 1.75rem;
+  border-radius: 10px;
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
+  color: #fff;
+  cursor: pointer;
+  background-color: var(--formBtn);
+  box-shadow: var(--shadow);
+  opacity: 0;
+}
+
+.domain-panel .Go.active {
+  display: block;
+  opacity: 0.5;
+  transition: 0.2s ease-in;
+}
+.domain-panel .Go.active:hover {
+  opacity: 1;
+}
