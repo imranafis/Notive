@@ -7,6 +7,7 @@ import { useFullScreen } from "../../lib/FullScreenContext.jsx";
 
 function LandingPage() {
   const [activeSection, setActiveSection] = useState("");
+  const [addSection, setAddSection] = useState("");
   const { isFullScreen, toggleFullScreen } = useFullScreen();
 
   useEffect(() => {
@@ -28,10 +29,19 @@ function LandingPage() {
     <>
       {/* <Header /> */}
       <div className={`actionPanel ${isFullScreen ? "active" : ""}`}>
-        <ActionPanel setActiveSection={setActiveSection} />
+        <ActionPanel
+          activeSection={activeSection}
+          setActiveSection={setActiveSection}
+          addSection={addSection}
+          setAddSection={setAddSection}
+        />
       </div>
       <div className={`contentPanel ${isFullScreen ? "active" : ""}`}>
-        <DisplayPanel activeSection={activeSection} />
+        <DisplayPanel
+          activeSection={activeSection}
+          addSection={addSection}
+          setAddSection={setAddSection}
+        />
       </div>
     </>
   );

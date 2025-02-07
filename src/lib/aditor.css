@@ -390,6 +390,10 @@ input:checked ~ .bubble::after {
   cursor: text;
 } */
 
+.aditor .line {
+  padding: 0.5rem 0.25rem 0.5rem 0.25rem;
+}
+
 .aditor .line .Head {
   display: flex;
   align-items: center;

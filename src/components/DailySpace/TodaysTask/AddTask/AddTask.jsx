@@ -3,6 +3,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { db } from "/src/lib/firebase"; // Adjust the path to your firebase.js file
 
 import { getUser } from "/src/lib/user";
+
 import Aditor_Checkbox from "../../../../lib/Aditor_Checkbox.jsx";
 import Aditor_Point from "../../../../lib/Aditor_Point.jsx";
 import RadioGroup from "../../../others/RadioGroup";
@@ -11,8 +12,7 @@ import "./addTask.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBackward } from "@fortawesome/free-solid-svg-icons";
 
-
-const AddTask = ({setActivePanel}) => {
+const AddTask = ({ setActivePanel }) => {
   const Aditor_Task_Point = useRef(null);
   const Aditor_Task_Checkbox = useRef(null);
 
@@ -97,20 +97,19 @@ const AddTask = ({setActivePanel}) => {
     //   }
   };
 
-  const handlePanelChange = () =>{
+  const handlePanelChange = () => {
     setActivePanel("");
-  }
-
+  };
 
   const add = async () => {
     if (!inputValue.trim()) {
       alert("Task name is required!");
       return;
     }
-  
+
     try {
       const userID = getUser().uid; // Get user data from localStorage
-  
+
       const taskData = {
         name: inputValue.trim(),
         priority: selectedPriority,
@@ -120,11 +119,11 @@ const AddTask = ({setActivePanel}) => {
         steps: stepsContent,
         createdAt: new Date().toISOString(),
       };
-  
+
       // Save to Firestore
       const docRef = await addDoc(collection(db, userID), taskData);
       console.log("Document written with ID: ", docRef.id);
-  
+
       // Reset form state and collapse all sections
       setInputValue("");
       setAddedTags([]);
@@ -140,12 +139,11 @@ const AddTask = ({setActivePanel}) => {
       alert("Failed to save task. Please try again.");
     }
   };
-  
-  
+
   return (
     <div className="addTask">
       <div className="backBtn">
-        <FontAwesomeIcon icon={faBackward} onClick={handlePanelChange}/>
+        <FontAwesomeIcon icon={faBackward} onClick={handlePanelChange} />
       </div>
       <div className="taskName">
         <p>Task Name :</p>
@@ -249,8 +247,7 @@ const AddTask = ({setActivePanel}) => {
         )}
       </div>
 
-      <div className="controlBtn" >
-   
+      <div className="controlBtn">
         <button id="saveBtn" onClick={add}>
           Save
         </button>
