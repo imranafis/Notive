@@ -14,8 +14,7 @@ const GoalSection = ({ addSection }) => {
         const querySnapshot = await getDocs(collection(db, userID));
         const goalList = querySnapshot.docs
           .map((doc) => ({ id: doc.id, ...doc.data() }))
-          .filter((goal) => goal.category === "goal"); // Ensure only "goal" category
-
+          .filter((goal) => goal.category === "goal");
         setGoals(goalList);
       } catch (error) {
         console.error("Error fetching goals:", error);
