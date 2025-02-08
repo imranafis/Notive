@@ -25,6 +25,7 @@ function ActionPanel({
       //console
     }
     setActiveSection(panel);
+    setAddSection("");
   };
   const handleAddChange = () => {
     if (addSection != activeSection) {
@@ -39,24 +40,28 @@ function ActionPanel({
       <div className="sectionBtn" onClick={() => handleSectionChange("")}>
         <img src={Logo} />
       </div>
-      <div
-        className="sectionBtn"
-        onClick={() => handleSectionChange("dailyspace")}
-      >
-        <FontAwesomeIcon icon={faClock} />
-        {/* <img src={dailyBtn}/> */}
-      </div>
+
       <div className="sectionBtn" onClick={() => handleSectionChange("goal")}>
         {/* <img src={goalBtn}/> */}
         <FontAwesomeIcon icon={faBullseye} />
       </div>
-      <div className="sectionBtn" onClick={() => handleSectionChange("note")}>
+      <div
+        className="sectionBtn"
+        onClick={() => handleSectionChange("bulletJournal")}
+      >
         {/* <img src={noteBtn}/> */}
         <FontAwesomeIcon icon={faListUl} />
       </div>
       <div className="sectionBtn" onClick={() => handleSectionChange("task")}>
         {/* <img src={taskBtn}/> */}
         <FontAwesomeIcon icon={faListCheck} />
+      </div>
+      <div
+        className="sectionBtn"
+        onClick={() => handleSectionChange("dailyspace")}
+      >
+        <FontAwesomeIcon icon={faClock} />
+        {/* <img src={dailyBtn}/> */}
       </div>
       <div
         className="sectionBtn"

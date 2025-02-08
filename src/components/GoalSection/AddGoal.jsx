@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "/src/lib/firebase"; // Adjust the path to your firebase.js file
+import DatePickerComponent from "../../lib/DatePickerComponent.jsx";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -11,16 +12,17 @@ import Aditor_Checkbox from "../../lib/Aditor_Checkbox.jsx";
 import "./GoalSection.css";
 
 function AddGoal({ setAddSection }) {
-  const Aditor_Goal_Checkbox = useRef(null);
+  const Aditor_Checkbox_Goal = useRef(null);
   const [goalName, setGoalName] = useState("");
   const [activeGroup, setActiveGroup] = useState(null);
-  const [BreakdownContent, setBreakdownContent] = useState(""); // Store content
+  const [BreakdownContent, setBreakdownContent] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const toggleSection = (section) => {
     // If closing, store the content before hiding
     if (activeGroup === section) {
-      if (Aditor_Goal_Checkbox.current) {
-        setBreakdownContent(Aditor_Goal_Checkbox.current.innerHTML);
+      if (Aditor_Checkbox_Goal.current) {
+        setBreakdownContent(Aditor_Checkbox_Goal.current.innerHTML);
       }
       setActiveGroup(null);
     } else {
@@ -36,7 +38,7 @@ function AddGoal({ setAddSection }) {
     if (!goalName.trim()) {
       toast.error("Goal name is required!", {
         position: "bottom-right",
-        autoClose: 3000,
+        autoClose: 2000,
       });
       return;
     }
@@ -44,11 +46,15 @@ function AddGoal({ setAddSection }) {
     try {
       const userID = getUser().uid; // Get user ID
 
+      // Retrieve latest breakdown content
+      const updatedBreakdownContent = Aditor_Checkbox_Goal.current?.innerHTML;
+
       const goalData = {
         goalName: goalName.trim(),
+        estimatedTime: selectedDate ? selectedDate.format("DD/MM/YYYY") : null,
         category: "goal",
         done: false,
-        breakdown: BreakdownContent, // Store breakdown content
+        breakdown: updatedBreakdownContent, // Store retrieved breakdown content
         createdAt: new Date().toISOString(),
       };
 
@@ -56,25 +62,26 @@ function AddGoal({ setAddSection }) {
       const docRef = await addDoc(collection(db, userID), goalData);
       console.log("Goal saved with ID:", docRef.id);
 
-      // Reset form state and collapse sections
-      setGoalName("");
-      setBreakdownContent("");
-      setActiveGroup(null); // Collapse sections
-
       toast.success("Goal saved successfully!", {
         position: "bottom-right",
-        autoClose: 3000,
+        autoClose: 2000,
       });
+
+      // Reset form state
+      setGoalName("");
+      setBreakdownContent("");
+      setActiveGroup(null);
     } catch (e) {
       console.error("Error saving goal:", e);
       toast.error("Failed to save goal. Please try again.", {
         position: "bottom-right",
-        autoClose: 3000,
+        autoClose: 2000,
       });
     }
+
     setTimeout(() => {
       setAddSection("");
-    }, 3200);
+    }, 2200);
   };
 
   return (
@@ -89,11 +96,18 @@ function AddGoal({ setAddSection }) {
           />
 
           {activeGroup === "Breakdown" && (
-            <Aditor_Checkbox
-              ref={Aditor_Goal_Checkbox}
-              className="Aditor_Goal_Checkbox"
-              defaultValue={BreakdownContent} // Set saved content as default
-            />
+            <>
+              <Aditor_Checkbox
+                ref={Aditor_Checkbox_Goal}
+                className="Aditor_Checkbox_Goal"
+                defaultValue={BreakdownContent} // Set saved content as default
+              />
+              <p>Selecte a Date:</p>
+              <DatePickerComponent
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+              />
+            </>
           )}
         </div>
         <div className="controlSection">

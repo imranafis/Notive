@@ -23,7 +23,8 @@ export function initializeAditorPoint(inputSection, defaultValue) {
            <ul class="inputSubContent" contenteditable="true"></ul>
          </div>
        </div>
-     </div></div>
+     </div>
+     </div>
    </div>
    <div class="options" id="dropdownMenu">
      <div class="icon textBtn active" tabindex="0">
@@ -70,22 +71,22 @@ export function initializeAditorPoint(inputSection, defaultValue) {
 
   const aditor = inputSection.querySelector(".aditor");
 
-  const label = aditor.querySelector(".points");
+  // const label = aditor.querySelector(".points");
 
-  LabelColor(0);
+  // LabelColor(0);
 
-  let oneTime = false;
+  // let oneTime = false;
 
-  current_Editable.textContent = "Add details";
+  // current_Editable.textContent = "Add details";
 
-  function LabelColor(value) {
-    label.style.opacity = value;
-  }
+  // function LabelColor(value) {
+  //   label.style.opacity = value;
+  // }
 
-  if (defaultValue != "") {
-    aditor.innerHTML = defaultValue;
-    oneTime = true;
-  }
+  // if (defaultValue != "") {
+  //   aditor.innerHTML = defaultValue;
+  //   oneTime = true;
+  // }
 
   function updateElement() {
     current_Line = current_Editable.closest(".line");
@@ -125,8 +126,10 @@ export function initializeAditorPoint(inputSection, defaultValue) {
 
     aditor.innerHTML = `
 <div class="line">
-     <div class="Head">
-       <label class="textLabel"></label>
+       <div class="Head">
+       <label class="pointLabel">
+       <input type="checkbox" /><span class="points"><i class="fa-solid fa-circle"></i></span
+     ></label>
          <div class="content">
            <ul class="inputContent" contenteditable="true"></ul>
          </div>
@@ -593,14 +596,14 @@ export function initializeAditorPoint(inputSection, defaultValue) {
         }
       }
     } else if (e.target.classList == "inputContent") {
-      if (!oneTime) {
-        current_Editable = e.target;
-        updateElement();
-        current_Editable.textContent = "";
-        LabelColor(1);
-        oneTime = true;
-        // activeOption();
-      }
+      // if (!oneTime) {
+      //   current_Editable = e.target;
+      //   updateElement();
+      //   current_Editable.textContent = "";
+      //   LabelColor(1);
+      //   oneTime = true;
+      //   // activeOption();
+      // }
       subLineActive = false;
       current_Editable = e.target;
       updateElement();
@@ -1171,7 +1174,7 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
   <div class="line">
     <div class="Head">
       <label class="checkboxLabel">
-        <input type="checkbox"><span class="unchecked" style="opacity: 0.25;"></span></label>
+        <input type="checkbox"><span class="unchecked"></span></label>
       <div class="content">
         <ul class="inputContent" contenteditable="true"></ul>
       </div>
@@ -1222,20 +1225,20 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
 
   const label = aditor.querySelector(".unchecked");
 
-  let oneTime = false;
+  // let oneTime = false;
 
-  current_Editable.textContent = "Add a steps";
+  // current_Editable.textContent = "Add a steps";
 
-  function LabelColor(value) {
-    label.style.opacity = value;
-  }
+  // function LabelColor(value) {
+  //   label.style.opacity = value;
+  // }
 
-  LabelColor(0);
+  // LabelColor(0);
 
-  if (defaultValue != "") {
-    aditor.innerHTML = defaultValue;
-    oneTime = true;
-  }
+  // if (defaultValue != "") {
+  //   aditor.innerHTML = defaultValue;
+  //   oneTime = true;
+  // }
 
   function updateElement() {
     current_Line = current_Editable.closest(".line");
@@ -1275,7 +1278,7 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
   <div class="line">
     <div class="Head">
       <label class="checkboxLabel">
-        <input type="checkbox"><span class="unchecked" style="opacity: 0.25;"></span></label>
+        <input type="checkbox"><span class="unchecked"></span></label>
       <div class="content">
         <ul class="inputContent" contenteditable="true"></ul>
       </div>
@@ -1641,9 +1644,9 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
       e.target.parentElement.className == "expand" ||
       e.target.parentElement.className == "collapse"
     ) {
-      const label = e.target.parentElement
-        .closest(".line")
-        .querySelector("label").className;
+      // const label = e.target.parentElement
+      //   .closest(".line")
+      //   .querySelector("label").className;
 
       let expandBtn = e.target.parentElement;
       let expand = e.target.parentElement
@@ -1660,7 +1663,7 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
         expandBtn.innerHTML = ` <i class="fa-solid fa-caret-down"></i>`;
       }
     } else if (e.target.parentElement.className == "actions") {
-      const label = e.target.closest(".line").querySelector("label").className;
+      // const label = e.target.closest(".line").querySelector("label").className;
 
       let expandBtn = e.target;
       let expand = e.target.closest(".line").querySelector(".sub-line");
@@ -1675,14 +1678,14 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
         expandBtn.innerHTML = ` <i class="fa-solid fa-caret-down"></i>`;
       }
     } else if (e.target.classList == "inputContent") {
-      if (!oneTime) {
-        current_Editable = e.target;
-        updateElement();
-        current_Editable.textContent = "";
-        LabelColor(1);
-        oneTime = true;
-        // activeOption();
-      }
+      // if (!oneTime) {
+      //   current_Editable = e.target;
+      //   updateElement();
+      //   current_Editable.textContent = "";
+      //   LabelColor(1);
+      //   oneTime = true;
+      //   activeOption();
+      // }
 
       subLineActive = false;
       current_Editable = e.target;
@@ -2132,40 +2135,44 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
 
   function updateNestedCheckbox(parent) {
     if (parent.querySelector(".Head").querySelector(".checked")) {
-      const subUnchecked = parent
-        .querySelector(".sub-line")
-        .querySelectorAll(".unchecked");
+      if (parent.querySelector(".sub-line") != null) {
+        const subUnchecked = parent
+          .querySelector(".sub-line")
+          .querySelectorAll(".unchecked");
 
-      subUnchecked.forEach((item) => {
-        item.classList.replace("unchecked", "checked");
-      });
+        subUnchecked.forEach((item) => {
+          item.classList.replace("unchecked", "checked");
+        });
+      }
     } else {
-      const subChecked = parent
-        .querySelector(".sub-line")
-        .querySelectorAll(".checked");
+      if (parent.querySelector(".sub-line") != null) {
+        const subChecked = parent
+          .querySelector(".sub-line")
+          .querySelectorAll(".checked");
 
-      subChecked.forEach((item) => {
-        item.classList.replace("checked", "unchecked");
-      });
+        subChecked.forEach((item) => {
+          item.classList.replace("checked", "unchecked");
+        });
+      }
     }
   }
 
   function updateParentCheckbox(parent) {
-    const subUnchecked = parent
+    const subUncheckedLen = parent
       .querySelector(".sub-line")
       .querySelectorAll(".unchecked").length;
-    const subChecked = parent
+    const subCheckedLen = parent
       .querySelector(".sub-line")
       .querySelectorAll(".checked").length;
 
-    if (subUnchecked == 0 && subChecked > 0) {
+    if (subUncheckedLen == 0 && subCheckedLen > 0) {
       const parentCheckbox = parent
         .querySelector(".Head")
         .querySelector(".unchecked");
       if (parentCheckbox != null) {
         parentCheckbox.classList.replace("unchecked", "checked");
       }
-    } else if (subUnchecked > 0) {
+    } else if (subUncheckedLen > 0) {
       const parentCheckbox = parent
         .querySelector(".Head")
         .querySelector(".checked");
@@ -2182,7 +2189,7 @@ export function initializeAditorCheckboxLite(inputSection) {
   <div class="line">
     <div class="Head">
       <label class="checkboxLabel">
-        <input type="checkbox"><span class="unchecked" style="opacity: 0.25;"></span></label>
+        <input type="checkbox"><span class="unchecked"></span></label>
       <div class="content">
         <ul class="inputContent" contenteditable="true"></ul>
       </div>
@@ -2269,7 +2276,7 @@ export function initializeAditorCheckboxLite(inputSection) {
   <div class="line">
     <div class="Head">
       <label class="checkboxLabel">
-        <input type="checkbox"><span class="unchecked" style="opacity: 0.25;"></span></label>
+        <input type="checkbox"><span class="unchecked"></span></label>
       <div class="content">
         <ul class="inputContent" contenteditable="true"></ul>
       </div>

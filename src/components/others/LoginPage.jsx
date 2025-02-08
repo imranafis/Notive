@@ -16,7 +16,6 @@ import "./LoginPage.css";
 import InputField from "./InputField";
 import Logo from "/src/icons/N.png";
 
-
 const handleAuthError = (errorCode) => {
   switch (errorCode) {
     case "auth/weak-password":
@@ -44,7 +43,7 @@ const LoginPage = () => {
       } else if (userLevel == "Intermediate") {
         navigate("/Landing");
       } else if (userID) {
-        // navigate("/Landing");
+        navigate("/Landing");
       }
     };
 
@@ -148,7 +147,7 @@ const LoginPage = () => {
       <div className="auth-panel">
         <div className="intro">
           <div className="logo">
-            <img src={Logo}  />
+            <img src={Logo} />
           </div>
           <p className="text">You deserve it!</p>
         </div>
