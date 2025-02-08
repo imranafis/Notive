@@ -1024,12 +1024,17 @@ ${current_subContent}`;
     } else if (subLineActive) {
       subLineActive = false;
 
+      //sub line off after moved to new Line
+      const expandBtn = current_Line.querySelector(".expand");
+      current_subLine = current_Line.querySelector(".sub-line");
+
+      current_subLine.classList.replace("sub-line", "sub-line-off");
+      expandBtn.classList.replace("expand", "collapse");
+      expandBtn.innerHTML = `<i class="fa-solid fa-caret-right"></i>`;
+      //sub line off after moved to new Line
+
       const label = current_Line.querySelector(".Head").querySelector("label");
       current_Label = label.className;
-
-      if (current_Label == "headingLabel") {
-        current_Label = "textLabel";
-      }
 
       current_Editable = current_subEditable
         .closest(".sub-Head")
