@@ -958,15 +958,16 @@ ${current_subContent}`;
           window.getSelection().selectAllChildren(current_subEditable);
           window.getSelection().collapseToEnd();
         }
-      } else if (current_subEditable.textContent.trim() != "") {
-        // change the sub line
-        updateSubLine(current_Label, current_EditableText, current_subHead);
-        subAditorActive = false;
-        current_subEditable = current_subHead.querySelector(".inputSubContent");
-        current_subEditable.focus();
-        window.getSelection().selectAllChildren(current_subEditable);
-        window.getSelection().collapseToEnd();
       }
+      // else if (current_subEditable.textContent.trim() != "") {
+      //   // change the sub line
+      //   updateSubLine(current_Label, current_EditableText, current_subHead);
+      //   subAditorActive = false;
+      //   current_subEditable = current_subHead.querySelector(".inputSubContent");
+      //   current_subEditable.focus();
+      //   window.getSelection().selectAllChildren(current_subEditable);
+      //   window.getSelection().collapseToEnd();
+      // }
 
       if (current_Line.querySelector("label").className == "checkboxLabel") {
         const parent = current_subHead.closest(".line");
@@ -1008,8 +1009,15 @@ ${current_subContent}`;
       subAditorActive = true;
 
       current_EditableText = current_subEditable.textContent;
+      console.log(current_subHead);
+      console.log(current_subEditable);
+      updateSubLine(current_Label, current_EditableText, current_subHead);
 
-      addDiv();
+      current_subEditable = current_subHead.querySelector(".inputSubContent");
+      current_subEditable.focus();
+      window.getSelection().selectAllChildren(current_subEditable);
+      window.getSelection().collapseToEnd();
+      // addDiv();
     }
   }
 
@@ -2003,15 +2011,16 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
           window.getSelection().selectAllChildren(current_subEditable);
           window.getSelection().collapseToEnd();
         }
-      } else if (current_subEditable.textContent.trim() != "") {
-        // change the sub line
-        updateSubLine(current_Label, current_EditableText, current_subHead);
-        subAditorActive = false;
-        current_subEditable = current_subHead.querySelector(".inputSubContent");
-        current_subEditable.focus();
-        window.getSelection().selectAllChildren(current_subEditable);
-        window.getSelection().collapseToEnd();
       }
+      // else if (current_subEditable.textContent.trim() != "") {
+      //   // change the sub line
+      //   updateSubLine(current_Label, current_EditableText, current_subHead);
+      //   subAditorActive = false;
+      //   current_subEditable = current_subHead.querySelector(".inputSubContent");
+      //   current_subEditable.focus();
+      //   window.getSelection().selectAllChildren(current_subEditable);
+      //   window.getSelection().collapseToEnd();
+      // }
 
       if (current_Line.querySelector("label").className == "checkboxLabel") {
         const parent = current_subHead.closest(".line");
@@ -2052,8 +2061,15 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
       subAditorActive = true;
 
       current_EditableText = current_subEditable.textContent;
+      console.log(current_subHead);
+      console.log(current_subEditable);
+      updateSubLine(current_Label, current_EditableText, current_subHead);
 
-      addDiv();
+      current_subEditable = current_subHead.querySelector(".inputSubContent");
+      current_subEditable.focus();
+      window.getSelection().selectAllChildren(current_subEditable);
+      window.getSelection().collapseToEnd();
+      // addDiv();
     }
   }
 
