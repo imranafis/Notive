@@ -71,6 +71,8 @@ const LoginPage = () => {
       });
       localStorage.setItem("userLevel", "Beginner");
       navigate("/Domain");
+      localStorage.setItem("bulletDate", displayDate);
+      localStorage.setItem("bulletContent", "");
     }
     setUser(user.displayName, user.uid);
   };

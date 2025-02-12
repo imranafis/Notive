@@ -1,5 +1,6 @@
 export function initializeAditorPoint(inputSection, defaultValue) {
-  inputSection.innerHTML = ` 
+  if (defaultValue == "") {
+    inputSection.innerHTML = ` 
   <div class="aditor">
      <div class="line">
        <div class="Head">
@@ -17,11 +18,10 @@ export function initializeAditorPoint(inputSection, defaultValue) {
      </div>
      <div class="sub-line-off">
        <div class="sub-Head">
-         <label class="pointLabel">
-           <input type="checkbox"><span class="points"><i class="fa-solid fa-square"></i></span></label>
-         <div class="sub-content">
-           <ul class="inputSubContent" contenteditable="true"></ul>
-         </div>
+         <label class="textLabel"></label>
+        <div class="sub-content">
+          <ul class="inputSubContent" contenteditable="true"></ul>
+        </div>
        </div>
      </div>
      </div>
@@ -37,6 +37,9 @@ export function initializeAditorPoint(inputSection, defaultValue) {
        <span><i class="fa-solid fa-indent"></i></span>
      </div>
    </div>`;
+  } else {
+    inputSection.innerHTML = defaultValue;
+  }
 
   const textBtn = inputSection.querySelector(".textBtn");
 
@@ -141,11 +144,10 @@ export function initializeAditorPoint(inputSection, defaultValue) {
      </div>
      <div class="sub-line-off">
        <div class="sub-Head">
-         <label class="pointLabel">
-           <input type="checkbox"><span class="points"><i class="fa-solid fa-square"></i></span></label>
-         <div class="sub-content">
-           <ul class="inputSubContent" contenteditable="true"></ul>
-         </div>
+        <label class="textLabel"></label>
+        <div class="sub-content">
+          <ul class="inputSubContent" contenteditable="true"></ul>
+        </div>
        </div>
      </div>
    </div>
@@ -837,12 +839,10 @@ ${newLabel}
  </div>
  <div class="sub-line-off">
    <div class="sub-Head">
-     <label class="pointLabel">
-       <input type="checkbox" /><span class="points"><i class="fa-solid fa-square"></i></span
-     ></label>
-     <div class="sub-content">
-       <ul class="inputSubContent" contenteditable="true"></ul>
-     </div>
+     <label class="textLabel"></label>
+      <div class="sub-content">
+        <ul class="inputSubContent" contenteditable="true"></ul>
+      </div>
    </div>
  </div>`;
     }
@@ -920,7 +920,7 @@ ${current_subContent}`;
     } else {
       // updateElement();
 
-      if (!subAditorActive && current_subEditable.textContent.trim() != "") {
+      if (current_subEditable.textContent.trim() != "") {
         const range = window.getSelection().getRangeAt(0);
         const tempRange = document.createRange();
         tempRange.selectNodeContents(current_subEditable);
@@ -1009,8 +1009,6 @@ ${current_subContent}`;
       subAditorActive = true;
 
       current_EditableText = current_subEditable.textContent;
-      console.log(current_subHead);
-      console.log(current_subEditable);
       updateSubLine(current_Label, current_EditableText, current_subHead);
 
       current_subEditable = current_subHead.querySelector(".inputSubContent");
@@ -1104,6 +1102,10 @@ ${current_subContent}`;
       window.getSelection().selectAllChildren(current_Editable);
       window.getSelection().collapseToEnd();
     }
+    //  else {
+    //   subLineActive = false;
+    //   addDiv();
+    // }
     // current_Editable.focus();
     activeOption();
   }
@@ -1973,7 +1975,7 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
     } else {
       // updateElement();
 
-      if (!subAditorActive && current_subEditable.textContent.trim() != "") {
+      if (current_subEditable.textContent.trim() != "") {
         const range = window.getSelection().getRangeAt(0);
         const tempRange = document.createRange();
         tempRange.selectNodeContents(current_subEditable);
@@ -2061,8 +2063,6 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
       subAditorActive = true;
 
       current_EditableText = current_subEditable.textContent;
-      console.log(current_subHead);
-      console.log(current_subEditable);
       updateSubLine(current_Label, current_EditableText, current_subHead);
 
       current_subEditable = current_subHead.querySelector(".inputSubContent");
