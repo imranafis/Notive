@@ -1,11 +1,29 @@
 import React, { useState, useEffect } from "react";
 // import Header from "./Header.jsx";
+import { useNavigate } from "react-router-dom";
 import ActionPanel from "../ActionPanel.jsx";
 import DisplayPanel from "../DisplayPanel.jsx";
 import "./LandingPage.css";
 import { useFullScreen } from "../../lib/FullScreenContext.jsx";
 
 function LandingPage() {
+  useEffect(() => {
+    const handleOnLoad = (e) => {
+      const userLevel = localStorage.getItem("userLevel");
+      const userID = localStorage.getItem("userID");
+      if (userLevel == "Beginner") {
+        navigate("/Domain");
+      } else if (userLevel == "Intermediate") {
+        navigate("/Landing");
+      } else if (userID) {
+        navigate("/Landing");
+      }
+    };
+
+    handleOnLoad();
+  }, []);
+
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("");
   const [addSection, setAddSection] = useState("");
   const { isFullScreen, toggleFullScreen } = useFullScreen();
