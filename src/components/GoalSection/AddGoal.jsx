@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "/src/lib/firebase"; // Adjust the path to your firebase.js file
+import { db } from "/src/lib/firebase";
 import DatePickerComponent from "../../lib/DatePickerComponent.jsx";
 
 import { ToastContainer, toast } from "react-toastify";
@@ -14,27 +14,39 @@ import "./GoalSection.css";
 function AddGoal({ setAddSection }) {
   const Aditor_Checkbox_Goal = useRef(null);
   const [goalName, setGoalName] = useState("");
-  const [activeGroup, setActiveGroup] = useState(null);
+  const [category, setCategory] = useState("");
+  const [activeGroups, setActiveGroups] = useState([]);
   const [BreakdownContent, setBreakdownContent] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
 
-  const toggleSection = (section) => {
-    // If closing, store the content before hiding
-    if (activeGroup === section) {
-      if (Aditor_Checkbox_Goal.current) {
-        setBreakdownContent(Aditor_Checkbox_Goal.current.innerHTML);
-      }
-      setActiveGroup(null);
-    } else {
-      setActiveGroup(section);
-    }
+  const addSection = (section) => {
+    setActiveGroups((prev) =>
+      prev.includes(section) ? prev : [...prev, section]
+    );
   };
 
   const handleInputChange = (e) => {
     setGoalName(e.target.value);
   };
 
+  const handleCategoryChange = (e) => {
+    const newCategory = e.target.value;
+    setCategory(newCategory);
+
+    setBreakdownContent("");
+    setSelectedDate(null);
+    setActiveGroups([]);
+  };
+
   const addGoal = async () => {
+    if (!category) {
+      toast.error("Please select a category!", {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+      return;
+    }
+
     if (!goalName.trim()) {
       toast.error("Goal name is required!", {
         position: "bottom-right",
@@ -44,33 +56,46 @@ function AddGoal({ setAddSection }) {
     }
 
     try {
-      const userID = getUser().uid; // Get user ID
+      const userID = getUser().uid;
 
-      // Retrieve latest breakdown content
-      const updatedBreakdownContent = Aditor_Checkbox_Goal.current?.innerHTML;
+      if (category === "Project") {
+        const updatedBreakdownContent =
+          Aditor_Checkbox_Goal.current?.innerHTML || "";
+        const goalData = {
+          goalName: goalName.trim(),
+          estimatedTime: selectedDate
+            ? selectedDate.format("DD/MM/YYYY")
+            : null,
+          category: "goal",
+          subCategory: category,
+          done: false,
+          breakdown: updatedBreakdownContent,
+          createdAt: new Date().toISOString(),
+        };
+        await addDoc(collection(db, userID), goalData);
+      } else if (category === "Habit") {
+        const goalData = {
+          goalName: goalName.trim(),
+          category: "goal",
+          subCategory: category,
+          done: false,
+          createdAt: new Date().toISOString(),
+        };
+        await addDoc(collection(db, userID), goalData);
+      }
 
-      const goalData = {
-        goalName: goalName.trim(),
-        estimatedTime: selectedDate ? selectedDate.format("DD/MM/YYYY") : null,
-        category: "goal",
-        done: false,
-        breakdown: updatedBreakdownContent, // Store retrieved breakdown content
-        createdAt: new Date().toISOString(),
-      };
-
-      // Save to Firestore
-      const docRef = await addDoc(collection(db, userID), goalData);
-      console.log("Goal saved with ID:", docRef.id);
-
-      toast.success("Goal saved successfully!", {
+      toast.success(`Goal (${category}) saved successfully!`, {
         position: "bottom-right",
         autoClose: 2000,
       });
+      setTimeout(() => {
+        setAddSection("");
+      }, 1200);
 
-      // Reset form state
       setGoalName("");
       setBreakdownContent("");
-      setActiveGroup(null);
+      setActiveGroups([]);
+      setCategory("");
     } catch (e) {
       console.error("Error saving goal:", e);
       toast.error("Failed to save goal. Please try again.", {
@@ -78,16 +103,24 @@ function AddGoal({ setAddSection }) {
         autoClose: 2000,
       });
     }
-
-    setTimeout(() => {
-      setAddSection("");
-    }, 2200);
   };
 
   return (
     <div className="addGoal">
       <div className="panel">
         <div className="contentSection">
+          <select
+            value={category}
+            onChange={handleCategoryChange}
+            className="goal-dropdown"
+          >
+            <option value="" disabled>
+              Select Category
+            </option>
+            <option value="Habit">Habit</option>
+            <option value="Project">Project</option>
+          </select>
+
           <input
             type="text"
             value={goalName}
@@ -95,14 +128,17 @@ function AddGoal({ setAddSection }) {
             placeholder="Add a Goal name"
           />
 
-          {activeGroup === "Breakdown" && (
+          {activeGroups.includes("Breakdown") && (
+            <Aditor_Checkbox
+              ref={Aditor_Checkbox_Goal}
+              className="Aditor_Checkbox_Goal"
+              defaultValue={BreakdownContent}
+            />
+          )}
+
+          {activeGroups.includes("Details") && (
             <>
-              <Aditor_Checkbox
-                ref={Aditor_Checkbox_Goal}
-                className="Aditor_Checkbox_Goal"
-                defaultValue={BreakdownContent} // Set saved content as default
-              />
-              <p>Selecte a Date:</p>
+              <p>Select a Date:</p>
               <DatePickerComponent
                 selectedDate={selectedDate}
                 setSelectedDate={setSelectedDate}
@@ -110,13 +146,26 @@ function AddGoal({ setAddSection }) {
             </>
           )}
         </div>
+
         <div className="controlSection">
-          <button
-            className={`${activeGroup === "Breakdown" ? "active" : ""}`}
-            onClick={() => toggleSection("Breakdown")}
-          >
-            Breakdown
-          </button>
+          {category === "Project" && (
+            <>
+              <button
+                className={
+                  activeGroups.includes("Breakdown") ? "btnActive" : ""
+                }
+                onClick={() => addSection("Breakdown")}
+              >
+                Breakdown
+              </button>
+              <button
+                className={activeGroups.includes("Details") ? "btnActive" : ""}
+                onClick={() => addSection("Details")}
+              >
+                Details
+              </button>
+            </>
+          )}
           <button onClick={addGoal}>Save</button>
         </div>
       </div>

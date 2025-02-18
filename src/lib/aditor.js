@@ -476,6 +476,10 @@ export function initializeAditorPoint(inputSection, defaultValue) {
             current_Label = label.className;
             activeOption();
 
+            // Remove bold
+            current_EditableText = current_Editable.textContent;
+            current_Editable.innerHTML = current_EditableText;
+
             current_Editable.focus();
             window.getSelection().selectAllChildren(current_Editable);
             window.getSelection().collapseToEnd();
@@ -1054,8 +1058,11 @@ ${current_subContent}`;
       const actionBtn = current_Line.querySelector(".actionsOff");
 
       if (current_subLine_Amount == 1 && actionBtn != null) {
-        subLineActive = true;
+        // Add bold
+        current_EditableText = current_Editable.textContent;
+        current_Editable.innerHTML = `<b>${current_EditableText}</b>`;
 
+        subLineActive = true;
         current_subLine.classList.replace("sub-line-off", "sub-line");
 
         actionBtn.classList.replace("actionsOff", "actions");

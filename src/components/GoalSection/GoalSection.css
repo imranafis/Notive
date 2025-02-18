@@ -1,34 +1,80 @@
 .goalSection {
-  z-index: 0;
   display: flex;
-  padding: 1rem;
   flex-direction: column;
-  align-items: center;
+  height: 100vh; /* Full viewport height */
+  width: 100%; /* Full width */
+}
+
+.goalContainer {
+  flex: 1; /* Divide equally between habit and project */
+  display: flex;
+  flex-direction: column;
   padding: 20px;
+  overflow: hidden; /* Avoid any vertical overflow */
+}
 
-  .goalGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    width: 100%;
-    max-width: 1000px;
-  }
+.goalContainer.habit {
+  background-color: #dddddd; /* Optional background for habit section */
+}
 
-  .goalCard {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    text-align: center;
-  }
+.goalContainer.project {
+  background-color: #e9ecef; /* Optional background for project section */
+}
+
+.goalLabel {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.goalGrid {
+  display: flex;
+  flex-wrap: wrap; /* Allow items to wrap to the next line */
+  gap: 10px;
+  padding: 10px 0;
+  max-height: calc(100% - 40px); /* Ensure space for the label */
+  overflow-y: auto; /* Allow vertical scrolling if content exceeds height */
+  overflow-x: hidden; /* Prevent unnecessary horizontal overflow */
+}
+
+.goalGrid::-webkit-scrollbar {
+  height: 8px; /* Scrollbar height */
+}
+
+.goalGrid::-webkit-scrollbar-thumb {
+  background: #888; /* Scrollbar thumb color */
+  border-radius: 4px;
+}
+
+.goalGrid::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Scrollbar thumb hover color */
+}
+
+.goalCard {
+  min-width: 200px; /* Minimum width of each card */
+  max-width: 300px; /* Optional maximum width of cards */
+  background-color: #fff; /* Card background color */
+  border: 1px solid #ddd; /* Card border */
+  border-radius: 8px; /* Rounded corners */
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  flex-shrink: 0; /* Prevent cards from shrinking */
+}
+
+.goalCard h3 {
+  font-size: 1.2rem;
+  margin: 0;
+  color: #333;
 }
 
 .addGoal {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(202, 202, 202, 0.75); /* Semi-transparent */
-  backdrop-filter: blur(2px); /* Blur effect */
+  background: rgba(202, 202, 202, 0.75);
+  backdrop-filter: blur(2px);
   left: 15%;
   width: 85%;
   height: 100%;
@@ -48,7 +94,7 @@
       max-height: 9rem;
       overflow-y: auto;
     }
-    /*  */
+
     .Aditor_Goal_Checkbox {
       margin-top: 1rem;
       margin-bottom: 1rem;
@@ -56,18 +102,10 @@
       min-width: 25rem;
       overflow-y: auto;
     }
-    /* .Aditor_Task_Checkbox_Lite {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    max-height: 9rem;
-    overflow-y: auto;
-  } */
 
     .contentSection [type="text"] {
       display: block;
       width: 100%;
-      /* min-width: 25rem;
-    max-width: 25rem; */
       height: auto;
       font-size: 1.125rem;
       padding: 1rem 1.5rem;
@@ -98,13 +136,51 @@
         box-shadow: var(--gray);
         cursor: pointer;
         margin-top: 1.5rem;
-        /* margin-bottom: 1rem; */
         opacity: 0.35;
       }
 
       button:hover {
         opacity: 1;
       }
+
+      .btnActive {
+        display: none;
+      }
     }
+  }
+
+  .goal-dropdown {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    cursor: pointer;
+    outline: none;
+    transition: border 0.2s ease-in-out;
+  }
+
+  .goal-dropdown:hover,
+  .goal-dropdown:focus {
+    border-color: #007bff;
+  }
+
+  .goal-dropdown option[value=""] {
+    color: #aaa;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border 0.2s ease-in-out;
+  }
+
+  input[type="text"]:focus {
+    border-color: #007bff;
   }
 }
