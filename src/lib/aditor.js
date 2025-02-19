@@ -552,6 +552,8 @@ export function initializeAditorPoint(inputSection, defaultValue) {
   });
 
   aditor.addEventListener("click", (e) => {
+    // console.log(e.target.tagName);
+
     if (
       e.target.parentElement.className == "expand" ||
       e.target.parentElement.className == "collapse"
@@ -601,21 +603,34 @@ export function initializeAditorPoint(inputSection, defaultValue) {
           expandBtn.innerHTML = ` <i class="fa-solid fa-caret-down"></i>`;
         }
       }
-    } else if (e.target.classList == "inputContent") {
-      // if (!oneTime) {
-      //   current_Editable = e.target;
-      //   updateElement();
-      //   current_Editable.textContent = "";
-      //   LabelColor(1);
-      //   oneTime = true;
-      //   // activeOption();
-      // }
+    } else if (
+      e.target.classList == "inputContent" ||
+      e.target.tagName == "B"
+    ) {
       subLineActive = false;
       current_Editable = e.target;
       updateElement();
       const label = current_Line.querySelector("label");
       current_Label = label.className;
       activeOption();
+
+      //when bold if click on the text it exxpand
+      const actionBtn = current_Line.querySelector(".actions");
+
+      if (actionBtn != null) {
+        const expandBtn = actionBtn.querySelector(".expand");
+        const collapseBtn = actionBtn.querySelector(".collapse");
+        if (expandBtn != null) {
+          current_subLine.classList.replace("sub-line", "sub-line-off");
+          expandBtn.classList.replace("expand", "collapse");
+          expandBtn.innerHTML = `<i class="fa-solid fa-caret-right"></i>`;
+        } else if (collapseBtn != null) {
+          current_subLine = current_Line.querySelector(".sub-line-off");
+          current_subLine.classList.replace("sub-line-off", "sub-line");
+          collapseBtn.classList.replace("collapse", "expand");
+          collapseBtn.innerHTML = ` <i class="fa-solid fa-caret-down"></i>`;
+        }
+      }
     } else if (e.target.classList == "inputSubContent") {
       subLineActive = true;
       current_subEditable = e.target;
@@ -660,8 +675,8 @@ export function initializeAditorPoint(inputSection, defaultValue) {
         current_Label = label.className;
         current_Editable = current_Line.querySelector(".inputContent");
         current_Editable.focus();
-        window.getSelection().selectAllChildren(current_Editable);
-        window.getSelection().collapseToEnd();
+        // window.getSelection().selectAllChildren(current_Editable);
+        // window.getSelection().collapseToEnd();
       }
     }
   });
