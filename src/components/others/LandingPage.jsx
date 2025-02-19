@@ -13,10 +13,10 @@ function LandingPage() {
       const userID = localStorage.getItem("userID");
       if (userLevel == "Beginner") {
         navigate("/Domain");
-      } else if (userLevel == "Intermediate") {
+      } else if (userLevel == "Intermediate" || userID) {
         navigate("/Landing");
-      } else if (userID) {
-        navigate("/Landing");
+      } else {
+        navigate("/");
       }
     };
 
