@@ -27,12 +27,15 @@ export function initializeAditorPoint(inputSection, defaultValue) {
      </div>
    </div>
    <div class="options" id="dropdownMenu">
-     <div class="icon textBtn active" tabindex="0">
+     <div class="icon textBtn" tabindex="0">
        <span><i class="fa-solid fa-paragraph"></i></span>
      </div>
      <div class="icon pointBtn" tabindex="0">
        <span><i class="fa-solid fa-list"></i></span>
      </div>
+      <div class="icon checkboxBtn" tabindex="0">
+        <span><i class="fa-solid fa-square-check"></i></span>
+      </div>
      <div class="icon indentBtn" tabindex="0">
        <span><i class="fa-solid fa-indent"></i></span>
      </div>
@@ -44,6 +47,8 @@ export function initializeAditorPoint(inputSection, defaultValue) {
   const textBtn = inputSection.querySelector(".textBtn");
 
   const pointBtn = inputSection.querySelector(".pointBtn");
+
+  const checkboxBtn = inputSection.querySelector(".checkboxBtn");
 
   const indentBtn = inputSection.querySelector(".indentBtn");
 
@@ -183,19 +188,20 @@ export function initializeAditorPoint(inputSection, defaultValue) {
     }
 
     if (e.key == " ") {
-      if (!subLineActive) {
-        if (current_Editable.textContent.startsWith(">")) {
-          e.preventDefault();
-          current_Editable.innerHTML = current_Editable.innerHTML.substring(4);
-          current_Label = "textLabel";
-          elementFunc(current_Label);
-        } else if (current_Editable.textContent.startsWith("-")) {
-          e.preventDefault();
-          current_Editable.innerHTML = current_Editable.innerHTML.substring(1);
-          current_Label = "pointLabel";
-          elementFunc(current_Label);
-        }
-      } else {
+      // if (!subLineActive) {
+      //   if (current_Editable.textContent.startsWith(">")) {
+      //     e.preventDefault();
+      //     current_Editable.innerHTML = current_Editable.innerHTML.substring(4);
+      //     current_Label = "textLabel";
+      //     elementFunc(current_Label);
+      //   } else if (current_Editable.textContent.startsWith("-")) {
+      //     e.preventDefault();
+      //     current_Editable.innerHTML = current_Editable.innerHTML.substring(1);
+      //     current_Label = "pointLabel";
+      //     elementFunc(current_Label);
+      //   }
+      // } else {
+      if (subLineActive) {
         if (current_subEditable.textContent.startsWith(">")) {
           e.preventDefault();
           current_subEditable.innerHTML =
@@ -207,6 +213,12 @@ export function initializeAditorPoint(inputSection, defaultValue) {
           current_subEditable.innerHTML =
             current_subEditable.innerHTML.substring(1);
           current_Label = "pointLabel";
+          elementFunc(current_Label);
+        } else if (current_subEditable.textContent.startsWith("*")) {
+          e.preventDefault();
+          current_subEditable.innerHTML =
+            current_subEditable.innerHTML.substring(1);
+          current_Label = "checkboxLabel";
           elementFunc(current_Label);
         }
       }
@@ -812,6 +824,13 @@ export function initializeAditorPoint(inputSection, defaultValue) {
      <div class="content">
        <ul class="inputContent" contenteditable="true">${current_EditableText}</ul>
      </div>`;
+    } else if (label == "checkboxLabel") {
+      return `<label class="checkboxLabel">
+                <input type="checkbox"/><span class="unchecked"></span
+              ></label>
+              <div class="content">
+                <ul class="inputContent" contenteditable="true">${current_EditableText}</ul>
+              </div>`;
     }
   }
 
@@ -884,18 +903,26 @@ ${current_subContent}`;
   function updateSubLine(label, current_EditableText, Div) {
     if (label == "textLabel") {
       Div.innerHTML = `
-<label class="textLabel"></label>
-<div class="sub-content">
- <ul class="inputSubContent" contenteditable="true">${current_EditableText}</ul>
-</div>`;
+    <label class="textLabel"></label>
+    <div class="sub-content">
+       <ul class="inputSubContent" contenteditable="true">${current_EditableText}</ul>
+    </div>`;
     } else if (label == "pointLabel") {
       Div.innerHTML = `
-<label class="pointLabel">
-<input type="checkbox" /><span class="points"><i class="fa-solid fa-square"></i></i></span
-></label>
-<div class="sub-content">
-<ul class="inputSubContent" contenteditable="true">${current_EditableText}</ul>
-</div>`;
+    <label class="pointLabel">
+    <input type="checkbox" /><span class="points"><i class="fa-solid fa-square"></i></i></span
+    ></label>
+    <div class="sub-content">
+       <ul class="inputSubContent" contenteditable="true">${current_EditableText}</ul>
+    </div>`;
+    } else if (label == "checkboxLabel") {
+      Div.innerHTML = `
+      <label class="checkboxLabel">
+        <input type="checkbox"/><span class="unchecked"></span
+      ></label>
+      <div class="sub-content">
+        <ul class="inputSubContent" contenteditable="true">${current_EditableText}</ul>
+      </div>`;
     }
   }
 
@@ -1149,6 +1176,8 @@ ${current_subContent}`;
       textBtn.classList.add("active");
     } else if (current_Label == "pointLabel") {
       pointBtn.classList.add("active");
+    } else if (current_Label == "checkboxLabel") {
+      checkboxBtn.classList.add("active");
     }
   }
 
@@ -1161,6 +1190,8 @@ ${current_subContent}`;
       return 0;
     } else if (current_Label == "pointLabel") {
       return 1;
+    } else if (current_Label == "checkboxLabel") {
+      return 2;
     }
   }
 
@@ -1191,6 +1222,11 @@ ${current_subContent}`;
 
   pointBtn.addEventListener("click", (e) => {
     current_Label = "pointLabel";
+    elementFunc(current_Label);
+  });
+
+  checkboxBtn.addEventListener("click", (e) => {
+    current_Label = "checkboxLabel";
     elementFunc(current_Label);
   });
 
@@ -3130,7 +3166,7 @@ export function initializeAditor(inputSection) {
               </div></div>
             </div>
             <div class="options" id="dropdownMenu">
-              <div class="icon textBtn active" tabindex="0">
+              <div class="icon textBtn" tabindex="0">
                 <span><i class="fa-solid fa-paragraph"></i></span>
               </div>
               <div class="icon headingBtn" tabindex="0">
