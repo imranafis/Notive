@@ -3,11 +3,19 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "/src/lib/firebase"; // Adjust if needed
 import { getUser } from "/src/lib/user";
 import "./GoalSection.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import AddGoal from "./AddGoal.jsx";
 
-const GoalSection = ({ addSection }) => {
+const GoalSection = ({
+  addSection,
+  setAddSection,
+  defaultCategory,
+  setDefaultCategory,
+}) => {
   const [habits, setHabits] = useState([]);
   const [projects, setProjects] = useState([]);
-
+  // const [defaultCategory, setDefaultCategory] = useState("");
   useEffect(() => {
     const fetchGoals = async () => {
       try {
@@ -31,40 +39,70 @@ const GoalSection = ({ addSection }) => {
     fetchGoals();
   }, [addSection]);
 
+  const handleAddGoal = (category) => {
+    setDefaultCategory(category);
+    setAddSection(category);
+  };
+
   return (
-    <div className="goalSection">
-      {/* Habit Section */}
-      <div className="goalContainer habit">
-        <h2 className="goalLabel">Habit</h2>
-        <div className="goalGrid">
-          {habits.length === 0 ? (
-            <p>No habits added yet.</p>
-          ) : (
-            habits.map((goal) => (
-              <div key={goal.id} className="goalCard">
-                <h3>{goal.goalName}</h3>
-              </div>
-            ))
-          )}
+    <>
+      <div className="goalSection">
+        {/* Habit Section */}
+        <div className="goalSection Habit">
+          <h2 className="goalLabel">Habit</h2>
+          <div className="goalContainer">
+            <div className="goalGrid">
+              {habits.length === 0 ? (
+                <p>No habits added yet.</p>
+              ) : (
+                habits.map((goal) => (
+                  <div key={goal.id} className="goalCard">
+                    <h3>{goal.goalName}</h3>
+                  </div>
+                ))
+              )}
+            </div>
+            <FontAwesomeIcon
+              className="addBtnHabit"
+              icon={faPlus}
+              onClick={() => handleAddGoal("Habit")}
+            />
+          </div>
+        </div>
+
+        {/* Project Section */}
+        <div className="goalSection Project">
+          <h2 className="goalLabel">Project</h2>
+          <div className="goalContainer">
+            <div className="goalGrid">
+              {projects.length === 0 ? (
+                <p>No projects added yet.</p>
+              ) : (
+                projects.map((goal) => (
+                  <div key={goal.id} className="goalCard">
+                    <h3>{goal.goalName}</h3>
+                  </div>
+                ))
+              )}
+            </div>
+            <FontAwesomeIcon
+              className="addBtnProject"
+              icon={faPlus}
+              onClick={() => handleAddGoal("Project")}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Project Section */}
-      <div className="goalContainer project">
-        <h2 className="goalLabel">Project</h2>
-        <div className="goalGrid">
-          {projects.length === 0 ? (
-            <p>No projects added yet.</p>
-          ) : (
-            projects.map((goal) => (
-              <div key={goal.id} className="goalCard">
-                <h3>{goal.goalName}</h3>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    </div>
+      {/* AddGoal Component (Appears when adding a goal) */}
+      {defaultCategory !== "" && addSection !== "" && (
+        <AddGoal
+          setAddSection={setAddSection}
+          defaultCategory={defaultCategory}
+          setDefaultCategory={setDefaultCategory}
+        />
+      )}
+    </>
   );
 };
 

@@ -25,6 +25,8 @@ function LandingPage() {
 
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("");
+  const [defaultCategory, setDefaultCategory] = useState("");
+
   const [addSection, setAddSection] = useState("");
   const { isFullScreen, toggleFullScreen } = useFullScreen();
 
@@ -59,6 +61,8 @@ function LandingPage() {
           activeSection={activeSection}
           addSection={addSection}
           setAddSection={setAddSection}
+          defaultCategory={defaultCategory}
+          setDefaultCategory={setDefaultCategory}
         />
       </div>
     </>

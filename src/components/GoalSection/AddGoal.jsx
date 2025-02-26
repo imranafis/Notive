@@ -3,6 +3,9 @@ import { collection, addDoc } from "firebase/firestore";
 import { db } from "/src/lib/firebase";
 import DatePickerComponent from "../../lib/DatePickerComponent.jsx";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
+
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -11,11 +14,13 @@ import { getUser } from "/src/lib/user";
 import Aditor_Checkbox from "../../lib/Aditor_Checkbox.jsx";
 import "./GoalSection.css";
 
-function AddGoal({ setAddSection }) {
+function AddGoal({ setAddSection, defaultCategory, setDefaultCategory }) {
   const Aditor_Checkbox_Goal = useRef(null);
   const [goalName, setGoalName] = useState("");
   const [category, setCategory] = useState("");
-  const [activeGroups, setActiveGroups] = useState([]);
+  const [activeGroups, setActiveGroups] = useState(
+    defaultCategory === "Project" ? ["Breakdown", "Details"] : []
+  );
   const [BreakdownContent, setBreakdownContent] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
 
@@ -105,22 +110,31 @@ function AddGoal({ setAddSection }) {
     }
   };
 
+  const handleAddGoal = () => {
+    setDefaultCategory("");
+    setAddSection("");
+  };
+
   return (
     <div className="addGoal">
       <div className="panel">
+        <button className="closeBtn" onClick={() => handleAddGoal()}>
+          <FontAwesomeIcon icon={faTimes} />
+        </button>
         <div className="contentSection">
-          <select
-            value={category}
-            onChange={handleCategoryChange}
-            className="goal-dropdown"
-          >
-            <option value="" disabled>
-              Select Category
-            </option>
-            <option value="Habit">Habit</option>
-            <option value="Project">Project</option>
-          </select>
-
+          {defaultCategory === "" && (
+            <select
+              value={category}
+              onChange={handleCategoryChange}
+              className="goal-dropdown"
+            >
+              <option value="" disabled>
+                Select Category
+              </option>
+              <option value="Habit">Habit</option>
+              <option value="Project">Project</option>
+            </select>
+          )}
           <input
             type="text"
             value={goalName}

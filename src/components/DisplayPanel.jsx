@@ -6,18 +6,38 @@ import TaskSection from "../icons/TaskSection.jsx";
 import JournalSection from "./others/JournalSection.jsx";
 import DailySpace from "./DailySpace/DailySpace.jsx";
 
-function DisplayPanel({ activeSection, addSection, setAddSection }) {
+function DisplayPanel({
+  activeSection,
+  addSection,
+  setAddSection,
+  defaultCategory,
+  setDefaultCategory,
+}) {
   return (
     <>
-      {activeSection === "goal" && <GoalSection addSection={addSection} />}
-      {activeSection === "goal" && addSection === "goal" && (
-        <AddGoal setAddSection={setAddSection} />
+      {activeSection === "goal" && (
+        <>
+          <GoalSection
+            addSection={addSection}
+            setAddSection={setAddSection}
+            defaultCategory={defaultCategory}
+            setDefaultCategory={setDefaultCategory}
+          />
+          {addSection === "goal" && (
+            <AddGoal
+              setAddSection={setAddSection}
+              defaultCategory={defaultCategory}
+              setDefaultCategory={setDefaultCategory}
+            />
+          )}
+        </>
       )}
       {activeSection === "bulletJournal" && <BulletJournal />}
       {activeSection === "dailyspace" && <DailySpace />}
-      {/* {activeSection === "note" && <NoteSection />}
-      {activeSection === "task" && <TaskSection />}
-      {activeSection === "journal" && <JournalSection />} */}
+      {/* Uncomment these if needed */}
+      {/* {activeSection === "note" && <NoteSection />} */}
+      {/* {activeSection === "task" && <TaskSection />} */}
+      {/* {activeSection === "journal" && <JournalSection />} */}
     </>
   );
 }
