@@ -1,16 +1,17 @@
 import React, { useRef, useState } from "react";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "/src/lib/firebase"; // Adjust the path to your firebase.js file
-
 import { getUser } from "/src/lib/user";
-
-import Aditor_Checkbox from "../../../../lib/Aditor_Checkbox.jsx";
-import Aditor_Point from "../../../../lib/Aditor_Point.jsx";
-import RadioGroup from "../../../others/RadioGroup";
-import Tag from "../../../Tag/Tag";
-import "./addTask.css";
+import Aditor_Checkbox from "../../../lib/Aditor_Checkbox.jsx";
+import Aditor_Point from "../../../lib/Aditor_Point.jsx";
+import RadioGroup from "../../others/RadioGroup.jsx";
+import Tag from "../../Tag/Tag.jsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBackward } from "@fortawesome/free-solid-svg-icons";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./addTask.css";
+import { Category } from "@mui/icons-material";
 
 const AddTask = ({ setActivePanel }) => {
   const Aditor_Task_Point = useRef(null);
@@ -30,55 +31,22 @@ const AddTask = ({ setActivePanel }) => {
   const [stepsContent, setStepsContent] = useState("");
 
   const toggleSection = (section) => {
-    setActiveSection(activeSection === section ? null : section); // Toggles the section
+    setActiveSection(activeSection === section ? null : section);
   };
+
   const toggleOption = (option) => {
-    // Save the current content before switching
     if (activeOption === "notes" && Aditor_Task_Point.current) {
       setNotesContent(Aditor_Task_Point.current.innerHTML);
     } else if (activeOption === "steps" && Aditor_Task_Checkbox.current) {
       setStepsContent(Aditor_Task_Checkbox.current.innerHTML);
     }
-
-    setActiveOption(option); // Toggle to new option
+    setActiveOption(option);
   };
-
-  const levelOptions = [
-    {
-      id: "categoryL",
-      value: "large",
-      label: "Large",
-      bubbleClass: "large",
-      extra: "*",
-    },
-    {
-      id: "categoryL",
-      value: "medium",
-      label: "Medium",
-      bubbleClass: "medium",
-      extra: "***",
-    },
-    {
-      id: "categoryL",
-      value: "small",
-      label: "Small",
-      bubbleClass: "small",
-      extra: "*****",
-    },
-  ];
-
-  const priorityOptions = [
-    { id: "categoryP", value: "P0", label: "P0", bubbleClass: "large" },
-    { id: "categoryP", value: "P1", label: "P1", bubbleClass: "medium" },
-    { id: "categoryP", value: "P2", label: "P2", bubbleClass: "small" },
-  ];
 
   const handleRadioChange = (option) => {
     if (option.id === "categoryL") {
-      console.log(option.value);
       setSelectedLevel(option.value);
     } else if (option.id === "categoryP") {
-      console.log(option.value);
       setSelectedPriority(option.value);
     }
   };
@@ -90,12 +58,6 @@ const AddTask = ({ setActivePanel }) => {
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
   };
-  const handleKeyDown = (e) => {
-    //   if (e.key == "Enter") {
-    //     e.preventDefault();
-    //     Aditor_Task_Point.current.querySelector(".inputContent").focus();
-    //   }
-  };
 
   const handlePanelChange = () => {
     setActivePanel("");
@@ -103,16 +65,17 @@ const AddTask = ({ setActivePanel }) => {
 
   const add = async () => {
     if (!inputValue.trim()) {
-      alert("Task name is required!");
+      toast.error("Task name is required!", { position: "bottom-right" });
       return;
     }
 
     try {
-      const userID = getUser().uid; // Get user data from localStorage
+      const userID = getUser().uid;
 
       const taskData = {
         name: inputValue.trim(),
         priority: selectedPriority,
+        Category: "task",
         size: selectedLevel,
         tags: addedTags,
         notes: notesContent,
@@ -120,49 +83,43 @@ const AddTask = ({ setActivePanel }) => {
         createdAt: new Date().toISOString(),
       };
 
-      // Save to Firestore
-      const docRef = await addDoc(collection(db, userID), taskData);
-      console.log("Document written with ID: ", docRef.id);
+      await addDoc(collection(db, userID), taskData);
 
-      // Reset form state and collapse all sections
+      // Reset form state
       setInputValue("");
       setAddedTags([]);
       setSelectedPriority("");
       setSelectedLevel("");
       setNotesContent("");
       setStepsContent("");
-      setActiveSection(null); // Collapse all sections
-      setActiveOption("notes"); // Reset to default option
-      alert("Task saved successfully!");
+      setActiveSection(null);
+      setActiveOption("notes");
+
+      toast.success("Task saved successfully!", { position: "bottom-right" });
     } catch (e) {
       console.error("Error adding document: ", e);
-      alert("Failed to save task. Please try again.");
+      toast.error("Failed to save task. Please try again.", {
+        position: "bottom-right",
+      });
     }
   };
 
   return (
     <div className="addTask">
+      <ToastContainer />
       <div className="backBtn">
         <FontAwesomeIcon icon={faBackward} onClick={handlePanelChange} />
       </div>
       <div className="taskName">
         <p>Task Name :</p>
-        <input
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-        />
+        <input type="text" value={inputValue} onChange={handleInputChange} />
       </div>
       <button
-        // id="activateBtn"
         className={`details ${activeSection === "details" ? "activate" : ""}`}
-        onClick={() => {
-          toggleSection("details");
-        }}
+        onClick={() => toggleSection("details")}
       >
         <i
-          className={`fa-solid  ${
+          className={`fa-solid ${
             activeSection === "details" ? "fa-angle-down" : "fa-angle-right"
           }`}
         ></i>
@@ -173,20 +130,10 @@ const AddTask = ({ setActivePanel }) => {
         {activeSection === "details" && (
           <>
             <div className="switchBtn">
-              <button
-                className="noteBtn"
-                onClick={() => {
-                  toggleOption("notes");
-                }}
-              >
+              <button className="noteBtn" onClick={() => toggleOption("notes")}>
                 Notes
               </button>
-              <button
-                className="stepBtn"
-                onClick={() => {
-                  toggleOption("steps");
-                }}
-              >
+              <button className="stepBtn" onClick={() => toggleOption("steps")}>
                 Steps
               </button>
             </div>
@@ -209,14 +156,13 @@ const AddTask = ({ setActivePanel }) => {
       </div>
 
       <button
-        // id="activateBtn"
         className={`taskDetails ${
           activeSection === "taskDetails" ? "activate" : ""
         }`}
         onClick={() => toggleSection("taskDetails")}
       >
         <i
-          className={`fa-solid  ${
+          className={`fa-solid ${
             activeSection === "taskDetails" ? "fa-angle-down" : "fa-angle-right"
           }`}
         ></i>
@@ -227,22 +173,64 @@ const AddTask = ({ setActivePanel }) => {
         {activeSection === "taskDetails" && (
           <>
             <p>Priority :</p>
-
             <RadioGroup
               name="priorityCategory"
-              options={priorityOptions}
+              options={[
+                {
+                  id: "categoryP",
+                  value: "P0",
+                  label: "P0",
+                  bubbleClass: "large",
+                },
+                {
+                  id: "categoryP",
+                  value: "P1",
+                  label: "P1",
+                  bubbleClass: "medium",
+                },
+                {
+                  id: "categoryP",
+                  value: "P2",
+                  label: "P2",
+                  bubbleClass: "small",
+                },
+              ]}
               onRadioChange={handleRadioChange}
             />
+
             <p>Task Size :</p>
             <RadioGroup
               name="taskCategory"
-              options={levelOptions}
+              options={[
+                {
+                  id: "categoryL",
+                  value: "large",
+                  label: "Large",
+                  bubbleClass: "large",
+                  extra: "*",
+                },
+                {
+                  id: "categoryL",
+                  value: "medium",
+                  label: "Medium",
+                  bubbleClass: "medium",
+                  extra: "***",
+                },
+                {
+                  id: "categoryL",
+                  value: "small",
+                  label: "Small",
+                  bubbleClass: "small",
+                  extra: "*****",
+                },
+              ]}
               onRadioChange={handleRadioChange}
             />
+
             <Tag
               tagSuggestions={tagSuggestions}
               onTagChange={handleTagChange}
-            ></Tag>
+            />
           </>
         )}
       </div>

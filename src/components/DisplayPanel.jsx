@@ -12,6 +12,8 @@ function DisplayPanel({
   setAddSection,
   defaultCategory,
   setDefaultCategory,
+  selectedGoal,
+  setSelectedGoal,
 }) {
   return (
     <>
@@ -22,12 +24,16 @@ function DisplayPanel({
             setAddSection={setAddSection}
             defaultCategory={defaultCategory}
             setDefaultCategory={setDefaultCategory}
+            selectedGoal={selectedGoal}
+            setSelectedGoal={setSelectedGoal}
           />
           {addSection === "goal" && (
             <AddGoal
               setAddSection={setAddSection}
               defaultCategory={defaultCategory}
               setDefaultCategory={setDefaultCategory}
+              selectedGoal={selectedGoal}
+              setSelectedGoal={setSelectedGoal}
             />
           )}
         </>

@@ -1,6 +1,7 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import "./todaysTask.css";
-import AddTask from "./AddTask/AddTask";
+import AddTask from "./AddTask";
+import SelectTask from "./SelectTask"; // Import SelectTask component
 import { useFullScreen } from "../../../lib/FullScreenContext";
 
 function TodaysTask() {
@@ -8,17 +9,16 @@ function TodaysTask() {
   const [activePanel, setActivePanel] = useState("");
 
   const handlePanelChange = (panel) => {
-    // if (!isFullScreen) {
-    //   toggleFullScreen(); // Exit full screen if currently active
-    // }
     setActivePanel(panel);
   };
 
   return (
     <div className="todaysTask">
-      <div className={`actionPanel-todaysTask ${activePanel != ""  ? "unactive" : ""}`}>
-        {/* <div className="tasks">No Task yet</div> */}
-
+      <div
+        className={`actionPanel-todaysTask ${
+          activePanel !== "" ? "unactive" : ""
+        }`}
+      >
         <div className="task-options">
           <div
             className="actionBtn"
@@ -29,7 +29,7 @@ function TodaysTask() {
 
           <div
             className="actionBtn"
-            onClick={() => handlePanelChange("")} //selectTask
+            onClick={() => handlePanelChange("selectTask")}
           >
             Select Task
           </div>
@@ -37,9 +37,23 @@ function TodaysTask() {
       </div>
 
       <div
-        className={`contentPanel-todaysTask ${activePanel == "addTask" ? "active" : ""}`}
+        className={`contentPanel-todaysTask ${
+          activePanel === "addTask" ? "active" : ""
+        }`}
       >
-        {activePanel === "addTask" && <AddTask setActivePanel={setActivePanel}/>}
+        {activePanel === "addTask" && (
+          <AddTask setActivePanel={setActivePanel} />
+        )}
+      </div>
+
+      <div
+        className={`contentPanel-todaysTask ${
+          activePanel === "selectTask" ? "active" : ""
+        }`}
+      >
+        {activePanel === "selectTask" && (
+          <SelectTask setActivePanel={setActivePanel} />
+        )}
       </div>
     </div>
   );

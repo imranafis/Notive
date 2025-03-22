@@ -17,6 +17,7 @@
       font-size: 1.25rem;
       font-weight: bold;
       text-align: center;
+      cursor: pointer;
     }
 
     &.unactive {

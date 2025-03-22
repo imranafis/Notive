@@ -12,9 +12,12 @@ const GoalSection = ({
   setAddSection,
   defaultCategory,
   setDefaultCategory,
+  selectedGoal,
+  setSelectedGoal,
 }) => {
   const [habits, setHabits] = useState([]);
   const [projects, setProjects] = useState([]);
+  // const [selectedGoal, setSelectedGoal] = useState(null);
   // const [defaultCategory, setDefaultCategory] = useState("");
   useEffect(() => {
     const fetchGoals = async () => {
@@ -42,6 +45,12 @@ const GoalSection = ({
   const handleAddGoal = (category) => {
     setDefaultCategory(category);
     setAddSection(category);
+    setSelectedGoal(null);
+  };
+  const handleEditGoal = (goal) => {
+    setSelectedGoal(goal);
+    setDefaultCategory(goal.subCategory);
+    setAddSection(goal.subCategory);
   };
 
   return (
@@ -56,7 +65,11 @@ const GoalSection = ({
                 <p>No habits added yet.</p>
               ) : (
                 habits.map((goal) => (
-                  <div key={goal.id} className="goalCard">
+                  <div
+                    key={goal.id}
+                    className="goalCard"
+                    onClick={() => handleEditGoal(goal)}
+                  >
                     <h3>{goal.goalName}</h3>
                   </div>
                 ))
@@ -79,7 +92,11 @@ const GoalSection = ({
                 <p>No projects added yet.</p>
               ) : (
                 projects.map((goal) => (
-                  <div key={goal.id} className="goalCard">
+                  <div
+                    key={goal.id}
+                    className="goalCard"
+                    onClick={() => handleEditGoal(goal)}
+                  >
                     <h3>{goal.goalName}</h3>
                   </div>
                 ))
@@ -100,6 +117,8 @@ const GoalSection = ({
           setAddSection={setAddSection}
           defaultCategory={defaultCategory}
           setDefaultCategory={setDefaultCategory}
+          selectedGoal={selectedGoal}
+          setSelectedGoal={setSelectedGoal}
         />
       )}
     </>

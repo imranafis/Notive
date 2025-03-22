@@ -30,6 +30,8 @@ function LandingPage() {
   const [addSection, setAddSection] = useState("");
   const { isFullScreen, toggleFullScreen } = useFullScreen();
 
+  const [selectedGoal, setSelectedGoal] = useState(null);
+
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.ctrlKey && e.key === "f") {
@@ -63,6 +65,8 @@ function LandingPage() {
           setAddSection={setAddSection}
           defaultCategory={defaultCategory}
           setDefaultCategory={setDefaultCategory}
+          selectedGoal={selectedGoal}
+          setSelectedGoal={setSelectedGoal}
         />
       </div>
     </>
