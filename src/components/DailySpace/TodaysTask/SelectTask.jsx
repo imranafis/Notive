@@ -5,7 +5,7 @@ import { getUser } from "/src/lib/user";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBackward } from "@fortawesome/free-solid-svg-icons";
 import TaskBox from "./TaskBox"; // Import the TaskBox component
-import "./selectTask.css";
+import "./SelectTask.css";
 
 const SelectTask = ({ setActivePanel }) => {
   const [tasks, setTasks] = useState([]);
