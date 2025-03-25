@@ -1,10 +1,13 @@
+import React, { useState } from "react";
+
 import GoalSection from "./GoalSection/GoalSection.jsx";
 import AddGoal from "./GoalSection/AddGoal.jsx";
 import BulletJournal from "./BulletJournal/BulletJournal.jsx";
 import NoteSection from "./others/NoteSection.jsx";
-import TaskSection from "../icons/TaskSection.jsx";
+import TaskSection from "./TaskSection/TaskSection.jsx";
 import JournalSection from "./others/JournalSection.jsx";
 import DailySpace from "./DailySpace/DailySpace.jsx";
+import AddTask from "./TaskSection/AddTask.jsx";
 
 function DisplayPanel({
   activeSection,
@@ -12,9 +15,9 @@ function DisplayPanel({
   setAddSection,
   defaultCategory,
   setDefaultCategory,
-  selectedGoal,
-  setSelectedGoal,
 }) {
+  const [selectedItem, setSelectedItem] = useState(null);
+
   return (
     <>
       {activeSection === "goal" && (
@@ -24,25 +27,31 @@ function DisplayPanel({
             setAddSection={setAddSection}
             defaultCategory={defaultCategory}
             setDefaultCategory={setDefaultCategory}
-            selectedGoal={selectedGoal}
-            setSelectedGoal={setSelectedGoal}
+            selectedItem={selectedItem}
+            setSelectedItem={setSelectedItem}
           />
           {addSection === "goal" && (
             <AddGoal
               setAddSection={setAddSection}
               defaultCategory={defaultCategory}
               setDefaultCategory={setDefaultCategory}
-              selectedGoal={selectedGoal}
-              setSelectedGoal={setSelectedGoal}
+              selectedItem={selectedItem}
+              setSelectedItem={setSelectedItem}
             />
           )}
         </>
       )}
       {activeSection === "bulletJournal" && <BulletJournal />}
       {activeSection === "dailyspace" && <DailySpace />}
-      {/* Uncomment these if needed */}
+      {activeSection === "taskSection" && (
+        <>
+          <TaskSection addSection={addSection} setAddSection={setAddSection} />
+          {addSection === "taskSection" && (
+            <AddTask setAddSection={setAddSection} />
+          )}
+        </>
+      )}
       {/* {activeSection === "note" && <NoteSection />} */}
-      {/* {activeSection === "task" && <TaskSection />} */}
       {/* {activeSection === "journal" && <JournalSection />} */}
     </>
   );

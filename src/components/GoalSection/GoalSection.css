@@ -26,6 +26,7 @@
   display: flex;
   align-items: center;
   gap: 50px;
+  flex: 1;
 }
 
 .goalLabel {
@@ -34,10 +35,10 @@
   margin-bottom: 10px;
   text-align: left;
 }
-
 .goalGrid {
   display: flex;
-  flex-wrap: nowrap; /* Prevent wrapping to keep items in one row */
+  flex-wrap: nowrap;
+  height: 80%;
   gap: 10px;
   padding: 10px 0;
   max-width: calc(100% - 120px); /* Ensure space for the label */
@@ -45,6 +46,7 @@
   overflow-y: hidden; /* Prevent vertical overflow */
   padding-right: 50px;
   scroll-snap-type: x mandatory;
+  flex: 1; /* Allow goalGrid to take full height */
 }
 
 .goalGrid::-webkit-scrollbar {
@@ -62,8 +64,9 @@
 
 .goalCard {
   display: flex;
-  min-width: 200px; /* Minimum width of each card */
-  max-width: 300px; /* Optional maximum width */
+  min-width: 300px; /* Minimum width of each card */
+  max-width: 300px;
+  height: 100%; /* Take full height of goalGrid */
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;

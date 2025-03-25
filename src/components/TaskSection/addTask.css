@@ -45,7 +45,7 @@ input[type="radio"],
 input[type="checkbox"] {
   display: none;
 }
-/* 
+
 .addTask {
   display: flex;
   flex-direction: column;
@@ -95,6 +95,7 @@ input[type="checkbox"] {
   .details {
     font-size: 1rem;
     font-weight: 700;
+    /* margin-bottom: 1rem; */
     margin-top: 1.25rem;
 
     &.activate {
@@ -106,6 +107,7 @@ input[type="checkbox"] {
     width: 100%;
     background-color: #f9f9f9;
     margin-top: 1rem;
+    /* margin-bottom: 1rem; */
 
     .switchBtn {
       display: flex;
@@ -123,6 +125,7 @@ input[type="checkbox"] {
         font-weight: 600;
         padding: 0.5rem 0.5rem;
         color: #fff;
+        /* background-color: var(--primary); */
         border-radius: 0.5rem;
         box-shadow: var(--gray);
         cursor: pointer;
@@ -145,6 +148,7 @@ input[type="checkbox"] {
   p {
     font-size: 1rem;
     font-weight: 700;
+    /* margin-bottom: 1rem; */
   }
 
   .taskSection {
@@ -157,6 +161,7 @@ input[type="checkbox"] {
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    /* width: 100%; */
     gap: 10px;
     margin-bottom: 1.5rem;
   }
@@ -167,6 +172,7 @@ input[type="checkbox"] {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    /* padding: 1rem; */
     border-radius: 0.5rem;
     cursor: pointer;
   }
@@ -227,6 +233,11 @@ input[type="checkbox"] {
     }
   }
 
+  /* .activate {
+      color: #fff;
+      background-color: var(--primary);
+      opacity: 1;
+    } */
 
   .controlBtn {
     display: flex;
@@ -253,4 +264,4 @@ input[type="checkbox"] {
       }
     }
   }
-} */
+}

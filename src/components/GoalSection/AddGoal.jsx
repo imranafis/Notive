@@ -29,8 +29,8 @@ function AddGoal({
   setAddSection,
   defaultCategory,
   setDefaultCategory,
-  selectedGoal,
-  setSelectedGoal,
+  selectedItem,
+  setSelectedItem,
 }) {
   const Aditor_Goal = useRef(null);
   const Aditor_Checkbox_Goal = useRef(null);
@@ -42,26 +42,26 @@ function AddGoal({
   const [selectedDate, setSelectedDate] = useState(null);
 
   useEffect(() => {
-    console.log(selectedGoal);
-    if (selectedGoal) {
-      if (selectedGoal.subCategory === "Habit") {
-        setGoalName(selectedGoal.goalName);
-        setNote(selectedGoal.note);
-      } else if (selectedGoal.subCategory === "Project") {
+    console.log(selectedItem);
+    if (selectedItem) {
+      if (selectedItem.subCategory === "Habit") {
+        setGoalName(selectedItem.goalName);
+        setNote(selectedItem.note);
+      } else if (selectedItem.subCategory === "Project") {
         // Convert Firestore Timestamp to Day.js
-        const estimatedTime = selectedGoal.estimatedTime
-          ? dayjs(selectedGoal.estimatedTime.toDate()) // Convert if it's a Timestamp
+        const estimatedTime = selectedItem.estimatedTime
+          ? dayjs(selectedItem.estimatedTime.toDate()) // Convert if it's a Timestamp
           : null;
 
         setSelectedDate(estimatedTime);
-        setGoalName(selectedGoal.goalName);
-        setNote(selectedGoal.note);
-        setBreakdownContent(selectedGoal.breakdown);
+        setGoalName(selectedItem.goalName);
+        setNote(selectedItem.note);
+        setBreakdownContent(selectedItem.breakdown);
       }
     }
 
     if (Aditor_Goal.current && !Aditor_Goal.current.innerHTML.trim()) {
-      initializeAditor(Aditor_Goal.current, selectedGoal?.note || "");
+      initializeAditor(Aditor_Goal.current, selectedItem?.note || "");
     }
     if (
       Aditor_Checkbox_Goal.current &&
@@ -69,15 +69,15 @@ function AddGoal({
     ) {
       initializeAditorCheckbox(
         Aditor_Checkbox_Goal.current,
-        selectedGoal?.breakdown || ""
+        selectedItem?.breakdown || ""
       );
     }
-  }, [activeGroups, selectedGoal]);
+  }, [activeGroups, selectedItem]);
 
   // useEffect(() => {
-  //   if (selectedGoal && Aditor_Goal.current) {
-  //     const note = selectedGoal.note;
-  //     console.log(selectedGoal.note);
+  //   if (selectedItem && Aditor_Goal.current) {
+  //     const note = selectedItem.note;
+  //     console.log(selectedItem.note);
   //     initializeAditorX(Aditor_Goal.current, note);
   //   }
   // }, [activeGroups]);
@@ -172,6 +172,7 @@ function AddGoal({
       setBreakdownContent("");
       setActiveGroups([]);
       setCategory("Goal");
+      setSelectedDate("");
     } catch (e) {
       console.error("Error saving goal:", e);
       toast.error("Failed to save goal. Please try again.", {
@@ -198,7 +199,7 @@ function AddGoal({
       return;
     }
 
-    if (!selectedGoal) {
+    if (!selectedItem) {
       toast.error("No goal selected to update!", {
         position: "bottom-right",
         autoClose: 2000,
@@ -208,7 +209,7 @@ function AddGoal({
 
     try {
       const userID = getUser().uid;
-      const goalRef = doc(db, userID, selectedGoal.id);
+      const goalRef = doc(db, userID, selectedItem.id);
       const updatedNoteContent = Aditor_Goal.current?.innerHTML || "";
 
       const updatedGoalData = {
@@ -256,30 +257,81 @@ function AddGoal({
   };
 
   const deleteGoal = async () => {
-    if (!selectedGoal) return;
-    try {
-      const userID = getUser().uid;
-      const goalRef = doc(db, userID, selectedGoal.id);
-      await deleteDoc(goalRef);
+    if (!selectedItem) return;
 
-      toast.success("Goal deleted successfully!", {
+    toast.warn(
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center", // Center the buttons horizontally
+          alignItems: "center", // Center the buttons vertically
+          flexDirection: "column", // Stack the buttons vertically
+          gap: "10px", // Space between the buttons
+        }}
+      >
+        <p>Are you sure you want to delete this goal?</p>
+        <div>
+          <button
+            onClick={async () => {
+              try {
+                const userID = getUser().uid;
+                const goalRef = doc(db, userID, selectedItem.id);
+                await deleteDoc(goalRef);
+                toast.success("Goal deleted successfully!", {
+                  position: "bottom-right",
+                  autoClose: 500,
+                });
+                setTimeout(() => setAddSection(""), 1000);
+              } catch (error) {
+                console.error("Error deleting goal:", error);
+                toast.error("Failed to delete goal. Please try again.", {
+                  position: "bottom-right",
+                  autoClose: 1000,
+                });
+              }
+            }}
+            style={{
+              backgroundColor: "#28a745" /* Green */,
+              color: "white",
+              padding: "8px 16px",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              marginRight: "10px",
+            }}
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => toast.dismiss()}
+            style={{
+              backgroundColor: "#dc3545" /* Red */,
+              color: "white",
+              padding: "8px 16px",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            No
+          </button>
+        </div>
+      </div>,
+      {
         position: "bottom-right",
-        autoClose: 2000,
-      });
-      setTimeout(() => setAddSection(""), 1200);
-    } catch (error) {
-      console.error("Error deleting goal:", error);
-      toast.error("Failed to delete goal. Please try again.", {
-        position: "bottom-right",
-        autoClose: 2000,
-      });
-    }
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        pauseOnHover: false,
+        hideProgressBar: true,
+      }
+    );
   };
 
   const handleCloseGoal = () => {
     setDefaultCategory("");
     setAddSection("");
-    setSelectedGoal(null);
+    setSelectedItem(null);
   };
 
   return (
@@ -319,7 +371,7 @@ function AddGoal({
 
           {activeGroups.includes("Details") && (
             <>
-              <p>Select a Date:</p>
+              <p>Deadline:</p>
               <DatePickerComponent
                 selectedDate={selectedDate ? dayjs(selectedDate) : null}
                 setSelectedDate={(newValue) => setSelectedDate(newValue)}
@@ -353,7 +405,7 @@ function AddGoal({
               </button>
             </>
           )}
-          {selectedGoal ? (
+          {selectedItem ? (
             <>
               <button onClick={updateGoal} className="updateBtn">
                 Update

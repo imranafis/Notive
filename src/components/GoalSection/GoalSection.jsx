@@ -12,12 +12,12 @@ const GoalSection = ({
   setAddSection,
   defaultCategory,
   setDefaultCategory,
-  selectedGoal,
-  setSelectedGoal,
+  selectedItem,
+  setSelectedItem,
 }) => {
   const [habits, setHabits] = useState([]);
   const [projects, setProjects] = useState([]);
-  // const [selectedGoal, setSelectedGoal] = useState(null);
+  // const [selectedItem, setSelectedItem] = useState(null);
   // const [defaultCategory, setDefaultCategory] = useState("");
   useEffect(() => {
     const fetchGoals = async () => {
@@ -45,10 +45,10 @@ const GoalSection = ({
   const handleAddGoal = (category) => {
     setDefaultCategory(category);
     setAddSection(category);
-    setSelectedGoal(null);
+    setSelectedItem(null);
   };
   const handleEditGoal = (goal) => {
-    setSelectedGoal(goal);
+    setSelectedItem(goal);
     setDefaultCategory(goal.subCategory);
     setAddSection(goal.subCategory);
   };
@@ -117,8 +117,8 @@ const GoalSection = ({
           setAddSection={setAddSection}
           defaultCategory={defaultCategory}
           setDefaultCategory={setDefaultCategory}
-          selectedGoal={selectedGoal}
-          setSelectedGoal={setSelectedGoal}
+          selectedItem={selectedItem}
+          setSelectedItem={setSelectedItem}
         />
       )}
     </>

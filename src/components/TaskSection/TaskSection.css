@@ -1,0 +1,275 @@
+.TaskSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+
+  h2 {
+    margin-bottom: 2rem;
+  }
+}
+
+.taskList {
+  list-style: none;
+  padding: 0;
+}
+
+.taskItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.taskItem span {
+  cursor: pointer;
+  font-size: 1.35rem;
+}
+
+.unchecked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 25%;
+  border: 3.5px solid var(--medium);
+  box-shadow: var(--medium-glow);
+  transition: 0.2s ease-in-out;
+}
+
+.checked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 25%;
+  border: 3.5px solid var(--greenS);
+  box-shadow: var(--greenS-glow);
+  transition: 0.2s ease-in-out;
+}
+
+.checked::after {
+  content: "";
+  display: block;
+  opacity: 1;
+  width: 10px;
+  height: 10px;
+  background-color: var(--greenS);
+  box-shadow: var(--greenS-glow);
+  border-radius: 25%;
+  transition: 0.2s ease-in-out;
+}
+
+.addTask {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(202, 202, 202, 0.75);
+  backdrop-filter: blur(2px);
+  left: 15%;
+  width: 85%;
+  height: 100%;
+  z-index: 1;
+  position: fixed;
+
+  .panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background-color: #eee;
+    padding: 1.5rem;
+    border-radius: 20px;
+    width: 30rem;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+
+    .closeBtn {
+      position: absolute;
+      top: -15px;
+      right: -5px;
+      background: none;
+      border: none;
+      font-size: 30px;
+      cursor: pointer;
+      color: #333;
+
+      &:hover {
+        color: red;
+      }
+    }
+
+    .taskName {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: center;
+      width: 100%;
+      gap: 1rem;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+
+      input[type="text"] {
+        font-size: 1rem;
+        width: 70%;
+        border-bottom: 1px solid gray;
+      }
+    }
+
+    .details,
+    .breakdown,
+    .taskDetails {
+      display: block;
+      text-align: left;
+      align-items: flex-start;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      margin-top: 1.25rem;
+
+      &.activate {
+        color: rgb(27, 97, 219);
+      }
+    }
+
+    .Aditor_Task {
+      display: none;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      max-height: 9rem;
+      overflow-y: auto;
+
+      &.active {
+        display: block;
+      }
+    }
+
+    .Aditor_Task_Checkbox {
+      display: none;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      max-height: 15rem;
+      min-width: 25rem;
+      overflow-y: auto;
+
+      &.active {
+        display: block;
+      }
+    }
+
+    p {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .taskSection {
+      max-width: 30rem;
+    }
+
+    .priorityCategory,
+    .taskCategory {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .priorityCategory label,
+    .taskCategory label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+
+    .priorityCategory .bubble,
+    .taskCategory .bubble {
+      padding: 5px 10px;
+      margin: 5px;
+      min-width: 5rem;
+      border-radius: 5px;
+      border: 3px solid var(--small);
+      background-color: var(--small);
+      box-shadow: var(--small-glow);
+      cursor: pointer;
+      text-align: center;
+      opacity: 0.35;
+      transition: opacity 0.2s ease-in-out;
+
+      &:hover {
+        opacity: 0.85;
+      }
+    }
+
+    .priorityCategory .bubble.medium,
+    .taskCategory .bubble.medium {
+      border-color: var(--medium);
+      background-color: var(--medium);
+      box-shadow: var(--medium-glow);
+    }
+
+    .priorityCategory .bubble.large,
+    .taskCategory .bubble.large {
+      border-color: var(--large);
+      background-color: var(--large);
+      box-shadow: var(--large-glow);
+    }
+
+    label input:checked + .bubble {
+      opacity: 1;
+    }
+
+    #activateBtn {
+      display: block;
+      font-size: 1.125rem;
+      font-weight: 600;
+      padding: 1rem 1.125rem;
+      color: #fff;
+      background-color: var(--primary);
+      border-radius: 0.5rem;
+      box-shadow: var(--gray);
+      cursor: pointer;
+      margin-top: 1.5rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.35;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    .controlBtn {
+      display: flex;
+      width: 100%;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+
+      #saveBtn {
+        display: block;
+        font-size: 1.125rem;
+        font-weight: 600;
+        padding: 1rem 1.125rem;
+        color: #fff;
+        background-color: var(--greenM);
+        border-radius: 0.5rem;
+        box-shadow: var(--gray);
+        cursor: pointer;
+        margin-top: 1.5rem;
+        opacity: 0.35;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}

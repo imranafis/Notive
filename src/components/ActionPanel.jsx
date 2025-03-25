@@ -52,7 +52,10 @@ function ActionPanel({
         {/* <img src={noteBtn}/> */}
         <FontAwesomeIcon icon={faListUl} />
       </div>
-      <div className="sectionBtn" onClick={() => handleSectionChange("task")}>
+      <div
+        className="sectionBtn"
+        onClick={() => handleSectionChange("taskSection")}
+      >
         {/* <img src={taskBtn}/> */}
         <FontAwesomeIcon icon={faListCheck} />
       </div>
