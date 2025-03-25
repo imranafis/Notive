@@ -22,7 +22,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./TAskSection.css";
+import "./TaskSection.css";
 
 const AddTask = ({ setAddSection }) => {
   const Aditor_Task = useRef(null);
