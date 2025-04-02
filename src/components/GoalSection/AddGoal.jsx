@@ -31,18 +31,83 @@ function AddGoal({
   setDefaultCategory,
   selectedItem,
   setSelectedItem,
+  fullScreenMode,
+  onClose,
 }) {
   const Aditor_Goal = useRef(null);
-  const Aditor_Checkbox_Goal = useRef(null);
+  const Aditor_Goal_Checkbox = useRef(null);
   const [goalName, setGoalName] = useState("");
   const [category, setCategory] = useState("Habit");
-  const [activeGroups, setActiveGroups] = useState([]);
+  const [activeSection, setActiveSection] = useState([]);
   const [Note, setNote] = useState("");
   const [BreakdownContent, setBreakdownContent] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
 
+  // useEffect(() => {
+  //   console.log(selectedItem);
+  //   if (selectedItem) {
+  //     // const newActiveSections = [];
+  //     // if (selectedItem.note) newActiveSections.push("note");
+  //     // if (selectedItem.breakdown) newActiveSections.push("breakdown");
+  //     // if (selectedItem.estimatedTime) newActiveSections.push("details");
+
+  //     // setActiveSection(newActiveSections);
+  //     if (selectedItem.subCategory === "Habit") {
+  //       setGoalName(selectedItem.goalName);
+  //       setNote(selectedItem.note);
+  //     } else if (selectedItem.subCategory === "Project") {
+  //       // Convert Firestore Timestamp to Day.js
+  //       const estimatedTime = selectedItem.estimatedTime
+  //         ? dayjs(selectedItem.estimatedTime.toDate()) // Convert if it's a Timestamp
+  //         : null;
+
+  //       setSelectedDate(estimatedTime);
+  //       setGoalName(selectedItem.goalName);
+  //       setNote(selectedItem.note);
+  //       setBreakdownContent(selectedItem.breakdown);
+  //     }
+  //   }
+
+  //   if (Aditor_Goal.current && !Aditor_Goal.current.innerHTML.trim()) {
+  //     initializeAditor(Aditor_Goal.current, selectedItem?.note || "");
+  //   }
+  //   if (
+  //     Aditor_Goal_Checkbox.current &&
+  //     !Aditor_Goal_Checkbox.current.innerHTML.trim()
+  //   ) {
+  //     initializeAditorCheckbox(
+  //       Aditor_Goal_Checkbox.current,
+  //       selectedItem?.breakdown || ""
+  //     );
+  //   }
+
+  //   // Automatically expand sections if data exists
+  // }, [activeSection, selectedItem]);
+
+  // useEffect(() => {
+  //   if (selectedItem && Aditor_Goal.current) {
+  //     const note = selectedItem.note;
+  //     console.log(selectedItem.note);
+  //     initializeAditorX(Aditor_Goal.current, note);
+  //   }
+  // }, [activeSection]);
+
   useEffect(() => {
-    console.log(selectedItem);
+    if (Aditor_Goal.current && !Aditor_Goal.current.innerHTML.trim()) {
+      initializeAditor(Aditor_Goal.current, selectedItem?.note || "");
+    }
+    if (
+      Aditor_Goal_Checkbox.current &&
+      !Aditor_Goal_Checkbox.current.innerHTML.trim()
+    ) {
+      initializeAditorCheckbox(
+        Aditor_Goal_Checkbox.current,
+        selectedItem?.breakdown || ""
+      );
+    }
+  }, [activeSection]);
+
+  useEffect(() => {
     if (selectedItem) {
       if (selectedItem.subCategory === "Habit") {
         setGoalName(selectedItem.goalName);
@@ -58,44 +123,26 @@ function AddGoal({
         setNote(selectedItem.note);
         setBreakdownContent(selectedItem.breakdown);
       }
+
+      // Dynamically set active sections based on content
+      setActiveSection((prev) => {
+        const updatedSections = [...prev];
+        if (selectedItem.note && !updatedSections.includes("note")) {
+          updatedSections.push("note");
+        }
+        if (selectedItem.breakdown && !updatedSections.includes("breakdown")) {
+          updatedSections.push("breakdown");
+        }
+        if (
+          selectedItem.estimatedTime &&
+          !updatedSections.includes("details")
+        ) {
+          updatedSections.push("details");
+        }
+        return updatedSections;
+      });
     }
-
-    if (Aditor_Goal.current && !Aditor_Goal.current.innerHTML.trim()) {
-      initializeAditor(Aditor_Goal.current, selectedItem?.note || "");
-    }
-    if (
-      Aditor_Checkbox_Goal.current &&
-      !Aditor_Checkbox_Goal.current.innerHTML.trim()
-    ) {
-      initializeAditorCheckbox(
-        Aditor_Checkbox_Goal.current,
-        selectedItem?.breakdown || ""
-      );
-    }
-  }, [activeGroups, selectedItem]);
-
-  // useEffect(() => {
-  //   if (selectedItem && Aditor_Goal.current) {
-  //     const note = selectedItem.note;
-  //     console.log(selectedItem.note);
-  //     initializeAditorX(Aditor_Goal.current, note);
-  //   }
-  // }, [activeGroups]);
-
-  // useEffect(() => {
-  //   if (Aditor_Checkbox_Goal.current) {
-  //     initializeAditorCheckbox(Aditor_Checkbox_Goal.current, "");
-  //   }
-  //   if (Aditor_Goal.current) {
-  //     initializeAditor(Aditor_Goal.current, "");
-  //   }
-  // }, [activeGroups]);
-
-  const addSection = (section) => {
-    setActiveGroups((prev) =>
-      prev.includes(section) ? prev : [...prev, section]
-    );
-  };
+  }, [selectedItem]);
 
   const handleInputChange = (e) => {
     setGoalName(e.target.value);
@@ -113,7 +160,7 @@ function AddGoal({
 
     setBreakdownContent("");
     setSelectedDate(null);
-    setActiveGroups([]);
+    setActiveSection([]);
   };
 
   const addGoal = async () => {
@@ -148,7 +195,7 @@ function AddGoal({
 
       if (category === "Project") {
         const updatedBreakdownContent =
-          Aditor_Checkbox_Goal.current?.innerHTML || "";
+          Aditor_Goal_Checkbox.current?.innerHTML || "";
 
         goalData.estimatedTime = selectedDate
           ? Timestamp.fromDate(new Date(selectedDate))
@@ -170,7 +217,7 @@ function AddGoal({
       setGoalName("");
       setNote("");
       setBreakdownContent("");
-      setActiveGroups([]);
+      setActiveSection([]);
       setCategory("Goal");
       setSelectedDate("");
     } catch (e) {
@@ -223,7 +270,7 @@ function AddGoal({
 
       if (category === "Project") {
         const updatedBreakdownContent =
-          Aditor_Checkbox_Goal.current?.innerHTML || "";
+          Aditor_Goal_Checkbox.current?.innerHTML || "";
 
         updatedGoalData.estimatedTime = selectedDate
           ? Timestamp.fromDate(new Date(selectedDate))
@@ -245,7 +292,7 @@ function AddGoal({
       setGoalName("");
       setNote("");
       setBreakdownContent("");
-      setActiveGroups([]);
+      setActiveSection([]);
       setCategory("Goal");
     } catch (e) {
       console.error("Error updating goal:", e);
@@ -329,95 +376,139 @@ function AddGoal({
   };
 
   const handleCloseGoal = () => {
-    setDefaultCategory("");
-    setAddSection("");
-    setSelectedItem(null);
+    onClose(); // Call the passed onClose function
+  };
+
+  const addSection = (section) => {
+    setActiveSection((prev) =>
+      prev.includes(section)
+        ? prev.filter((s) => s !== section)
+        : [...prev, section]
+    );
   };
 
   return (
-    <div className="addGoal">
+    <div className={`addGoal ${fullScreenMode ? "fullScreen" : ""}`}>
       <div className="panel">
         <button className="closeBtn" onClick={() => handleCloseGoal()}>
           <FontAwesomeIcon icon={faTimes} />
         </button>
-        <div className="contentSection">
-          {defaultCategory === "" && (
-            <select
-              value={category}
-              onChange={handleCategoryChange}
-              className="goal-dropdown"
-            >
-              <option value="" disabled>
-                Select Category
-              </option>
-              <option value="Habit">Habit</option>
-              <option value="Project">Project</option>
-            </select>
-          )}
-          <input
-            type="text"
-            value={goalName}
-            onChange={handleInputChange}
-            placeholder={`Add a ${category} name`}
-          />
-
-          {/* <div ref={Aditor_Goal} className="Aditor_Goal" /> */}
-          {activeGroups.includes("Note") && (
-            <div ref={Aditor_Goal} className="Aditor_Goal" />
-          )}
-          {activeGroups.includes("Breakdown") && (
-            <div ref={Aditor_Checkbox_Goal} className="Aditor_Checkbox_Goal" />
-          )}
-
-          {activeGroups.includes("Details") && (
-            <>
-              <p>Deadline:</p>
-              <DatePickerComponent
-                selectedDate={selectedDate ? dayjs(selectedDate) : null}
-                setSelectedDate={(newValue) => setSelectedDate(newValue)}
-              />
-            </>
-          )}
-        </div>
-
-        <div className="controlSection">
-          <button
-            className={activeGroups.includes("Note") ? "btnActive" : ""}
-            onClick={() => addSection("Note")}
+        {/* <div className="contentSection"> */}
+        {defaultCategory === "" && (
+          <select
+            value={category}
+            onChange={handleCategoryChange}
+            className="goal-dropdown"
           >
-            Note
-          </button>
-          {category === "Project" && (
-            <>
-              <button
-                className={
-                  activeGroups.includes("Breakdown") ? "btnActive" : ""
-                }
-                onClick={() => addSection("Breakdown")}
-              >
-                Breakdown
-              </button>
-              <button
-                className={activeGroups.includes("Details") ? "btnActive" : ""}
-                onClick={() => addSection("Details")}
-              >
-                Details
-              </button>
-            </>
-          )}
+            <option value="" disabled>
+              Select Category
+            </option>
+            <option value="Habit">Habit</option>
+            <option value="Project">Project</option>
+          </select>
+        )}
+        <input
+          type="text"
+          className="goalName"
+          value={goalName}
+          onChange={handleInputChange}
+          placeholder={`Add a ${category} name`}
+        />
+
+        {/* </div> */}
+
+        {/* <div className="controlSection"> */}
+        <button
+          className={`note ${activeSection.includes("note") ? "activate" : ""}`}
+          onClick={() => addSection("note")}
+        >
+          <i
+            className={`fa-solid ${
+              activeSection.includes("note")
+                ? "fa-angle-down"
+                : "fa-angle-right"
+            }`}
+          ></i>
+          Note
+        </button>
+
+        {/* {activeSection === "details" && ( */}
+        <div
+          ref={Aditor_Goal}
+          className={`Aditor_Goal ${
+            activeSection.includes("note") ? "active" : ""
+          }`}
+        />
+        {category === "Project" && (
+          <>
+            <button
+              className={`breakdown ${
+                activeSection.includes("breakdown") ? "activate" : ""
+              }`}
+              onClick={() => addSection("breakdown")}
+            >
+              <i
+                className={`fa-solid ${
+                  activeSection.includes("breakdown")
+                    ? "fa-angle-down"
+                    : "fa-angle-right"
+                }`}
+              ></i>
+              Breakdown
+            </button>
+
+            {/* {activeSection === "breakdown" && ( */}
+            <div
+              ref={Aditor_Goal_Checkbox}
+              className={`Aditor_Goal_Checkbox ${
+                activeSection.includes("breakdown") ? "active" : ""
+              }`}
+            />
+            <button
+              className={`details ${
+                activeSection.includes("details") ? "activate" : ""
+              }`}
+              onClick={() => addSection("details")}
+            >
+              <i
+                className={`fa-solid ${
+                  activeSection.includes("details")
+                    ? "fa-angle-down"
+                    : "fa-angle-right"
+                }`}
+              ></i>
+              Details
+            </button>
+
+            {activeSection.includes("details") && (
+              <>
+                <p>Deadline:</p>
+                <DatePickerComponent
+                  selectedDate={selectedDate ? dayjs(selectedDate) : null}
+                  setSelectedDate={(newValue) => setSelectedDate(newValue)}
+                />
+              </>
+            )}
+          </>
+        )}
+
+        <div className="controlBtn">
           {selectedItem ? (
             <>
               <button onClick={updateGoal} className="updateBtn">
-                Update
+                Save
               </button>
               <button onClick={deleteGoal} className="deleteBtn">
                 Delete
               </button>
             </>
           ) : (
-            <button onClick={addGoal}>Save</button>
+            <button onClick={addGoal} className="saveBtn">
+              Save
+            </button>
           )}
         </div>
+        {/* </div> */}
       </div>
 
       <ToastContainer />

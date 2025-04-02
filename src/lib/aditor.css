@@ -276,7 +276,7 @@ input:checked ~ .bubble::after {
 } */
 
 .aditor .line {
-  padding: 0.5rem 0.25rem 0.5rem 0.25rem;
+  padding: 0.5rem 0 0.5rem 0;
 }
 
 .aditor .line .Head {

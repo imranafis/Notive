@@ -35,7 +35,7 @@ const AddTask = ({ setAddSection }) => {
   const [selectedPriority, setSelectedPriority] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
 
-  const [activeSection, setActiveSection] = useState(null);
+  const [activeSection, setActiveSection] = useState([]);
 
   const [Note, setNote] = useState("");
   const [BreakdownContent, setBreakdownContent] = useState("");
@@ -52,9 +52,12 @@ const AddTask = ({ setAddSection }) => {
       initializeAditorCheckbox(Aditor_Task_Checkbox.current, "");
     }
   }, []);
-
-  const toggleSection = (section) => {
-    setActiveSection(activeSection === section ? null : section);
+  const addSection = (section) => {
+    setActiveSection((prev) =>
+      prev.includes(section)
+        ? prev.filter((s) => s !== section)
+        : [...prev, section]
+    );
   };
 
   const handleRadioChange = (option) => {
@@ -136,12 +139,16 @@ const AddTask = ({ setAddSection }) => {
           <input type="text" value={inputValue} onChange={handleInputChange} />
         </div>
         <button
-          className={`details ${activeSection === "details" ? "activate" : ""}`}
-          onClick={() => toggleSection("details")}
+          className={`details ${
+            activeSection.includes("details") ? "activate" : ""
+          }`}
+          onClick={() => addSection("details")}
         >
           <i
             className={`fa-solid ${
-              activeSection === "details" ? "fa-angle-down" : "fa-angle-right"
+              activeSection.includes("details")
+                ? "fa-angle-down"
+                : "fa-angle-right"
             }`}
           ></i>
           Details
@@ -151,20 +158,22 @@ const AddTask = ({ setAddSection }) => {
         <div
           ref={Aditor_Task}
           className={`Aditor_Task ${
-            activeSection == "details" ? "active" : ""
+            activeSection.includes("details") ? "active" : ""
           }`}
         />
         {/* )} */}
 
         <button
           className={`breakdown ${
-            activeSection === "breakdown" ? "activate" : ""
+            activeSection.includes("breakdown") ? "activate" : ""
           }`}
-          onClick={() => toggleSection("breakdown")}
+          onClick={() => addSection("breakdown")}
         >
           <i
             className={`fa-solid ${
-              activeSection === "breakdown" ? "fa-angle-down" : "fa-angle-right"
+              activeSection.includes("breakdown")
+                ? "fa-angle-down"
+                : "fa-angle-right"
             }`}
           ></i>
           Breakdown
@@ -174,20 +183,20 @@ const AddTask = ({ setAddSection }) => {
         <div
           ref={Aditor_Task_Checkbox}
           className={`Aditor_Task_Checkbox ${
-            activeSection == "breakdown" ? "active" : ""
+            activeSection.includes("breakdown") ? "active" : ""
           }`}
         />
         {/* )} */}
 
         <button
           className={`taskDetails ${
-            activeSection === "taskDetails" ? "activate" : ""
+            activeSection.includes("taskDetails") ? "activate" : ""
           }`}
-          onClick={() => toggleSection("taskDetails")}
+          onClick={() => addSection("taskDetails")}
         >
           <i
             className={`fa-solid ${
-              activeSection === "taskDetails"
+              activeSection.includes("taskDetails")
                 ? "fa-angle-down"
                 : "fa-angle-right"
             }`}
@@ -196,7 +205,7 @@ const AddTask = ({ setAddSection }) => {
         </button>
 
         <div className="taskSection">
-          {activeSection === "taskDetails" && (
+          {activeSection.includes("taskDetails") && (
             <>
               <p>Priority :</p>
               <RadioGroup

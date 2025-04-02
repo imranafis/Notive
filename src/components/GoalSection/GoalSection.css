@@ -64,6 +64,7 @@
 
 .goalCard {
   display: flex;
+  position: relative;
   min-width: 300px; /* Minimum width of each card */
   max-width: 300px;
   height: 100%; /* Take full height of goalGrid */
@@ -84,6 +85,82 @@
   font-size: 1.2rem;
   margin: 0;
   color: #333;
+}
+
+.goalCard:hover {
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.goalActions {
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  display: flex;
+  font-size: 1.25rem;
+  justify-content: space-between;
+  padding: 0 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.goalCard:hover .goalActions {
+  opacity: 1;
+}
+
+.starBtn {
+  color: rgb(0, 0, 0);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.starBtn:hover {
+  transform: scale(1.1);
+}
+
+.menuBtn {
+  color: gray;
+  cursor: pointer;
+}
+
+/* Dropdown styles */
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 20px; /* Adjust as needed */
+  top: -100px;
+  /* transform: translateY(-50%); Center it vertically */
+  background-color: white;
+  min-width: 120px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  border-radius: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.dropdown-item {
+  font-size: 0.75rem;
+  padding: 8px 16px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background-color: #f1f1f1;
+}
+
+.menuBtn {
+  cursor: pointer;
+  padding: 4px;
+}
+
+.menuBtn:hover {
+  background-color: #f1f1f1;
+  border-radius: 4px;
 }
 
 .addBtnHabit,
@@ -116,16 +193,21 @@
 
   .panel {
     position: relative;
+    display: flex;
+    flex-direction: column;
     background-color: #eee;
     padding: 1.5rem;
-    border-radius: 20px;
+    /* border-radius: 20px; */
+    max-height: 80%;
+    overflow-y: auto;
+    overflow-x: hidden;
     width: 30rem;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 
     .closeBtn {
       position: absolute;
-      top: -15px;
-      right: -5px;
+      top: -7px;
+      left: -3px;
       background: none;
       border: none;
       font-size: 30px;
@@ -137,22 +219,23 @@
       }
     }
 
-    .Aditor_Goal {
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-      max-height: 9rem;
-      overflow-y: auto;
-    }
-
+    .Aditor_Goal,
     .Aditor_Goal_Checkbox {
+      display: none;
       margin-top: 1rem;
       margin-bottom: 1rem;
-      max-height: 15rem;
-      min-width: 25rem;
-      overflow-y: auto;
+
+      &.active {
+        display: block;
+        /* min-height: 10rem; */
+        min-height: 6rem;
+        max-height: 15rem;
+        overflow-y: auto;
+        /* background-color: #f9f9f9; */
+      }
     }
 
-    .contentSection [type="text"] {
+    .goalName {
       display: block;
       width: 100%;
       height: auto;
@@ -168,34 +251,62 @@
       margin-bottom: 0.5rem;
     }
 
-    .controlSection {
+    /* .controlSection {
       display: flex;
       flex-direction: column;
+      align-items: center; */
+
+    .note,
+    .breakdown,
+    .details {
+      display: block;
+      text-align: left;
+      align-items: flex-start;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      margin-top: 1.25rem;
+      cursor: pointer;
+      &.activate {
+        color: rgb(27, 97, 219);
+      }
+    }
+
+    .controlBtn {
+      display: flex;
+      width: 100%;
+      gap: 20px;
+      flex-direction: row;
       align-items: center;
+      justify-content: center;
 
       button {
         display: block;
         font-size: 1.125rem;
-        width: 10rem;
         font-weight: 600;
         padding: 1rem 1.125rem;
         color: #fff;
-        background-color: var(--primary);
         border-radius: 0.5rem;
         box-shadow: var(--gray);
         cursor: pointer;
         margin-top: 1.5rem;
         opacity: 0.35;
+
+        &:hover {
+          opacity: 1;
+        }
       }
 
-      button:hover {
-        opacity: 1;
+      .saveBtn,
+      .updateBtn {
+        background-color: var(--greenM);
       }
 
-      .btnActive {
-        display: none;
+      .deleteBtn {
+        background-color: var(--primary);
       }
     }
+    /* } */
   }
 
   .goal-dropdown {
@@ -232,4 +343,20 @@
   input[type="text"]:focus {
     border-color: #007bff;
   }
+}
+
+/* Add to your GoalSection.css */
+.addGoal.fullScreen {
+  left: 0;
+  width: 100%;
+}
+
+.addGoal.fullScreen .panel {
+  width: 60rem;
+  max-height: 90%;
+  height: 90%;
+}
+.Toastify {
+  padding: 0;
+  margin: 0;
 }

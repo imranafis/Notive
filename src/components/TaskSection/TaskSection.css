@@ -83,14 +83,17 @@
     flex-direction: column;
     background-color: #eee;
     padding: 1.5rem;
-    border-radius: 20px;
+    /* border-radius: 20px; */
+    max-height: 80%;
+    overflow-y: auto;
+    overflow-x: hidden;
     width: 30rem;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 
     .closeBtn {
       position: absolute;
-      top: -15px;
-      right: -5px;
+      top: -7px;
+      left: -3px;
       background: none;
       border: none;
       font-size: 30px;
@@ -111,6 +114,7 @@
       gap: 1rem;
       font-size: 1rem;
       font-weight: 700;
+      margin-top: 1rem;
       margin-bottom: 1rem;
 
       input[type="text"] {
@@ -130,34 +134,25 @@
       font-weight: 700;
       margin-bottom: 1rem;
       margin-top: 1.25rem;
-
+      cursor: pointer;
       &.activate {
         color: rgb(27, 97, 219);
       }
     }
 
-    .Aditor_Task {
-      display: none;
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-      max-height: 9rem;
-      overflow-y: auto;
-
-      &.active {
-        display: block;
-      }
-    }
-
+    .Aditor_Task,
     .Aditor_Task_Checkbox {
       display: none;
       margin-top: 1rem;
       margin-bottom: 1rem;
-      max-height: 15rem;
-      min-width: 25rem;
-      overflow-y: auto;
 
       &.active {
         display: block;
+        /* min-height: 10rem; */
+        min-height: 6rem;
+        max-height: 15rem;
+        overflow-y: auto;
+        /* background-color: #f9f9f9; */
       }
     }
 
@@ -168,6 +163,11 @@
 
     .taskSection {
       max-width: 30rem;
+
+      p {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+      }
     }
 
     .priorityCategory,
