@@ -5,16 +5,14 @@ import {
   doc,
   deleteDoc,
   updateDoc,
-} from "firebase/firestore"; // Added updateDoc
-import { db } from "/src/lib/firebase"; // Adjust if needed
+} from "firebase/firestore";
+import { db } from "/src/lib/firebase";
 import { getUser } from "/src/lib/user";
 import "./GoalSection.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faStar, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
 import AddGoal from "./AddGoal.jsx";
-
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 
 const GoalSection = ({
   addSection,
@@ -38,10 +36,8 @@ const GoalSection = ({
           .map((doc) => ({ id: doc.id, ...doc.data() }))
           .filter((goal) => goal.category === "goal");
 
-        // Sort the goals by createdAt in descending order
         goalList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-        // Separate goals based on subCategory
         setHabits(goalList.filter((goal) => goal.subCategory === "Habit"));
         setProjects(goalList.filter((goal) => goal.subCategory === "Project"));
       } catch (error) {
@@ -52,102 +48,92 @@ const GoalSection = ({
     fetchGoals();
   }, [addSection]);
 
-  const handleAddGoal = (category) => {
-    setDefaultCategory(category);
-    setAddSection(category);
-    setSelectedItem(null);
-    setActiveDropdown(null); // Close any open dropdowns
-  };
-
-  // const handleEditGoal = (goal) => {
-  //   setSelectedItem(goal);
-  //   setDefaultCategory(goal.subCategory);
-  //   setAddSection(goal.subCategory);
-  //   setActiveDropdown(null); // Close any open dropdowns
-  // };
-
   const handleDeleteGoal = async (goalId) => {
-    try {
-      toast.warn(
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center", // Center the buttons horizontally
-            alignItems: "center", // Center the buttons vertically
-            flexDirection: "column", // Stack the buttons vertically
-            gap: "10px", // Space between the buttons
-          }}
-        >
-          <p>Are you sure you want to delete this goal?</p>
-          <div>
-            <button
-              onClick={async () => {
-                try {
-                  const userID = getUser().uid;
-                  const goalRef = doc(db, userID, selectedItem.id);
-                  await deleteDoc(goalRef);
-                  toast.success("Goal deleted successfully!", {
-                    position: "bottom-right",
-                    autoClose: 500,
-                  });
-                  setTimeout(() => setAddSection(""), 1000);
-                } catch (error) {
-                  console.error("Error deleting goal:", error);
-                  toast.error("Failed to delete goal. Please try again.", {
-                    position: "bottom-right",
-                    autoClose: 1000,
-                  });
-                }
-              }}
-              style={{
-                backgroundColor: "#28a745" /* Green */,
-                color: "white",
-                padding: "8px 16px",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                marginRight: "10px",
-              }}
-            >
-              Yes
-            </button>
-            <button
-              onClick={() => toast.dismiss()}
-              style={{
-                backgroundColor: "#dc3545" /* Red */,
-                color: "white",
-                padding: "8px 16px",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
-              No
-            </button>
-          </div>
-        </div>,
-        {
-          position: "bottom-right",
-          autoClose: false,
-          closeOnClick: false,
-          draggable: false,
-          pauseOnHover: false,
-          hideProgressBar: true,
-        }
-      );
+    const toastId = toast.warn(
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+          gap: "10px",
+        }}
+      >
+        <p>Are you sure you want to delete this goal?</p>
+        <div>
+          <button
+            onClick={async () => {
+              try {
+                const userID = getUser().uid;
+                const goalRef = doc(db, userID, goalId);
+                await deleteDoc(goalRef);
 
-      setActiveDropdown(null); // Close the dropdown
-    } catch (error) {
-      console.error("Error deleting goal:", error);
-    }
+                setHabits((prevHabits) =>
+                  prevHabits.filter((goal) => goal.id !== goalId)
+                );
+                setProjects((prevProjects) =>
+                  prevProjects.filter((goal) => goal.id !== goalId)
+                );
+
+                toast.dismiss(toastId);
+                toast.success("Goal deleted successfully!", {
+                  position: "bottom-right",
+                  autoClose: 1000,
+                });
+              } catch (error) {
+                console.error("Error deleting goal:", error);
+                toast.dismiss(toastId);
+                toast.error("Failed to delete goal. Please try again.", {
+                  position: "bottom-right",
+                  autoClose: 1000,
+                });
+              }
+            }}
+            style={{
+              backgroundColor: "#28a745",
+              color: "white",
+              padding: "8px 16px",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              marginRight: "10px",
+            }}
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => toast.dismiss(toastId)}
+            style={{
+              backgroundColor: "#dc3545",
+              color: "white",
+              padding: "8px 16px",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            No
+          </button>
+        </div>
+      </div>,
+      {
+        position: "bottom-right",
+        autoClose: 5000,
+        closeOnClick: false,
+        draggable: false,
+        pauseOnHover: false,
+        hideProgressBar: true,
+      }
+    );
+
+    setActiveDropdown(null);
   };
 
   const toggleDropdown = (goalId, e) => {
-    e.stopPropagation(); // Prevent triggering the card click event
+    e.stopPropagation();
     setActiveDropdown(activeDropdown === goalId ? null : goalId);
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
       setActiveDropdown(null);
@@ -160,15 +146,14 @@ const GoalSection = ({
   }, []);
 
   const toggleStar = async (goal, e) => {
-    e.stopPropagation(); // Prevent triggering the card click event
+    e.stopPropagation();
     try {
       const userID = getUser().uid;
       const goalRef = doc(db, userID, goal.id);
       await updateDoc(goalRef, {
-        star: !goal.star, // Toggle the star status
+        star: !goal.star,
       });
 
-      // Update local state
       if (goal.subCategory === "Habit") {
         setHabits(
           habits.map((h) => (h.id === goal.id ? { ...h, star: !h.star } : h))
@@ -187,14 +172,24 @@ const GoalSection = ({
     }
   };
 
-  const handleViewGoal = (goal, fullScreen = false) => {
-    setSelectedItem(goal);
-    setDefaultCategory(goal.subCategory);
-    setAddSection("add");
-    setFullScreenMode(fullScreen); // Set full screen mode
+  const handleAddGoal = (category) => {
+    setDefaultCategory(category);
+    setAddSection(category);
+    setSelectedItem(null);
+    setActiveDropdown(null);
   };
 
-  // ... (keep all other existing functions the same)
+  const handleViewGoal = (goal, fullScreen = false, e) => {
+    // Check if the click originated from the goalActions area
+    if (e && e.target.closest(".goalActions")) {
+      return;
+    }
+    setSelectedItem(goal);
+    setDefaultCategory(goal.subCategory);
+    setAddSection("viewGoal");
+    setFullScreenMode(fullScreen);
+  };
+
   return (
     <>
       <div className="goalSection">
@@ -210,21 +205,30 @@ const GoalSection = ({
                   <div
                     key={goal.id}
                     className="goalCard"
-                    onClick={() => handleViewGoal(goal)}
+                    onClick={(e) => handleViewGoal(goal, false, e)}
                   >
                     <h3>{goal.goalName}</h3>
-                    <div className="goalActions">
+                    <div
+                      className="goalActions"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <FontAwesomeIcon
                         className="starBtn"
                         icon={faStar}
-                        onClick={(e) => toggleStar(goal, e)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleStar(goal, e);
+                        }}
                         style={{ color: goal.star ? "gold" : "black" }}
                       />
                       <div className="dropdown-container">
                         <FontAwesomeIcon
                           className="menuBtn"
                           icon={faEllipsisV}
-                          onClick={(e) => toggleDropdown(goal.id, e)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleDropdown(goal.id, e);
+                          }}
                         />
                         {activeDropdown === goal.id && (
                           <div
@@ -244,7 +248,7 @@ const GoalSection = ({
                               className="dropdown-item"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleViewGoal(goal, true); // Full screen mode
+                                handleViewGoal(goal, true);
                               }}
                             >
                               View in Full
@@ -278,37 +282,47 @@ const GoalSection = ({
             <FontAwesomeIcon
               className="addBtnHabit"
               icon={faPlus}
-              onClick={() => handleAddGoal("Habit")}
+              onClick={() => handleAddGoal("habit")}
             />
           </div>
         </div>
 
+        {/* Project Section */}
         <div className="goalSection Project">
           <h2 className="goalLabel">Project</h2>
           <div className="goalContainer">
             <div className="goalGrid">
               {projects.length === 0 ? (
-                <p>No habits added yet.</p>
+                <p>No projects added yet.</p>
               ) : (
                 projects.map((goal) => (
                   <div
                     key={goal.id}
                     className="goalCard"
-                    onClick={() => handleViewGoal(goal)}
+                    onClick={(e) => handleViewGoal(goal, false, e)}
                   >
                     <h3>{goal.goalName}</h3>
-                    <div className="goalActions">
+                    <div
+                      className="goalActions"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <FontAwesomeIcon
                         className="starBtn"
                         icon={faStar}
-                        onClick={(e) => toggleStar(goal, e)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleStar(goal, e);
+                        }}
                         style={{ color: goal.star ? "gold" : "black" }}
                       />
                       <div className="dropdown-container">
                         <FontAwesomeIcon
                           className="menuBtn"
                           icon={faEllipsisV}
-                          onClick={(e) => toggleDropdown(goal.id, e)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleDropdown(goal.id, e);
+                          }}
                         />
                         {activeDropdown === goal.id && (
                           <div
@@ -328,7 +342,7 @@ const GoalSection = ({
                               className="dropdown-item"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleViewGoal(goal, true); // Full screen mode
+                                handleViewGoal(goal, true);
                               }}
                             >
                               View in Full
@@ -360,9 +374,9 @@ const GoalSection = ({
               )}
             </div>
             <FontAwesomeIcon
-              className="addBtnHabit"
+              className="addBtnProject"
               icon={faPlus}
-              onClick={() => handleAddGoal("Habit")}
+              onClick={() => handleAddGoal("project")}
             />
           </div>
         </div>

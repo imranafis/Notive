@@ -6,6 +6,9 @@ import DisplayPanel from "../DisplayPanel.jsx";
 import "./LandingPage.css";
 import { useFullScreen } from "../../lib/FullScreenContext.jsx";
 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 function LandingPage() {
   useEffect(() => {
     const handleOnLoad = (e) => {
@@ -64,6 +67,7 @@ function LandingPage() {
           defaultCategory={defaultCategory}
           setDefaultCategory={setDefaultCategory}
         />
+        <ToastContainer />
       </div>
     </>
   );

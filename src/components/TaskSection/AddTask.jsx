@@ -109,7 +109,7 @@ const AddTask = ({ setAddSection }) => {
       setSelectedLevel("");
       setNote("");
       setBreakdownContent("");
-      setActiveSection(null);
+      setActiveSection([]);
       setSelectedDate("");
 
       toast.success("Task saved successfully!", { position: "bottom-right" });

@@ -17,6 +17,7 @@
 
   .Aditor_Point_BulletJournal {
     margin-top: 5rem; /* Adjust to ensure it's below displayDate */
+    max-height: 75%;
   }
 
   .addBullet {

@@ -14,12 +14,11 @@ import dayjs from "dayjs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
 import { getUser } from "/src/lib/user";
 
 import { initializeAditorX } from "aditorx";
+
+import { toast } from "react-toastify";
 
 import { initializeAditor, initializeAditorCheckbox } from "/src/lib/aditor.js";
 import "/src/lib/aditor.css";
@@ -34,6 +33,8 @@ function AddGoal({
   fullScreenMode,
   onClose,
 }) {
+  const addGoalRef = useRef(null);
+
   const Aditor_Goal = useRef(null);
   const Aditor_Goal_Checkbox = useRef(null);
   const [goalName, setGoalName] = useState("");
@@ -42,6 +43,21 @@ function AddGoal({
   const [Note, setNote] = useState("");
   const [BreakdownContent, setBreakdownContent] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (addGoalRef.current && !addGoalRef.current.contains(event.target)) {
+        handleCloseGoal();
+      }
+    }
+
+    // Bind the event listener
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      // Unbind the event listener on clean up
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]); // Add onClose to dependency array
 
   // useEffect(() => {
   //   console.log(selectedItem);
@@ -85,12 +101,8 @@ function AddGoal({
   // }, [activeSection, selectedItem]);
 
   // useEffect(() => {
-  //   if (selectedItem && Aditor_Goal.current) {
-  //     const note = selectedItem.note;
-  //     console.log(selectedItem.note);
-  //     initializeAditorX(Aditor_Goal.current, note);
-  //   }
-  // }, [activeSection]);
+  //   onClose();
+  // }, [setAddSection]);
 
   useEffect(() => {
     if (Aditor_Goal.current && !Aditor_Goal.current.innerHTML.trim()) {
@@ -127,10 +139,18 @@ function AddGoal({
       // Dynamically set active sections based on content
       setActiveSection((prev) => {
         const updatedSections = [...prev];
-        if (selectedItem.note && !updatedSections.includes("note")) {
+        if (
+          selectedItem.note &&
+          !updatedSections.includes("note") &&
+          selectedItem.note.length != 1536
+        ) {
           updatedSections.push("note");
         }
-        if (selectedItem.breakdown && !updatedSections.includes("breakdown")) {
+        if (
+          selectedItem.breakdown &&
+          !updatedSections.includes("breakdown") &&
+          selectedItem.breakdown.length != 758
+        ) {
           updatedSections.push("breakdown");
         }
         if (
@@ -271,7 +291,6 @@ function AddGoal({
       if (category === "Project") {
         const updatedBreakdownContent =
           Aditor_Goal_Checkbox.current?.innerHTML || "";
-
         updatedGoalData.estimatedTime = selectedDate
           ? Timestamp.fromDate(new Date(selectedDate))
           : null;
@@ -286,14 +305,9 @@ function AddGoal({
       });
 
       setTimeout(() => {
-        setAddSection("");
+        resetForm();
+        setAddSection(""); // Hide the form
       }, 1200);
-
-      setGoalName("");
-      setNote("");
-      setBreakdownContent("");
-      setActiveSection([]);
-      setCategory("Goal");
     } catch (e) {
       console.error("Error updating goal:", e);
       toast.error("Failed to update goal. Please try again.", {
@@ -310,10 +324,9 @@ function AddGoal({
       <div
         style={{
           display: "flex",
-          justifyContent: "center", // Center the buttons horizontally
-          alignItems: "center", // Center the buttons vertically
-          flexDirection: "column", // Stack the buttons vertically
-          gap: "10px", // Space between the buttons
+          flexDirection: "column",
+          gap: "10px",
+          textAlign: "center",
         }}
       >
         <p>Are you sure you want to delete this goal?</p>
@@ -328,7 +341,11 @@ function AddGoal({
                   position: "bottom-right",
                   autoClose: 500,
                 });
-                setTimeout(() => setAddSection(""), 1000);
+
+                setTimeout(() => {
+                  resetForm();
+                  setAddSection(""); // Hide the form
+                }, 1000);
               } catch (error) {
                 console.error("Error deleting goal:", error);
                 toast.error("Failed to delete goal. Please try again.", {
@@ -338,10 +355,9 @@ function AddGoal({
               }
             }}
             style={{
-              backgroundColor: "#28a745" /* Green */,
+              backgroundColor: "#28a745",
               color: "white",
               padding: "8px 16px",
-              border: "none",
               borderRadius: "4px",
               cursor: "pointer",
               marginRight: "10px",
@@ -352,10 +368,9 @@ function AddGoal({
           <button
             onClick={() => toast.dismiss()}
             style={{
-              backgroundColor: "#dc3545" /* Red */,
+              backgroundColor: "#dc3545",
               color: "white",
               padding: "8px 16px",
-              border: "none",
               borderRadius: "4px",
               cursor: "pointer",
             }}
@@ -366,7 +381,7 @@ function AddGoal({
       </div>,
       {
         position: "bottom-right",
-        autoClose: false,
+        autoClose: 5000,
         closeOnClick: false,
         draggable: false,
         pauseOnHover: false,
@@ -379,7 +394,7 @@ function AddGoal({
     onClose(); // Call the passed onClose function
   };
 
-  const addSection = (section) => {
+  const addActiveSection = (section) => {
     setActiveSection((prev) =>
       prev.includes(section)
         ? prev.filter((s) => s !== section)
@@ -387,8 +402,21 @@ function AddGoal({
     );
   };
 
+  const resetForm = () => {
+    setGoalName("");
+    setNote("");
+    setBreakdownContent("");
+    setActiveSection([]);
+    setCategory("Goal");
+    setSelectedDate("");
+    setSelectedItem(null);
+  };
+
   return (
-    <div className={`addGoal ${fullScreenMode ? "fullScreen" : ""}`}>
+    <div
+      className={`addGoal ${fullScreenMode ? "fullScreen" : ""}`}
+      ref={addGoalRef}
+    >
       <div className="panel">
         <button className="closeBtn" onClick={() => handleCloseGoal()}>
           <FontAwesomeIcon icon={faTimes} />
@@ -420,7 +448,7 @@ function AddGoal({
         {/* <div className="controlSection"> */}
         <button
           className={`note ${activeSection.includes("note") ? "activate" : ""}`}
-          onClick={() => addSection("note")}
+          onClick={() => addActiveSection("note")}
         >
           <i
             className={`fa-solid ${
@@ -445,7 +473,7 @@ function AddGoal({
               className={`breakdown ${
                 activeSection.includes("breakdown") ? "activate" : ""
               }`}
-              onClick={() => addSection("breakdown")}
+              onClick={() => addActiveSection("breakdown")}
             >
               <i
                 className={`fa-solid ${
@@ -468,7 +496,7 @@ function AddGoal({
               className={`details ${
                 activeSection.includes("details") ? "activate" : ""
               }`}
-              onClick={() => addSection("details")}
+              onClick={() => addActiveSection("details")}
             >
               <i
                 className={`fa-solid ${
@@ -511,7 +539,7 @@ function AddGoal({
         {/* </div> */}
       </div>
 
-      <ToastContainer />
+      {/* <ToastContainer /> */}
     </div>
   );
 }

@@ -33,10 +33,15 @@ function DisplayPanel({
           {addSection === "goal" && (
             <AddGoal
               setAddSection={setAddSection}
-              defaultCategory={defaultCategory}
+              defaultCategory={""}
               setDefaultCategory={setDefaultCategory}
-              selectedItem={selectedItem}
+              selectedItem={null}
               setSelectedItem={setSelectedItem}
+              onClose={() => {
+                setDefaultCategory("");
+                setAddSection("");
+                setSelectedItem(null);
+              }}
             />
           )}
         </>
