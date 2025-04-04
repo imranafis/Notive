@@ -134,16 +134,16 @@ const GoalSection = ({
     setActiveDropdown(activeDropdown === goalId ? null : goalId);
   };
 
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setActiveDropdown(null);
-    };
+  // useEffect(() => {
+  //   const handleClickOutside = () => {
+  //     setActiveDropdown(null);
+  //   };
 
-    document.addEventListener("click", handleClickOutside);
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, []);
+  //   document.addEventListener("click", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("click", handleClickOutside);
+  //   };
+  // }, []);
 
   const toggleStar = async (goal, e) => {
     e.stopPropagation();

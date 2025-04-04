@@ -44,20 +44,20 @@ function AddGoal({
   const [BreakdownContent, setBreakdownContent] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (addGoalRef.current && !addGoalRef.current.contains(event.target)) {
-        handleCloseGoal();
-      }
-    }
+  // useEffect(() => {
+  //   function handleClickOutside(event) {
+  //     if (addGoalRef.current && !addGoalRef.current.contains(event.target)) {
+  //       handleCloseGoal();
+  //     }
+  //   }
 
-    // Bind the event listener
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      // Unbind the event listener on clean up
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [onClose]); // Add onClose to dependency array
+  //   // Bind the event listener
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => {
+  //     // Unbind the event listener on clean up
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [onClose]); // Add onClose to dependency array
 
   // useEffect(() => {
   //   console.log(selectedItem);
