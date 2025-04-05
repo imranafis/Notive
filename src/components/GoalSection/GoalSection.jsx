@@ -11,6 +11,7 @@ import { getUser } from "/src/lib/user";
 import "./GoalSection.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faStar, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+
 import AddGoal from "./AddGoal.jsx";
 import { toast } from "react-toastify";
 
@@ -38,8 +39,8 @@ const GoalSection = ({
 
         goalList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-        setHabits(goalList.filter((goal) => goal.subCategory === "Habit"));
-        setProjects(goalList.filter((goal) => goal.subCategory === "Project"));
+        setHabits(goalList.filter((goal) => goal.subCategory === "habit"));
+        setProjects(goalList.filter((goal) => goal.subCategory === "project"));
       } catch (error) {
         console.error("Error fetching goals:", error);
       }
@@ -154,7 +155,7 @@ const GoalSection = ({
         star: !goal.star,
       });
 
-      if (goal.subCategory === "Habit") {
+      if (goal.subCategory === "habit") {
         setHabits(
           habits.map((h) => (h.id === goal.id ? { ...h, star: !h.star } : h))
         );
@@ -242,7 +243,7 @@ const GoalSection = ({
                                 handleViewGoal(goal);
                               }}
                             >
-                              View Info
+                              View
                             </div>
                             <div
                               className="dropdown-item"
@@ -270,6 +271,15 @@ const GoalSection = ({
                               }}
                             >
                               Delete
+                            </div>
+                            <div
+                              className="dropdown-item"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // handleDeleteGoal(goal.id);
+                              }}
+                            >
+                              Info
                             </div>
                           </div>
                         )}
@@ -336,7 +346,7 @@ const GoalSection = ({
                                 handleViewGoal(goal);
                               }}
                             >
-                              View Info
+                              View
                             </div>
                             <div
                               className="dropdown-item"
@@ -364,6 +374,15 @@ const GoalSection = ({
                               }}
                             >
                               Delete
+                            </div>
+                            <div
+                              className="dropdown-item"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // handleDeleteGoal(goal.id);
+                              }}
+                            >
+                              Info
                             </div>
                           </div>
                         )}

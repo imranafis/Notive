@@ -148,5 +148,64 @@
     .bulletCard:hover {
       box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15);
     }
+
+    .bulletActions {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      display: flex;
+      font-size: 1.25rem;
+      justify-content: space-between;
+      padding: 0 10px;
+      opacity: 1;
+      /* transition: opacity 0.1s ease-in-out; */
+
+      .menuBtn {
+        color: gray;
+        cursor: pointer;
+      }
+
+      /* Dropdown styles */
+      .dropdown-container {
+        margin-left: auto;
+        position: relative;
+        display: inline-block;
+      }
+
+      .dropdown-menu {
+        position: absolute;
+        right: 20px; /* Adjust as needed */
+        top: -40px;
+        /* transform: translateY(-50%); Center it vertically */
+        background-color: white;
+        width: 120px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        border-radius: 4px;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .dropdown-item {
+        font-size: 0.75rem;
+        padding: 8px 16px;
+        cursor: pointer;
+        text-align: left;
+      }
+
+      .dropdown-item:hover {
+        background-color: #f1f1f1;
+      }
+
+      .menuBtn {
+        cursor: pointer;
+        padding: 4px;
+      }
+
+      .menuBtn:hover {
+        background-color: #f1f1f1;
+        border-radius: 4px;
+      }
+    }
   }
 }

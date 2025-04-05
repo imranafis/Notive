@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import GoalSection from "./GoalSection/GoalSection.jsx";
 import AddGoal from "./GoalSection/AddGoal.jsx";
 import BulletJournal from "./BulletJournal/BulletJournal.jsx";
@@ -17,6 +16,7 @@ function DisplayPanel({
   setDefaultCategory,
 }) {
   const [selectedItem, setSelectedItem] = useState(null);
+  const [fullScreenMode, setFullScreenMode] = useState(false);
 
   return (
     <>
@@ -33,14 +33,16 @@ function DisplayPanel({
           {addSection === "goal" && (
             <AddGoal
               setAddSection={setAddSection}
-              defaultCategory={""}
+              defaultCategory={defaultCategory}
               setDefaultCategory={setDefaultCategory}
-              selectedItem={null}
+              selectedItem={selectedItem}
               setSelectedItem={setSelectedItem}
+              fullScreenMode={fullScreenMode}
               onClose={() => {
                 setDefaultCategory("");
                 setAddSection("");
                 setSelectedItem(null);
+                setFullScreenMode(false);
               }}
             />
           )}
@@ -50,9 +52,26 @@ function DisplayPanel({
       {activeSection === "dailyspace" && <DailySpace />}
       {activeSection === "taskSection" && (
         <>
-          <TaskSection addSection={addSection} setAddSection={setAddSection} />
-          {addSection === "taskSection" && (
-            <AddTask setAddSection={setAddSection} />
+          <TaskSection
+            addSection={addSection}
+            setAddSection={setAddSection}
+            selectedItem={selectedItem}
+            setSelectedItem={setSelectedItem}
+            fullScreenMode={fullScreenMode}
+            setFullScreenMode={setFullScreenMode}
+          />
+          {(addSection === "addTask" || addSection === "viewTask") && (
+            <AddTask
+              setAddSection={setAddSection}
+              selectedItem={selectedItem}
+              setSelectedItem={setSelectedItem}
+              fullScreenMode={fullScreenMode}
+              onClose={() => {
+                setAddSection("");
+                setSelectedItem(null);
+                setFullScreenMode(false);
+              }}
+            />
           )}
         </>
       )}
@@ -61,4 +80,5 @@ function DisplayPanel({
     </>
   );
 }
+
 export default DisplayPanel;

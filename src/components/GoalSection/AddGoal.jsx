@@ -121,10 +121,10 @@ function AddGoal({
 
   useEffect(() => {
     if (selectedItem) {
-      if (selectedItem.subCategory === "Habit") {
+      if (selectedItem.subCategory === "habit") {
         setGoalName(selectedItem.goalName);
         setNote(selectedItem.note);
-      } else if (selectedItem.subCategory === "Project") {
+      } else if (selectedItem.subCategory === "project") {
         // Convert Firestore Timestamp to Day.js
         const estimatedTime = selectedItem.estimatedTime
           ? dayjs(selectedItem.estimatedTime.toDate()) // Convert if it's a Timestamp
@@ -138,18 +138,28 @@ function AddGoal({
 
       // Dynamically set active sections based on content
       setActiveSection((prev) => {
+        const parser = new DOMParser();
+        const docNote = parser.parseFromString(selectedItem.note, "text/html");
+        const noteContent = docNote.querySelector(".inputContent")?.innerText;
+        const docbreakdown = parser.parseFromString(
+          selectedItem.breakdown,
+          "text/html"
+        );
+        const breakdownContent =
+          docbreakdown.querySelector(".inputContent")?.innerText;
+
         const updatedSections = [...prev];
         if (
           selectedItem.note &&
           !updatedSections.includes("note") &&
-          selectedItem.note.length != 1536
+          noteContent != ""
         ) {
           updatedSections.push("note");
         }
         if (
           selectedItem.breakdown &&
           !updatedSections.includes("breakdown") &&
-          selectedItem.breakdown.length != 758
+          breakdownContent != ""
         ) {
           updatedSections.push("breakdown");
         }
@@ -225,7 +235,7 @@ function AddGoal({
 
       await addDoc(collection(db, userID), goalData);
 
-      toast.success(`Goal (${category}) saved successfully!`, {
+      toast.success(`Goal ${category} saved successfully!`, {
         position: "bottom-right",
         autoClose: 2000,
       });
@@ -288,7 +298,7 @@ function AddGoal({
         createdAt: new Date().toISOString(),
       };
 
-      if (category === "Project") {
+      if (category === "project") {
         const updatedBreakdownContent =
           Aditor_Goal_Checkbox.current?.innerHTML || "";
         updatedGoalData.estimatedTime = selectedDate
@@ -299,7 +309,7 @@ function AddGoal({
 
       await updateDoc(goalRef, updatedGoalData);
 
-      toast.success(`Goal (${category}) updated successfully!`, {
+      toast.success(`Goal ${category} updated successfully!`, {
         position: "bottom-right",
         autoClose: 2000,
       });
@@ -467,7 +477,7 @@ function AddGoal({
             activeSection.includes("note") ? "active" : ""
           }`}
         />
-        {category === "Project" && (
+        {category === "project" && (
           <>
             <button
               className={`breakdown ${

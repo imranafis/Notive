@@ -7,6 +7,8 @@ import {
   addDoc,
   updateDoc,
   doc,
+  Timestamp,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "/src/lib/firebase"; // Adjust the path to your firebase.js file
 
@@ -14,6 +16,9 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { getUser } from "/src/lib/user";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
 
 import { initializeAditorPoint } from "/src/lib/aditor.js";
 import "/src/lib/aditor.css";
@@ -25,6 +30,8 @@ function BulletJournal() {
   const [BulletJournals, setBulletJournals] = useState([]);
   const [ViewMode, setViewMode] = useState("today");
   const [SelectedBullet, setSelectedBullet] = useState(null);
+
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
   // Get current date
   const currentDate = new Date();
@@ -59,6 +66,7 @@ function BulletJournal() {
     }
 
     fetchAllBullets();
+    setActiveDropdown(null);
   }, [ViewMode]);
 
   // Update local storage on content change
@@ -74,7 +82,7 @@ function BulletJournal() {
       aditorElement.addEventListener("keyup", handleKeyUp);
       return () => aditorElement.removeEventListener("keyup", handleKeyUp);
     }
-  }, []);
+  }, [ViewMode]);
 
   useEffect(() => {
     if (
@@ -171,6 +179,91 @@ function BulletJournal() {
     return plainText.substring(0, 100) + "...";
   };
 
+  const toggleDropdown = (bulletId, e) => {
+    e.stopPropagation();
+    setActiveDropdown(activeDropdown === bulletId ? null : bulletId);
+  };
+
+  const handleDeleteBullet = async (bulletId) => {
+    const toastId = toast.warn(
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+          gap: "10px",
+        }}
+      >
+        <p>Are you sure you want to delete this Bullet Journal?</p>
+        <div>
+          <button
+            onClick={async () => {
+              try {
+                const userID = getUser().uid;
+                const bulletRef = doc(db, userID, bulletId);
+                await deleteDoc(bulletRef);
+
+                setBulletJournals(
+                  BulletJournals.filter((bullet) => bullet.id !== bulletId)
+                );
+                toast.dismiss(toastId);
+                toast.success("Bullet Journal deleted successfully!", {
+                  position: "bottom-right",
+                  autoClose: 1000,
+                });
+              } catch (error) {
+                console.error("Error deleting Bullet Journal:", error);
+                toast.dismiss(toastId);
+                toast.error(
+                  "Failed to delete Bullet Journal. Please try again.",
+                  {
+                    position: "bottom-right",
+                    autoClose: 1000,
+                  }
+                );
+              }
+            }}
+            style={{
+              backgroundColor: "#28a745",
+              color: "white",
+              padding: "8px 16px",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              marginRight: "10px",
+            }}
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => toast.dismiss(toastId)}
+            style={{
+              backgroundColor: "#dc3545",
+              color: "white",
+              padding: "8px 16px",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            No
+          </button>
+        </div>
+      </div>,
+      {
+        position: "bottom-right",
+        autoClose: 5000,
+        closeOnClick: false,
+        draggable: false,
+        pauseOnHover: false,
+        hideProgressBar: true,
+      }
+    );
+
+    setActiveDropdown(null);
+  };
+
   return (
     <div className="bulletJournal">
       {ViewMode == "today" && (
@@ -223,6 +316,48 @@ function BulletJournal() {
                       <h3>{bullet.bulletDate}</h3>
                       <div className="content">
                         {truncateContent(bullet.bulletContent)}
+                      </div>
+
+                      <div
+                        className="bulletActions"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="dropdown-container">
+                          <FontAwesomeIcon
+                            className="menuBtn"
+                            icon={faEllipsisV}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleDropdown(bullet.id, e);
+                            }}
+                          />
+                          {activeDropdown === bullet.id && (
+                            <div
+                              className="dropdown-menu"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div
+                                className="dropdown-item"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSelectedBullet(bullet);
+                                }}
+                              >
+                                View
+                              </div>
+
+                              <div
+                                className="dropdown-item"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteBullet(bullet.id);
+                                }}
+                              >
+                                Delete
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))
