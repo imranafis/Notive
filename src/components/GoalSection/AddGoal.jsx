@@ -137,40 +137,44 @@ function AddGoal({
       }
 
       // Dynamically set active sections based on content
-      setActiveSection((prev) => {
-        const parser = new DOMParser();
-        const docNote = parser.parseFromString(selectedItem.note, "text/html");
-        const noteContent = docNote.querySelector(".inputContent")?.innerText;
-        const docbreakdown = parser.parseFromString(
-          selectedItem.breakdown,
-          "text/html"
-        );
-        const breakdownContent =
-          docbreakdown.querySelector(".inputContent")?.innerText;
+      // setActiveSection((prev) => {
+      const newActiveSections = [];
 
-        const updatedSections = [...prev];
-        if (
-          selectedItem.note &&
-          !updatedSections.includes("note") &&
-          noteContent != ""
-        ) {
-          updatedSections.push("note");
-        }
-        if (
-          selectedItem.breakdown &&
-          !updatedSections.includes("breakdown") &&
-          breakdownContent != ""
-        ) {
-          updatedSections.push("breakdown");
-        }
-        if (
-          selectedItem.estimatedTime &&
-          !updatedSections.includes("details")
-        ) {
-          updatedSections.push("details");
-        }
-        return updatedSections;
-      });
+      const parser = new DOMParser();
+      const docNote = parser.parseFromString(selectedItem.note, "text/html");
+      const noteContent = docNote.querySelector(".inputContent")?.innerText;
+      const docbreakdown = parser.parseFromString(
+        selectedItem.breakdown,
+        "text/html"
+      );
+      const breakdownContent =
+        docbreakdown.querySelector(".inputContent")?.innerText;
+
+      // const updatedSections = [...prev];
+      if (
+        selectedItem.note &&
+        !newActiveSections.includes("note") &&
+        noteContent != ""
+      ) {
+        newActiveSections.push("note");
+      }
+      if (
+        selectedItem.breakdown &&
+        !newActiveSections.includes("breakdown") &&
+        breakdownContent != ""
+      ) {
+        newActiveSections.push("breakdown");
+      }
+      if (
+        selectedItem.estimatedTime &&
+        !newActiveSections.includes("details")
+      ) {
+        newActiveSections.push("details");
+      }
+      // return updatedSections;
+      setActiveSection(newActiveSections);
+
+      // });
     }
   }, [selectedItem]);
 

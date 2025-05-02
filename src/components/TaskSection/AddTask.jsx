@@ -17,7 +17,7 @@ import RadioGroup from "../others/RadioGroup.jsx";
 import Tag from "../Tag/Tag.jsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./TaskSection.css";
 
@@ -43,6 +43,8 @@ const AddTask = ({
 
   useEffect(() => {
     if (selectedItem) {
+      // console.log(selectedItem.priority);
+      // First set all the state values
       setInputValue(selectedItem.name || "");
       setSelectedPriority(selectedItem.priority || "");
       setSelectedLevel(selectedItem.size || "");
@@ -53,10 +55,38 @@ const AddTask = ({
         selectedItem.deadline ? dayjs(selectedItem.deadline.toDate()) : null
       );
 
-      // Set active sections based on content
+      // Then initialize editors
+      if (Aditor_Task.current) {
+        initializeAditor(Aditor_Task.current, selectedItem.note || "");
+      }
+      if (Aditor_Task_Checkbox.current) {
+        initializeAditorCheckbox(
+          Aditor_Task_Checkbox.current,
+          selectedItem.breakdown || ""
+        );
+      }
+
+      // Finally set active sections
       const newActiveSections = [];
-      if (selectedItem.note) newActiveSections.push("note");
-      if (selectedItem.breakdown) newActiveSections.push("breakdown");
+      const parser = new DOMParser();
+      const docNote = parser.parseFromString(
+        selectedItem.note || "",
+        "text/html"
+      );
+      const noteContent = docNote.querySelector(".inputContent")?.innerText;
+      const docbreakdown = parser.parseFromString(
+        selectedItem.breakdown || "",
+        "text/html"
+      );
+      const breakdownContent =
+        docbreakdown.querySelector(".inputContent")?.innerText;
+
+      if (selectedItem.note && noteContent) {
+        newActiveSections.push("note");
+      }
+      if (selectedItem.breakdown && breakdownContent) {
+        newActiveSections.push("breakdown");
+      }
       if (
         selectedItem.priority ||
         selectedItem.size ||
@@ -66,22 +96,14 @@ const AddTask = ({
         newActiveSections.push("details");
       }
       setActiveSection(newActiveSections);
-    }
-
-    if (Aditor_Task.current && !Aditor_Task.current.innerHTML.trim()) {
-      initializeAditor(Aditor_Task.current, selectedItem?.note || "");
-    }
-    if (
-      Aditor_Task_Checkbox.current &&
-      !Aditor_Task_Checkbox.current.innerHTML.trim()
-    ) {
-      initializeAditorCheckbox(
-        Aditor_Task_Checkbox.current,
-        selectedItem?.breakdown || ""
-      );
+    } else {
+      // Reset for new task
+      resetForm();
+      if (Aditor_Task.current) initializeAditor(Aditor_Task.current, "");
+      if (Aditor_Task_Checkbox.current)
+        initializeAditorCheckbox(Aditor_Task_Checkbox.current, "");
     }
   }, [selectedItem]);
-
   const addSection = (section) => {
     setActiveSection((prev) =>
       prev.includes(section)
@@ -358,6 +380,7 @@ const AddTask = ({
               <p>Priority :</p>
               <RadioGroup
                 name="priorityCategory"
+                selectedValue={selectedPriority}
                 options={[
                   {
                     id: "categoryP",
@@ -379,12 +402,12 @@ const AddTask = ({
                   },
                 ]}
                 onRadioChange={handleRadioChange}
-                selectedValue={selectedPriority}
               />
 
               <p>Task Size :</p>
               <RadioGroup
                 name="taskCategory"
+                selectedValue={selectedLevel}
                 options={[
                   {
                     id: "categoryL",
@@ -409,7 +432,6 @@ const AddTask = ({
                   },
                 ]}
                 onRadioChange={handleRadioChange}
-                selectedValue={selectedLevel}
               />
 
               <Tag

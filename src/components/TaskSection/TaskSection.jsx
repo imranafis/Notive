@@ -161,18 +161,16 @@ const TaskSection = ({
               <p>No tasks available</p>
             ) : (
               tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="taskItem"
-                  onClick={(e) => handleViewTask(task, false, e)}
-                >
+                <div key={task.id} className="taskItem">
                   <TaskBox
                     status={taskStatuses[task.id] || task.status || "unchecked"}
                     onStatusChange={(newStatus) =>
                       handleTaskStatusChange(task.id, newStatus)
                     }
                   />
-                  <span>{task.name}</span>
+                  <span onClick={(e) => handleViewTask(task, false, e)}>
+                    {task.name}
+                  </span>
 
                   <div className="dropdown-container">
                     <FontAwesomeIcon

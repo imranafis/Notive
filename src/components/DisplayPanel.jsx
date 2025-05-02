@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import GoalSection from "./GoalSection/GoalSection.jsx";
 import AddGoal from "./GoalSection/AddGoal.jsx";
 import BulletJournal from "./BulletJournal/BulletJournal.jsx";
-import NoteSection from "./others/NoteSection.jsx";
+import NoteSection from "./NoteSection/NoteSection.jsx";
 import TaskSection from "./TaskSection/TaskSection.jsx";
 import JournalSection from "./others/JournalSection.jsx";
 import DailySpace from "./DailySpace/DailySpace.jsx";
@@ -75,7 +75,8 @@ function DisplayPanel({
           )}
         </>
       )}
-      {/* {activeSection === "note" && <NoteSection />} */}
+
+      {activeSection === "noteSection" && <NoteSection />}
       {/* {activeSection === "journal" && <JournalSection />} */}
     </>
   );

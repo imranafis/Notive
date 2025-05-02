@@ -265,7 +265,7 @@
       box-shadow: var(--large-glow);
     }
 
-    label input:checked + .bubble {
+    label:has(input[type="radio"]:checked) .bubble {
       opacity: 1;
     }
 

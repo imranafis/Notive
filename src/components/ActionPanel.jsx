@@ -68,7 +68,7 @@ function ActionPanel({
       </div>
       <div
         className="sectionBtn"
-        onClick={() => handleSectionChange("journal")}
+        onClick={() => handleSectionChange("noteSection")}
       >
         <FontAwesomeIcon icon={faBook} />
         {/* <img src={journalBtn}/> */}

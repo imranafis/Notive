@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./tag.css";
 
-function Tag({ tagSuggestions, onTagChange }) {
+function Tag({ tagSuggestions, onTagChange, initialTags }) {
   const [addedTag, setAddedTag] = useState([]);
   const addedTagsRef = useRef(null);
 
@@ -81,6 +81,10 @@ function Tag({ tagSuggestions, onTagChange }) {
   useEffect(() => {
     if (addedTagsRef.current) {
       addedTagsRef.current.scrollLeft = addedTagsRef.current.scrollWidth;
+    }
+
+    if (initialTags.length > 0) {
+      setAddedTag(initialTags);
     }
   }, [addedTag]);
 
