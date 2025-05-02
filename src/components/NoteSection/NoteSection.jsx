@@ -92,45 +92,54 @@ function NoteSection() {
 
     try {
       const updatedContent = aditorElement.innerHTML;
-
       const userID = getUser().uid; // Get user ID
 
-      if (NoteName == "") {
+      if (SelectedNote) {
+        const docRef = doc(db, userID, SelectedNote.id);
+
         const NoteData = {
           category: "NoteSection",
-          noteName: truncateContent(updatedContent).trim(),
+          noteName:
+            NoteName == "" ? truncateContent(updatedContent).trim() : NoteName,
           noteContent: updatedContent,
           createdAt: new Date().toISOString(),
         };
 
-        const userCollection = collection(db, userID);
-        await addDoc(userCollection, NoteData);
+        await updateDoc(docRef, NoteData);
+        toast.success("Note updated successfully!", {
+          position: "bottom-right",
+          autoClose: 2000,
+        });
+
+        setSelectedNote(null);
       } else {
         const NoteData = {
           category: "NoteSection",
-          noteName: NoteName,
+          noteName:
+            NoteName == "" ? truncateContent(updatedContent).trim() : NoteName,
           noteContent: updatedContent,
           createdAt: new Date().toISOString(),
         };
 
         const userCollection = collection(db, userID);
         await addDoc(userCollection, NoteData);
+
+        toast.success("Note saved successfully!", {
+          position: "bottom-right",
+          autoClose: 2000,
+        });
+
+        localStorage.setItem("noteContent", "");
+        localStorage.setItem("noteName", "");
+
+        setNoteName("");
+
+        if (Aditor_NoteSection.current) {
+          initializeAditor(Aditor_NoteSection.current, "");
+        }
       }
-
-      localStorage.setItem("noteContent", "");
-      localStorage.setItem("noteName", "");
-
-      setNoteName("");
-
-      if (Aditor_NoteSection.current) {
-        initializeAditor(Aditor_NoteSection.current, "");
-      }
-
-      toast.success("Note saved successfully!", {
-        position: "bottom-right",
-        autoClose: 2000,
-      });
     } catch (e) {
+      console.log(e);
       toast.error("Failed to save Note. Please try again.", {
         position: "bottom-right",
         autoClose: 2000,
@@ -290,6 +299,7 @@ function NoteSection() {
             <button
               onClick={() => {
                 setViewMode("all");
+                setSelectedNote(null);
               }}
             >
               View All
@@ -385,6 +395,7 @@ function NoteSection() {
             <button
               onClick={() => {
                 setViewMode("all");
+                setSelectedNote(null);
               }}
             >
               View All
@@ -392,6 +403,7 @@ function NoteSection() {
             <button
               onClick={() => {
                 setViewMode("currentNote");
+                setSelectedNote(null);
               }}
             >
               Create new

@@ -139,6 +139,8 @@ function BulletJournal() {
           position: "bottom-right",
           autoClose: 2000,
         });
+
+        setSelectedBullet(null);
       } else {
         await addDoc(userCollection, bulletData);
         toast.success("Bullet note saved successfully!", {
@@ -273,6 +275,7 @@ function BulletJournal() {
             <button
               onClick={() => {
                 setViewMode("all");
+                setSelectedBullet(null);
               }}
             >
               View All
@@ -295,6 +298,7 @@ function BulletJournal() {
               <button
                 onClick={() => {
                   setViewMode("today");
+                  setSelectedBullet(null);
                 }}
               >
                 Go Today
@@ -374,6 +378,7 @@ function BulletJournal() {
             <button
               onClick={() => {
                 setViewMode("all");
+                setSelectedBullet(null);
               }}
             >
               View All
@@ -381,6 +386,7 @@ function BulletJournal() {
             <button
               onClick={() => {
                 setViewMode("today");
+                setSelectedBullet(null);
               }}
             >
               Go Today
