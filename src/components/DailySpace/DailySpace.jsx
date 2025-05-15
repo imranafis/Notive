@@ -18,10 +18,10 @@ import { getUser } from "/src/lib/user";
 
 import { toast } from "react-toastify";
 
-import "/src/components/DailySpace/DailySpace.css";
+import "./DailySpace.css";
 
 import SelectTask from "./SelectTask.jsx";
-import TaskBox from "/src/components/others/TaskBox";
+import TaskBox from "/src/components/others/TaskBox.jsx";
 
 const DailySpace = ({
   addSection,
