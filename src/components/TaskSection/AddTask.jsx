@@ -305,7 +305,7 @@ const AddTask = ({
   };
 
   return (
-    <div className={`AddTask ${fullScreenMode ? "fullScreen" : ""}`}>
+    <div className={`AddTask${fullScreenMode ? "fullScreen" : ""}`}>
       <div className="panel">
         <button className="closeBtn" onClick={handleCloseTask}>
           <FontAwesomeIcon icon={faTimes} />
