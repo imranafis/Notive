@@ -19,7 +19,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
-import "./AddTask.css";
+import "./addTask.css";
 
 const AddTask = ({
   setAddSection,
