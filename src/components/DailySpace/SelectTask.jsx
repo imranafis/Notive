@@ -17,7 +17,7 @@ import { faBackward } from "@fortawesome/free-solid-svg-icons";
 import TaskBox from "/src/components/others/TaskBox";
 import { toast } from "react-toastify";
 
-import "./DailySpace.css";
+import "./dailySpace.css";
 
 const SelectTask = ({ setActivePanel }) => {
   const [tasks, setTasks] = useState([]);
