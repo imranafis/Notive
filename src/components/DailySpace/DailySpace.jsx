@@ -18,7 +18,7 @@ import { getUser } from "/src/lib/user";
 
 import { toast } from "react-toastify";
 
-import "./DailySpace.css";
+import "./dailySpace.css";
 
 //
 import SelectTask from "./SelectTask.jsx";
