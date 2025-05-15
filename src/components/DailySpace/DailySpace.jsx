@@ -18,7 +18,7 @@ import { getUser } from "/src/lib/user";
 
 import { toast } from "react-toastify";
 
-import "./DailySpace.css";
+import "/src/components/DailySpace/DailySpace.css";
 
 import SelectTask from "./SelectTask.jsx";
 import TaskBox from "/src/components/others/TaskBox";
