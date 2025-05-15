@@ -18,8 +18,7 @@ import Tag from "../Tag/Tag.jsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "./TaskSection.css";
+import "./AddTask.css";
 
 const AddTask = ({
   setAddSection,
@@ -305,7 +304,7 @@ const AddTask = ({
   };
 
   return (
-    <div className={`addTask ${fullScreenMode ? "fullScreen" : ""}`}>
+    <div className={`AddTask ${fullScreenMode ? "fullScreen" : ""}`}>
       <div className="panel">
         <button className="closeBtn" onClick={handleCloseTask}>
           <FontAwesomeIcon icon={faTimes} />

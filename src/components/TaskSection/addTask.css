@@ -1,266 +1,216 @@
-:root {
-  --primary: rgb(247, 119, 84);
-  --small: rgb(255, 188, 128);
-  --medium: rgb(255, 159, 69);
-  --large: rgb(247, 110, 17);
-  --light: #eee;
-  --dark: #313154;
-  --gray: #888;
-  --danger: #f32424;
-  --greenS: rgb(130, 205, 72);
-  --greenM: rgb(85, 180, 54);
-  --greenL: rgb(56, 146, 56);
-  --highLighter: rgb(191, 191, 191);
-
-  --btn: rgb(51, 177, 202);
-  --textBtn: rgb(34, 107, 135);
-  --formBtn: rgb(12, 177, 180);
-
-  --shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
-  --small-glow: 0px 0px 4px rgba(255, 188, 128, 0.75);
-  --medium-glow: 0px 0px 4px rgba(255, 159, 69, 0.75);
-  --large-glow: 0px 0px 4px rgb(247, 110, 17, 0.75);
-  --greenS-glow: 0px 0px 4px rgba(130, 205, 72, 0.75);
-  --greenM-glow: 0px 0px 4px rgba(85, 180, 54, 0.75);
-  --greenL-glow: 0px 0px 4px rgba(56, 146, 56, 0.75);
-
-  --side-panel: rgb(251, 251, 250);
-  --main-panel: rgb(255, 255, 255);
-
-  font-family: "Montserrat", sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  /* color-scheme: light dark; */
-  color: rgba(255, 255, 255, 0.87);
-  /* background-color: #242424; */
-
-  /* font-synthesis: none; */
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-input[type="radio"],
-input[type="checkbox"] {
-  display: none;
-}
-
-.addTask {
+.AddTask {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
   justify-content: center;
-  padding: 2rem;
+  align-items: center;
+  background: rgba(202, 202, 202, 0.75);
+  backdrop-filter: blur(2px);
+  left: 0;
   width: 100%;
   height: 100%;
+  z-index: 1;
+  position: fixed;
 
-  .backBtn svg {
+  .panel {
+    position: relative;
     display: flex;
-    position: absolute;
-    font-size: 1.5rem;
-    top: 0;
-    margin-top: 2rem;
-    cursor: pointer;
-  }
+    flex-direction: column;
+    background-color: #eee;
+    padding: 1.5rem;
+    /* border-radius: 20px; */
+    max-height: 80%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 30rem;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 
-  .taskName {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    width: 100%;
-    gap: 1rem;
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
+    .closeBtn {
+      position: absolute;
+      top: -7px;
+      left: -3px;
+      background: none;
+      border: none;
+      font-size: 30px;
+      cursor: pointer;
+      color: #333;
 
-    input[type="text"] {
-      font-size: 1rem;
-      width: 70%;
-      border-bottom: 1px solid gray;
+      &:hover {
+        color: red;
+      }
     }
-  }
 
-  .taskDetails {
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    margin-top: 1.25rem;
-
-    &.activate {
-      color: rgb(27, 97, 219);
-    }
-  }
-  .details {
-    font-size: 1rem;
-    font-weight: 700;
-    /* margin-bottom: 1rem; */
-    margin-top: 1.25rem;
-
-    &.activate {
-      color: rgb(27, 97, 219);
-    }
-  }
-
-  .detailsSection {
-    width: 100%;
-    background-color: #f9f9f9;
-    margin-top: 1rem;
-    /* margin-bottom: 1rem; */
-
-    .switchBtn {
+    .taskName {
       display: flex;
       flex-direction: row;
+      justify-content: flex-start;
+      align-items: center;
       width: 100%;
-      align-items: flex-end;
-      justify-content: flex-end;
-      gap: 5px;
+      gap: 1rem;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+
+      input[type="text"] {
+        font-size: 1rem;
+        width: 70%;
+        border-bottom: 1px solid gray;
+      }
+    }
+
+    .note,
+    .breakdown,
+    .details {
+      display: block;
+      text-align: left;
+      align-items: flex-start;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      margin-top: 1.25rem;
+      cursor: pointer;
+      &.activate {
+        color: rgb(27, 97, 219);
+      }
+    }
+
+    .Aditor_Task,
+    .Aditor_Task_Checkbox {
+      display: none;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+
+      &.active {
+        display: block;
+        /* min-height: 10rem; */
+        min-height: 6rem;
+        max-height: 15rem;
+        overflow-y: auto;
+        /* background-color: #f9f9f9; */
+      }
+    }
+
+    p {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .taskDetails {
+      max-width: 30rem;
+
+      p {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+      }
+    }
+
+    .priorityCategory,
+    .taskCategory {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .priorityCategory label,
+    .taskCategory label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+
+    .priorityCategory .bubble,
+    .taskCategory .bubble {
+      padding: 5px 10px;
+      margin: 5px;
+      min-width: 5rem;
+      border-radius: 5px;
+      border: 3px solid var(--small);
+      background-color: var(--small);
+      box-shadow: var(--small-glow);
+      cursor: pointer;
+      text-align: center;
+      opacity: 0.35;
+      transition: opacity 0.2s ease-in-out;
+
+      &:hover {
+        opacity: 0.85;
+      }
+    }
+
+    .priorityCategory .bubble.medium,
+    .taskCategory .bubble.medium {
+      border-color: var(--medium);
+      background-color: var(--medium);
+      box-shadow: var(--medium-glow);
+    }
+
+    .priorityCategory .bubble.large,
+    .taskCategory .bubble.large {
+      border-color: var(--large);
+      background-color: var(--large);
+      box-shadow: var(--large-glow);
+    }
+
+    label:has(input[type="radio"]:checked) .bubble {
+      opacity: 1;
+    }
+
+    #activateBtn {
+      display: block;
+      font-size: 1.125rem;
+      font-weight: 600;
+      padding: 1rem 1.125rem;
+      color: #fff;
+      background-color: var(--primary);
+      border-radius: 0.5rem;
+      box-shadow: var(--gray);
+      cursor: pointer;
+      margin-top: 1.5rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.35;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    .controlBtn {
+      display: flex;
+      width: 100%;
+      gap: 20px;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
 
       button {
-        font-size: 1rem;
-        font-weight: bold;
         display: block;
         font-size: 1.125rem;
         font-weight: 600;
-        padding: 0.5rem 0.5rem;
+        padding: 1rem 1.125rem;
         color: #fff;
-        /* background-color: var(--primary); */
         border-radius: 0.5rem;
         box-shadow: var(--gray);
         cursor: pointer;
-
+        margin-top: 1.5rem;
         opacity: 0.35;
 
         &:hover {
           opacity: 1;
         }
       }
-      .noteBtn {
-        background-color: rgb(58, 96, 222);
+
+      .saveBtn,
+      .updateBtn {
+        background-color: var(--greenM);
       }
-      .stepBtn {
-        background-color: rgb(255, 62, 37);
-      }
-    }
-  }
 
-  p {
-    font-size: 1rem;
-    font-weight: 700;
-    /* margin-bottom: 1rem; */
-  }
-
-  .taskSection {
-    max-width: 30rem;
-  }
-
-  .priorityCategory,
-  .taskCategory {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    /* width: 100%; */
-    gap: 10px;
-    margin-bottom: 1.5rem;
-  }
-
-  .priorityCategory label,
-  .taskCategory label {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    /* padding: 1rem; */
-    border-radius: 0.5rem;
-    cursor: pointer;
-  }
-
-  .priorityCategory .bubble,
-  .taskCategory .bubble {
-    padding: 5px 10px;
-    margin: 5px;
-    min-width: 5rem;
-    border-radius: 5px;
-    border: 3px solid var(--small);
-    background-color: var(--small);
-    box-shadow: var(--small-glow);
-    cursor: pointer;
-    text-align: center;
-    opacity: 0.35;
-    transition: opacity 0.2s ease-in-out;
-
-    &:hover {
-      opacity: 0.85;
-    }
-  }
-
-  .priorityCategory .bubble.medium,
-  .taskCategory .bubble.medium {
-    border-color: var(--medium);
-    background-color: var(--medium);
-    box-shadow: var(--medium-glow);
-  }
-
-  .priorityCategory .bubble.large,
-  .taskCategory .bubble.large {
-    border-color: var(--large);
-    background-color: var(--large);
-    box-shadow: var(--large-glow);
-  }
-
-  label input:checked + .bubble {
-    opacity: 1;
-  }
-
-  #activateBtn {
-    display: block;
-    font-size: 1.125rem;
-    font-weight: 600;
-    padding: 1rem 1.125rem;
-    color: #fff;
-    background-color: var(--primary);
-    border-radius: 0.5rem;
-    box-shadow: var(--gray);
-    cursor: pointer;
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
-    opacity: 0.35;
-
-    &:hover {
-      opacity: 1;
-    }
-  }
-
-  /* .activate {
-      color: #fff;
-      background-color: var(--primary);
-      opacity: 1;
-    } */
-
-  .controlBtn {
-    display: flex;
-    width: 100%;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-
-    #saveBtn {
-      display: block;
-      font-size: 1.125rem;
-      font-weight: 600;
-      padding: 1rem 1.125rem;
-      color: #fff;
-      background-color: var(--greenM);
-      border-radius: 0.5rem;
-      box-shadow: var(--gray);
-      cursor: pointer;
-      margin-top: 1.5rem;
-      opacity: 0.35;
-
-      &:hover {
-        opacity: 1;
+      .deleteBtn {
+        background-color: var(--primary);
       }
     }
   }

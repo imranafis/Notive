@@ -14,8 +14,9 @@ import { db } from "/src/lib/firebase";
 import { getUser } from "/src/lib/user";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
-import TaskBox from "./TaskBox";
-import AddTask from "./AddTask";
+import TaskBox from "/src/components/others/TaskBox";
+
+// import AddTask from "./AddTask";
 import "./TaskSection.css";
 import { toast } from "react-toastify";
 
@@ -28,9 +29,7 @@ const TaskSection = ({
   setFullScreenMode,
 }) => {
   const [tasks, setTasks] = useState([]);
-  const [taskStatuses, setTaskStatuses] = useState({});
   const [activeDropdown, setActiveDropdown] = useState(null);
-  // const [fullScreenMode, setFullScreenMode] = useState(false);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -55,11 +54,20 @@ const TaskSection = ({
     fetchTasks();
   }, [addSection]);
 
-  const handleTaskStatusChange = (taskId, newStatus) => {
-    setTaskStatuses((prevStatuses) => ({
-      ...prevStatuses,
-      [taskId]: newStatus,
-    }));
+  const handleTaskStatusChange = async (taskId, newStatus) => {
+    // setTaskStatuses((prevStatuses) => ({
+    //   ...prevStatuses,
+    //   [taskId]: newStatus,
+    // }));
+
+    try {
+      const userID = getUser().uid;
+      const taskRef = doc(db, userID, taskId);
+      await updateDoc(taskRef, { status: newStatus });
+    } catch (error) {
+      console.error("Failed to update task status:", error);
+      toast.error("Failed to update status. Please try again.");
+    }
   };
 
   const toggleDropdown = (taskId, e) => {
@@ -163,7 +171,7 @@ const TaskSection = ({
               tasks.map((task) => (
                 <div key={task.id} className="taskItem">
                   <TaskBox
-                    status={taskStatuses[task.id] || task.status || "unchecked"}
+                    status={task.status}
                     onStatusChange={(newStatus) =>
                       handleTaskStatusChange(task.id, newStatus)
                     }
@@ -187,6 +195,7 @@ const TaskSection = ({
                           className="dropdown-item"
                           onClick={(e) => {
                             e.stopPropagation();
+                            setActiveDropdown(null);
                             handleViewTask(task);
                           }}
                         >
@@ -196,6 +205,7 @@ const TaskSection = ({
                           className="dropdown-item"
                           onClick={(e) => {
                             e.stopPropagation();
+                            setActiveDropdown(null);
                             handleViewTask(task, true);
                           }}
                         >
@@ -205,6 +215,7 @@ const TaskSection = ({
                           className="dropdown-item"
                           onClick={(e) => {
                             e.stopPropagation();
+                            setActiveDropdown(null);
                             handleViewTask(task);
                           }}
                         >
@@ -228,7 +239,7 @@ const TaskSection = ({
           </div>
         </div>
       </div>
-
+      {/* 
       {addSection && (
         <AddTask
           setAddSection={setAddSection}
@@ -241,7 +252,7 @@ const TaskSection = ({
             setFullScreenMode(false);
           }}
         />
-      )}
+      )} */}
     </>
   );
 };

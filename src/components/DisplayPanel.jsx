@@ -49,7 +49,31 @@ function DisplayPanel({
         </>
       )}
       {activeSection === "bulletJournal" && <BulletJournal />}
-      {activeSection === "dailyspace" && <DailySpace />}
+      {activeSection === "dailyspace" && (
+        <>
+          <DailySpace
+            addSection={addSection}
+            setAddSection={setAddSection}
+            selectedItem={selectedItem}
+            setSelectedItem={setSelectedItem}
+            fullScreenMode={fullScreenMode}
+            setFullScreenMode={setFullScreenMode}
+          />
+          {(addSection === "dailyspace" || addSection === "viewTask") && (
+            <AddTask
+              setAddSection={setAddSection}
+              selectedItem={selectedItem}
+              setSelectedItem={setSelectedItem}
+              fullScreenMode={fullScreenMode}
+              onClose={() => {
+                setAddSection("");
+                setSelectedItem(null);
+                setFullScreenMode(false);
+              }}
+            />
+          )}
+        </>
+      )}
       {activeSection === "taskSection" && (
         <>
           <TaskSection
@@ -60,7 +84,7 @@ function DisplayPanel({
             fullScreenMode={fullScreenMode}
             setFullScreenMode={setFullScreenMode}
           />
-          {(addSection === "addTask" || addSection === "viewTask") && (
+          {(addSection === "taskSection" || addSection === "viewTask") && (
             <AddTask
               setAddSection={setAddSection}
               selectedItem={selectedItem}

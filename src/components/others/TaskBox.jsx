@@ -2,13 +2,13 @@ import React, { useState, useRef } from "react";
 import "./TaskBox.css"; // Import styles
 
 const TaskBox = ({ status: initialStatus, onStatusChange }) => {
-  const [status, setStatus] = useState(initialStatus);
+  const [status, setStatus] = useState(initialStatus ?? "unchecked");
+
   const timerRef = useRef(null);
   const longPressTriggeredRef = useRef(false); // Track long press state
 
   const handleClick = () => {
     if (longPressTriggeredRef.current) {
-      // If long press just happened, prevent immediate unchecking
       longPressTriggeredRef.current = false;
       return;
     }
@@ -20,6 +20,8 @@ const TaskBox = ({ status: initialStatus, onStatusChange }) => {
       newStatus = "unchecked";
     } else if (status === "checked") {
       newStatus = "unchecked";
+    } else {
+      newStatus = "unchecked"; // Fallback
     }
 
     setStatus(newStatus);

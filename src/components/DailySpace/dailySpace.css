@@ -1,56 +1,185 @@
 .dailySpace {
   width: 100%;
   height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 
+  .displayDate {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+  }
 
-
-  .actionPanel-dailySpace{
+  .taskBar {
     display: flex;
-    flex-direction: column;
+    width: 30%;
     justify-content: center;
     align-items: center;
-    position: absolute;
-    width: 45%;
-    height: 100%;
-    border-right: 2px solid gray;
+    gap: 10px;
+    padding: 1rem;
+  }
 
+  .taskPlus {
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin-left: auto;
+    color: #007bff;
+    transition: 0.2s ease;
+  }
 
-    .displayDate{
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 4rem;
+  .taskPlus:hover {
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+
+  .taskContainer {
+    /* margin-top: 1rem; */
+    border-radius: 10px;
+    padding: 2rem;
+    background-color: rgb(241, 240, 240);
+
+    .taskItem {
+      display: flex;
+      align-items: center;
+      /* text-align: center; */
+      gap: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+
+      span {
+        cursor: pointer;
+        font-size: 1.35rem;
+      }
+
+      /* Dropdown styles */
+      .dropdown-container {
+        display: flex;
+        position: relative;
+        padding: 5px;
+      }
+
+      .dropdown-menu {
+        position: absolute;
+        left: 20px;
+        top: 0;
+        /* transform: translateY(-50%); Center it vertically */
+        background-color: white;
+        min-width: 120px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        border-radius: 4px;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .dropdown-item {
+        font-size: 0.75rem;
+        padding: 8px 16px;
+        cursor: pointer;
+        text-align: left;
+      }
+
+      .dropdown-item:hover {
+        background-color: #f1f1f1;
+      }
+
+      .menuBtn {
+        cursor: pointer;
+        padding: 4px;
+      }
+
+      .menuBtn:hover {
+        background-color: #f1f1f1;
+        border-radius: 4px;
+      }
+    }
+    .unchecked {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 25%;
+      border: 3.5px solid var(--medium);
+      box-shadow: var(--medium-glow);
+      transition: 0.2s ease-in-out;
     }
 
-    .taskBar{
+    .checked {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 25%;
+      border: 3.5px solid var(--greenS);
+      box-shadow: var(--greenS-glow);
+      transition: 0.2s ease-in-out;
+    }
+
+    .checked::after {
+      content: "";
+      display: block;
+      opacity: 1;
+      width: 10px;
+      height: 10px;
+      background-color: var(--greenS);
+      box-shadow: var(--greenS-glow);
+      border-radius: 25%;
+      transition: 0.2s ease-in-out;
+    }
+  }
+
+  /* Popup styles */
+  .popupOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .popupContent {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .selectTask .selectTaskBar {
       display: flex;
       align-items: center;
       gap: 20px;
 
-      .taskPlus{
+      margin-bottom: 2rem;
+    }
+
+    .taskItem {
+      display: flex;
+      align-items: center;
+
+      gap: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+
+      span {
         cursor: pointer;
-        &:hover{
-          font-size: 1.3rem;
-          font-weight: 600;
-        }
-      }
-      
-      .icon {
-        font-size: 1.2rem;
-        
-       
+        font-size: 1.35rem;
       }
     }
-  }
-
-  .contentPanel-dailySpace{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    left: 45%;
-    width: 55%;
-    height: 100%;
-    /* background-color: green; */
   }
 }

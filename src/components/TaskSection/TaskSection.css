@@ -9,318 +9,100 @@
   h2 {
     margin-bottom: 2rem;
   }
-}
 
-.taskList {
-  list-style: none;
-  padding: 0;
-}
+  /* .taskGrid {
+    list-style: none;
+    padding: 0;
+  } */
 
-.taskItem {
-  display: flex;
-  align-items: center;
-  /* text-align: center; */
-  gap: 10px;
-  margin-bottom: 10px;
-  cursor: pointer;
-
-  span {
-    cursor: pointer;
-    font-size: 1.35rem;
-  }
-
-  /* Dropdown styles */
-  .dropdown-container {
+  .taskItem {
     display: flex;
-    position: relative;
-    padding: 5px;
-  }
-
-  .dropdown-menu {
-    position: absolute;
-    left: 20px;
-    top: 0;
-    /* transform: translateY(-50%); Center it vertically */
-    background-color: white;
-    min-width: 120px;
-    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-    z-index: 1;
-    border-radius: 4px;
-    overflow: hidden;
-    white-space: nowrap;
-  }
-
-  .dropdown-item {
-    font-size: 0.75rem;
-    padding: 8px 16px;
+    align-items: center;
+    /* text-align: center; */
+    gap: 10px;
+    margin-bottom: 10px;
     cursor: pointer;
-    text-align: left;
-  }
 
-  .dropdown-item:hover {
-    background-color: #f1f1f1;
-  }
+    span {
+      cursor: pointer;
+      font-size: 1.35rem;
+    }
 
-  .menuBtn {
-    cursor: pointer;
-    padding: 4px;
-  }
+    /* Dropdown styles */
+    .dropdown-container {
+      display: flex;
+      position: relative;
+      padding: 5px;
+    }
 
-  .menuBtn:hover {
-    background-color: #f1f1f1;
-    border-radius: 4px;
-  }
-}
-.unchecked {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 25%;
-  border: 3.5px solid var(--medium);
-  box-shadow: var(--medium-glow);
-  transition: 0.2s ease-in-out;
-}
-
-.checked {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 25%;
-  border: 3.5px solid var(--greenS);
-  box-shadow: var(--greenS-glow);
-  transition: 0.2s ease-in-out;
-}
-
-.checked::after {
-  content: "";
-  display: block;
-  opacity: 1;
-  width: 10px;
-  height: 10px;
-  background-color: var(--greenS);
-  box-shadow: var(--greenS-glow);
-  border-radius: 25%;
-  transition: 0.2s ease-in-out;
-}
-
-.addTask {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(202, 202, 202, 0.75);
-  backdrop-filter: blur(2px);
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  position: fixed;
-
-  .panel {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    background-color: #eee;
-    padding: 1.5rem;
-    /* border-radius: 20px; */
-    max-height: 80%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    width: 30rem;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-
-    .closeBtn {
+    .dropdown-menu {
       position: absolute;
-      top: -7px;
-      left: -3px;
-      background: none;
-      border: none;
-      font-size: 30px;
+      left: 20px;
+      top: 0;
+      /* transform: translateY(-50%); Center it vertically */
+      background-color: white;
+      min-width: 120px;
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+      border-radius: 4px;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .dropdown-item {
+      font-size: 0.75rem;
+      padding: 8px 16px;
       cursor: pointer;
-      color: #333;
-
-      &:hover {
-        color: red;
-      }
-    }
-
-    .taskName {
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-start;
-      align-items: center;
-      width: 100%;
-      gap: 1rem;
-      font-size: 1rem;
-      font-weight: 700;
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-
-      input[type="text"] {
-        font-size: 1rem;
-        width: 70%;
-        border-bottom: 1px solid gray;
-      }
-    }
-
-    .note,
-    .breakdown,
-    .details {
-      display: block;
       text-align: left;
-      align-items: flex-start;
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      margin-top: 1.25rem;
+    }
+
+    .dropdown-item:hover {
+      background-color: #f1f1f1;
+    }
+
+    .menuBtn {
       cursor: pointer;
-      &.activate {
-        color: rgb(27, 97, 219);
-      }
+      padding: 4px;
     }
 
-    .Aditor_Task,
-    .Aditor_Task_Checkbox {
-      display: none;
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-
-      &.active {
-        display: block;
-        /* min-height: 10rem; */
-        min-height: 6rem;
-        max-height: 15rem;
-        overflow-y: auto;
-        /* background-color: #f9f9f9; */
-      }
+    .menuBtn:hover {
+      background-color: #f1f1f1;
+      border-radius: 4px;
     }
+  }
+  .unchecked {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 25%;
+    border: 3.5px solid var(--medium);
+    box-shadow: var(--medium-glow);
+    transition: 0.2s ease-in-out;
+  }
 
-    p {
-      font-size: 1rem;
-      font-weight: 700;
-    }
+  .checked {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 25%;
+    border: 3.5px solid var(--greenS);
+    box-shadow: var(--greenS-glow);
+    transition: 0.2s ease-in-out;
+  }
 
-    .taskDetails {
-      max-width: 30rem;
-
-      p {
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-      }
-    }
-
-    .priorityCategory,
-    .taskCategory {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 1.5rem;
-    }
-
-    .priorityCategory label,
-    .taskCategory label {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border-radius: 0.5rem;
-      cursor: pointer;
-    }
-
-    .priorityCategory .bubble,
-    .taskCategory .bubble {
-      padding: 5px 10px;
-      margin: 5px;
-      min-width: 5rem;
-      border-radius: 5px;
-      border: 3px solid var(--small);
-      background-color: var(--small);
-      box-shadow: var(--small-glow);
-      cursor: pointer;
-      text-align: center;
-      opacity: 0.35;
-      transition: opacity 0.2s ease-in-out;
-
-      &:hover {
-        opacity: 0.85;
-      }
-    }
-
-    .priorityCategory .bubble.medium,
-    .taskCategory .bubble.medium {
-      border-color: var(--medium);
-      background-color: var(--medium);
-      box-shadow: var(--medium-glow);
-    }
-
-    .priorityCategory .bubble.large,
-    .taskCategory .bubble.large {
-      border-color: var(--large);
-      background-color: var(--large);
-      box-shadow: var(--large-glow);
-    }
-
-    label:has(input[type="radio"]:checked) .bubble {
-      opacity: 1;
-    }
-
-    #activateBtn {
-      display: block;
-      font-size: 1.125rem;
-      font-weight: 600;
-      padding: 1rem 1.125rem;
-      color: #fff;
-      background-color: var(--primary);
-      border-radius: 0.5rem;
-      box-shadow: var(--gray);
-      cursor: pointer;
-      margin-top: 1.5rem;
-      margin-bottom: 1.5rem;
-      opacity: 0.35;
-
-      &:hover {
-        opacity: 1;
-      }
-    }
-
-    .controlBtn {
-      display: flex;
-      width: 100%;
-      gap: 20px;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-
-      button {
-        display: block;
-        font-size: 1.125rem;
-        font-weight: 600;
-        padding: 1rem 1.125rem;
-        color: #fff;
-        border-radius: 0.5rem;
-        box-shadow: var(--gray);
-        cursor: pointer;
-        margin-top: 1.5rem;
-        opacity: 0.35;
-
-        &:hover {
-          opacity: 1;
-        }
-      }
-
-      .saveBtn,
-      .updateBtn {
-        background-color: var(--greenM);
-      }
-
-      .deleteBtn {
-        background-color: var(--primary);
-      }
-    }
+  .checked::after {
+    content: "";
+    display: block;
+    opacity: 1;
+    width: 10px;
+    height: 10px;
+    background-color: var(--greenS);
+    box-shadow: var(--greenS-glow);
+    border-radius: 25%;
+    transition: 0.2s ease-in-out;
   }
 }

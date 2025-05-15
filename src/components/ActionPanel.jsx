@@ -28,6 +28,8 @@ function ActionPanel({
     setAddSection("");
   };
   const handleAddChange = () => {
+    console.log(addSection);
+    console.log(activeSection);
     if (addSection != activeSection) {
       setAddSection(activeSection);
     } else {
