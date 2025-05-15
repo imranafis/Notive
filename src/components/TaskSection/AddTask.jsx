@@ -18,7 +18,8 @@ import Tag from "../Tag/Tag.jsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
-import "./AddTask.css";
+
+import "/src/components/TaskSection/AddTask.css";
 
 const AddTask = ({
   setAddSection,
