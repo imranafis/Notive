@@ -16,6 +16,7 @@ function EditGoal({ goalId, setEditGoal }) {
   const Aditor_Checkbox_Goal = useRef(null);
   const [goalData, setGoalData] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [status, setStatus] = useState("unchecked");
 
   useEffect(() => {
     const fetchGoalData = async () => {
@@ -30,10 +31,13 @@ function EditGoal({ goalId, setEditGoal }) {
 
         if (docSnap.exists()) {
           console.log("Goal Data:", docSnap.data()); // Debugging
-          setSelectedGoal(docSnap.data());
+          setGoalData(docSnap.data());
         } else {
           console.log("No such goal found!");
         }
+
+        setStatus(goalData.daily ? "checked" : "unchecked");
+                console.log(status);
       } catch (error) {
         console.error("Error fetching goal:", error);
       }
@@ -92,6 +96,18 @@ function EditGoal({ goalId, setEditGoal }) {
 
   if (!goalData) return <p>Loading goal...</p>;
 
+
+    const handleClick = () =>{
+        if(status == "unchecked")
+    {
+            setStatus("checked");
+        }
+        else if(status == "checked")
+    {
+            setStatus("unchecked");
+
+        }
+    }
   return (
     <div className="editGoal">
       <div className="panel">
@@ -108,7 +124,21 @@ function EditGoal({ goalId, setEditGoal }) {
             placeholder="Goal Name"
           />
           <div ref={Aditor_Goal} className="Aditor_Goal" />
-          {goalData.subCategory === "Project" && (
+
+{goalData.subCategory === "habit" && (
+                    <>
+                        <div className="dailyCheckbox">
+                            <div className="label">Daily Check:
+                            </div>
+                                {                        console.log(status);
+                                }
+
+                                <div  className={`task-box ${status}`}
+                                onClick={handleClick}></div>
+                        </div>
+                    </>
+                ) }
+        {goalData.subCategory === "Project" && (
             <div ref={Aditor_Checkbox_Goal} className="Aditor_Checkbox_Goal" />
           )}
           {goalData.subCategory === "Project" && (

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   collection,
   addDoc,
+  getDoc,
   updateDoc,
   Timestamp,
   doc,
@@ -16,546 +17,742 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
 import { getUser } from "/src/lib/user";
 
-import { initializeAditorX } from "aditorx";
+// import { initializeAditorX } from "aditorx";
 
 import { toast } from "react-toastify";
 
-import { initializeAditor, initializeAditorCheckbox } from "/src/lib/aditor.js";
+import { initializeAditor, initializeAditorCheckbox, initializeAditorDate } from "/src/lib/aditor.js";
 import "/src/lib/aditor.css";
 import "./GoalSection.css";
 
 function AddGoal({
-  setAddSection,
-  defaultCategory,
-  setDefaultCategory,
-  selectedItem,
-  setSelectedItem,
-  fullScreenMode,
-  onClose,
+    addSection,
+    setAddSection,
+    defaultCategory,
+    setDefaultCategory,
+    selectedItem,
+    setSelectedItem,
+    fullScreenMode,
+    onClose,
 }) {
-  const addGoalRef = useRef(null);
+    const addGoalRef = useRef(null);
 
-  const Aditor_Goal = useRef(null);
-  const Aditor_Goal_Checkbox = useRef(null);
-  const [goalName, setGoalName] = useState("");
-  const [category, setCategory] = useState("Habit");
-  const [activeSection, setActiveSection] = useState([]);
-  const [Note, setNote] = useState("");
-  const [BreakdownContent, setBreakdownContent] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null);
+    const Aditor_Goal = useRef(null);
 
-  // useEffect(() => {
-  //   function handleClickOutside(event) {
-  //     if (addGoalRef.current && !addGoalRef.current.contains(event.target)) {
-  //       handleCloseGoal();
-  //     }
-  //   }
+    const Aditor_DailyGoal = useRef(null);
 
-  //   // Bind the event listener
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => {
-  //     // Unbind the event listener on clean up
-  //     document.removeEventListener("mousedown", handleClickOutside);
-  //   };
-  // }, [onClose]); // Add onClose to dependency array
+    const Aditor_Goal_Checkbox = useRef(null);
+    const [goalName, setGoalName] = useState("");
+    const [category, setCategory] = useState("habit");
+    const [activeSection, setActiveSection] = useState([]);
+    const [Note, setNote] = useState("");
+    const [BreakdownContent, setBreakdownContent] = useState("");
+    const [selectedDate, setSelectedDate] = useState(null);
 
-  // useEffect(() => {
-  //   console.log(selectedItem);
-  //   if (selectedItem) {
-  //     // const newActiveSections = [];
-  //     // if (selectedItem.note) newActiveSections.push("note");
-  //     // if (selectedItem.breakdown) newActiveSections.push("breakdown");
-  //     // if (selectedItem.estimatedTime) newActiveSections.push("details");
+    const [status, setStatus] = useState("unchecked");
 
-  //     // setActiveSection(newActiveSections);
-  //     if (selectedItem.subCategory === "Habit") {
-  //       setGoalName(selectedItem.goalName);
-  //       setNote(selectedItem.note);
-  //     } else if (selectedItem.subCategory === "Project") {
-  //       // Convert Firestore Timestamp to Day.js
-  //       const estimatedTime = selectedItem.estimatedTime
-  //         ? dayjs(selectedItem.estimatedTime.toDate()) // Convert if it's a Timestamp
-  //         : null;
+    // useEffect(() => {
+    //   function handleClickOutside(event) {
+    //     if (addGoalRef.current && !addGoalRef.current.contains(event.target)) {
+    //       handleCloseGoal();
+    //     }
+    //   }
 
-  //       setSelectedDate(estimatedTime);
-  //       setGoalName(selectedItem.goalName);
-  //       setNote(selectedItem.note);
-  //       setBreakdownContent(selectedItem.breakdown);
-  //     }
-  //   }
+    //   // Bind the event listener
+    //   document.addEventListener("mousedown", handleClickOutside);
+    //   return () => {
+    //     // Unbind the event listener on clean up
+    //     document.removeEventListener("mousedown", handleClickOutside);
+    //   };
+    // }, [onClose]); // Add onClose to dependency array
 
-  //   if (Aditor_Goal.current && !Aditor_Goal.current.innerHTML.trim()) {
-  //     initializeAditor(Aditor_Goal.current, selectedItem?.note || "");
-  //   }
-  //   if (
-  //     Aditor_Goal_Checkbox.current &&
-  //     !Aditor_Goal_Checkbox.current.innerHTML.trim()
-  //   ) {
-  //     initializeAditorCheckbox(
-  //       Aditor_Goal_Checkbox.current,
-  //       selectedItem?.breakdown || ""
-  //     );
-  //   }
+    // useEffect(() => {
+    //   console.log(selectedItem);
+    //   if (selectedItem) {
+    //     // const newActiveSections = [];
+    //     // if (selectedItem.note) newActiveSections.push("note");
+    //     // if (selectedItem.breakdown) newActiveSections.push("breakdown");
+    //     // if (selectedItem.estimatedTime) newActiveSections.push("details");
 
-  //   // Automatically expand sections if data exists
-  // }, [activeSection, selectedItem]);
+    //     // setActiveSection(newActiveSections);
+    //     if (selectedItem.subCategory === "Habit") {
+    //       setGoalName(selectedItem.goalName);
+    //       setNote(selectedItem.note);
+    //     } else if (selectedItem.subCategory === "Project") {
+    //       // Convert Firestore Timestamp to Day.js
+    //       const estimatedTime = selectedItem.estimatedTime
+    //         ? dayjs(selectedItem.estimatedTime.toDate()) // Convert if it's a Timestamp
+    //         : null;
 
-  // useEffect(() => {
-  //   onClose();
-  // }, [setAddSection]);
+    //       setSelectedDate(estimatedTime);
+    //       setGoalName(selectedItem.goalName);
+    //       setNote(selectedItem.note);
+    //       setBreakdownContent(selectedItem.breakdown);
+    //     }
+    //   }
 
-  useEffect(() => {
-    if (Aditor_Goal.current && !Aditor_Goal.current.innerHTML.trim()) {
-      initializeAditor(Aditor_Goal.current, selectedItem?.note || "");
-    }
-    if (
-      Aditor_Goal_Checkbox.current &&
-      !Aditor_Goal_Checkbox.current.innerHTML.trim()
-    ) {
-      initializeAditorCheckbox(
-        Aditor_Goal_Checkbox.current,
-        selectedItem?.breakdown || ""
-      );
-    }
-  }, [activeSection]);
+    //   if (Aditor_Goal.current && !Aditor_Goal.current.innerHTML.trim()) {
+    //     initializeAditor(Aditor_Goal.current, selectedItem?.note || "");
+    //   }
+    //   if (
+    //     Aditor_Goal_Checkbox.current &&
+    //     !Aditor_Goal_Checkbox.current.innerHTML.trim()
+    //   ) {
+    //     initializeAditorCheckbox(
+    //       Aditor_Goal_Checkbox.current,
+    //       selectedItem?.breakdown || ""
+    //     );
+    //   }
 
-  useEffect(() => {
-    if (selectedItem) {
-      if (selectedItem.subCategory === "habit") {
-        setGoalName(selectedItem.goalName);
-        setNote(selectedItem.note);
-      } else if (selectedItem.subCategory === "project") {
-        // Convert Firestore Timestamp to Day.js
-        const estimatedTime = selectedItem.estimatedTime
-          ? dayjs(selectedItem.estimatedTime.toDate()) // Convert if it's a Timestamp
-          : null;
+    //   // Automatically expand sections if data exists
+    // }, [activeSection, selectedItem]);
 
-        setSelectedDate(estimatedTime);
-        setGoalName(selectedItem.goalName);
-        setNote(selectedItem.note);
-        setBreakdownContent(selectedItem.breakdown);
-      }
+    // useEffect(() => {
+    //   onClose();
+    // }, [setAddSection]);
 
-      // Dynamically set active sections based on content
-      // setActiveSection((prev) => {
-      const newActiveSections = [];
+    useEffect(() => {
+        if (Aditor_Goal.current && !Aditor_Goal.current.innerHTML.trim()) {
+            initializeAditor(Aditor_Goal.current, selectedItem?.note || "");
+        }
+        if (
+            Aditor_Goal_Checkbox.current &&
+                !Aditor_Goal_Checkbox.current.innerHTML.trim()
+        ) {
+            initializeAditorCheckbox(
+                Aditor_Goal_Checkbox.current,
+                selectedItem?.breakdown || ""
+            );
+        }
+     if (Aditor_DailyGoal.current && !Aditor_DailyGoal.current.innerHTML.trim()) {
+            initializeAditorDate(Aditor_DailyGoal.current);
+        }
+     console.log(addSection);
+    }, [activeSection]);
 
-      const parser = new DOMParser();
-      const docNote = parser.parseFromString(selectedItem.note, "text/html");
-      const noteContent = docNote.querySelector(".inputContent")?.innerText;
-      const docbreakdown = parser.parseFromString(
-        selectedItem.breakdown,
-        "text/html"
-      );
-      const breakdownContent =
-        docbreakdown.querySelector(".inputContent")?.innerText;
+    useEffect(() => {
+        if (selectedItem) {
+            if (selectedItem.subCategory === "habit") {
+                setGoalName(selectedItem.goalName);
+                setNote(selectedItem.note);
+                setStatus(selectedItem.daily ? "checked" : "unchecked");
+            } else if (selectedItem.subCategory === "project") {
+                // Convert Firestore Timestamp to Day.js
+                const estimatedTime = selectedItem.estimatedTime
+                    ? dayjs(selectedItem.estimatedTime.toDate()) // Convert if it's a Timestamp
+                    : null;
 
-      // const updatedSections = [...prev];
-      if (
-        selectedItem.note &&
-        !newActiveSections.includes("note") &&
-        noteContent != ""
-      ) {
-        newActiveSections.push("note");
-      }
-      if (
-        selectedItem.breakdown &&
-        !newActiveSections.includes("breakdown") &&
-        breakdownContent != ""
-      ) {
-        newActiveSections.push("breakdown");
-      }
-      if (
-        selectedItem.estimatedTime &&
-        !newActiveSections.includes("details")
-      ) {
-        newActiveSections.push("details");
-      }
-      // return updatedSections;
-      setActiveSection(newActiveSections);
+                setSelectedDate(estimatedTime);
+                setGoalName(selectedItem.goalName);
+                setNote(selectedItem.note);
+                setBreakdownContent(selectedItem.breakdown);
+            }
 
-      // });
-    }
-  }, [selectedItem]);
+            // Dynamically set active sections based on content
+            // setActiveSection((prev) => {
+            const newActiveSections = [];
 
-  const handleInputChange = (e) => {
-    setGoalName(e.target.value);
-  };
+            const parser = new DOMParser();
+            const docNote = parser.parseFromString(selectedItem.note, "text/html");
+            const noteContent = docNote.querySelector(".inputContent")?.innerText;
+            const docbreakdown = parser.parseFromString(
+                selectedItem.breakdown,
+                "text/html"
+            );
+            const breakdownContent =
+                docbreakdown.querySelector(".inputContent")?.innerText;
 
-  useEffect(() => {
-    if (defaultCategory) {
-      setCategory(defaultCategory);
-    }
-  }, [defaultCategory]);
+            // const updatedSections = [...prev];
+            if (
+                selectedItem.note &&
+                    !newActiveSections.includes("note") &&
+                    noteContent != ""
+            ) {
+                newActiveSections.push("note");
+            }
+            if (
+                selectedItem.breakdown &&
+                    !newActiveSections.includes("breakdown") &&
+                    breakdownContent != ""
+            ) {
+                newActiveSections.push("breakdown");
+            }
+            if (
+                selectedItem.estimatedTime &&
+                    !newActiveSections.includes("details")
+            ) {
+                newActiveSections.push("details");
+            }
+            // return updatedSections;
+            setActiveSection(newActiveSections);
 
-  const handleCategoryChange = (e) => {
-    const newCategory = e.target.value;
-    setCategory(newCategory);
+            // });
+        }
+    }, [selectedItem]);
 
-    setBreakdownContent("");
-    setSelectedDate(null);
-    setActiveSection([]);
-  };
+    const handleInputChange = (e) => {
+        setGoalName(e.target.value);
+    };
 
-  const addGoal = async () => {
-    if (!category) {
-      toast.error("Please select a category!", {
-        position: "bottom-right",
-        autoClose: 2000,
-      });
-      return;
-    }
+    useEffect(() => {
+        if (defaultCategory) {
+            setCategory(defaultCategory);
+        }
+    }, [defaultCategory]);
 
-    if (!goalName.trim()) {
-      toast.error("Goal name is required!", {
-        position: "bottom-right",
-        autoClose: 2000,
-      });
-      return;
-    }
+    const handleCategoryChange = (e) => {
+        const newCategory = e.target.value;
+        setCategory(newCategory);
 
-    try {
-      const userID = getUser().uid;
-      const updatedNoteContent = Aditor_Goal.current?.innerHTML || "";
+        setBreakdownContent("");
+        setSelectedDate(null);
+        setActiveSection([]);
+    };
 
-      const goalData = {
-        goalName: goalName.trim(),
-        category: "goal",
-        subCategory: category,
-        done: false,
-        note: updatedNoteContent,
-        createdAt: new Date().toISOString(),
-      };
+    const addGoal = async () => {
+        if (!category) {
+            toast.error("Please select a category!", {
+                position: "bottom-right",
+                autoClose: 2000,
+            });
+            return;
+        }
 
-      if (category === "Project") {
-        const updatedBreakdownContent =
-          Aditor_Goal_Checkbox.current?.innerHTML || "";
+        if (!goalName.trim()) {
+            toast.error("Goal name is required!", {
+                position: "bottom-right",
+                autoClose: 2000,
+            });
+            return;
+        }
 
-        goalData.estimatedTime = selectedDate
-          ? Timestamp.fromDate(new Date(selectedDate))
-          : null;
-        goalData.breakdown = updatedBreakdownContent;
-      }
+        try {
+            const userID = getUser().uid;
+            const updatedNoteContent = Aditor_Goal.current?.innerHTML || "";
 
-      await addDoc(collection(db, userID), goalData);
+            if(category == "habit")
+        {
+  const goalData = {
+                goalName: goalName.trim(),
+                category: "goal",
+                subCategory: category,
+                done: false,
+                daily: status == "checked" ? true : false,
+                status: "unchecked",
+                checkedDate: "",
+                note: updatedNoteContent,
+                createdAt: new Date().toISOString(),
+            };
+            await addDoc(collection(db, userID), goalData);
+            }
 
-      toast.success(`Goal ${category} saved successfully!`, {
-        position: "bottom-right",
-        autoClose: 2000,
-      });
 
-      setTimeout(() => {
-        setAddSection("");
-      }, 1200);
+            if (category === "project") {
+                const updatedBreakdownContent =
+                    Aditor_Goal_Checkbox.current?.innerHTML || "";
+  const goalData = {
+                goalName: goalName.trim(),
+                category: "goal",
+                subCategory: category,
+                done: false,
+                note: updatedNoteContent,
+               breakdown: updatedBreakdownContent,
+                createdAt: new Date().toISOString(),
+                estimatedTime: selectedDate
+                    ? Timestamp.fromDate(new Date(selectedDate))
+                    : null,
 
-      setGoalName("");
-      setNote("");
-      setBreakdownContent("");
-      setActiveSection([]);
-      setCategory("Goal");
-      setSelectedDate("");
+                };
+
+            await addDoc(collection(db, userID), goalData);
+            }
+
+
+            toast.success(`Goal ${category} saved successfully!`, {
+                position: "bottom-right",
+                autoClose: 2000,
+            });
+
+            setTimeout(() => {
+                setAddSection("");
+            }, 1200);
+
+            setGoalName("");
+            setNote("");
+            setBreakdownContent("");
+            setActiveSection([]);
+            setCategory("Goal");
+            setSelectedDate("");
+            setStatus("unchecked");
     } catch (e) {
-      console.error("Error saving goal:", e);
-      toast.error("Failed to save goal. Please try again.", {
-        position: "bottom-right",
-        autoClose: 2000,
-      });
-    }
-  };
+            console.error("Error saving goal:", e);
+            toast.error("Failed to save goal. Please try again.", {
+                position: "bottom-right",
+                autoClose: 2000,
+            });
+        }
+    };
 
-  const updateGoal = async () => {
-    if (!category) {
-      toast.error("Please select a category!", {
-        position: "bottom-right",
-        autoClose: 2000,
-      });
-      return;
-    }
+    const updateGoal = async () => {
+        if (!category) {
+            toast.error("Please select a category!", {
+                position: "bottom-right",
+                autoClose: 2000,
+            });
+            return;
+        }
 
-    if (!goalName.trim()) {
-      toast.error("Goal name is required!", {
-        position: "bottom-right",
-        autoClose: 2000,
-      });
-      return;
-    }
+        if (!goalName.trim()) {
+            toast.error("Goal name is required!", {
+                position: "bottom-right",
+                autoClose: 2000,
+            });
+            return;
+        }
 
-    if (!selectedItem) {
-      toast.error("No goal selected to update!", {
-        position: "bottom-right",
-        autoClose: 2000,
-      });
-      return;
-    }
+        if (!selectedItem) {
+            toast.error("No goal selected to update!", {
+                position: "bottom-right",
+                autoClose: 2000,
+            });
+            return;
+        }
 
-    try {
-      const userID = getUser().uid;
-      const goalRef = doc(db, userID, selectedItem.id);
-      const updatedNoteContent = Aditor_Goal.current?.innerHTML || "";
+        try {
+            const userID = getUser().uid;
+            const goalRef = doc(db, userID, selectedItem.id);
+            const updatedNoteContent = Aditor_Goal.current?.innerHTML || "";
 
-      const updatedGoalData = {
-        goalName: goalName.trim(),
-        category: "goal",
-        subCategory: category,
-        done: false,
-        note: updatedNoteContent,
-        createdAt: new Date().toISOString(),
-      };
+            if(category == "habit")
+        {
+  const updatedGoalData = {
+                 goalName: goalName.trim(),
+                category: "goal",
+                subCategory: category,
+                done: false,
+                daily: status == "checked" ? true : false,
+                status: "unchecked",
+                checkedDate: "",
+                note: updatedNoteContent,
+                createdAt: new Date().toISOString(),
+            };
+ await updateDoc(goalRef, updatedGoalData);
 
-      if (category === "project") {
-        const updatedBreakdownContent =
-          Aditor_Goal_Checkbox.current?.innerHTML || "";
-        updatedGoalData.estimatedTime = selectedDate
-          ? Timestamp.fromDate(new Date(selectedDate))
-          : null;
-        updatedGoalData.breakdown = updatedBreakdownContent;
-      }
+            }
 
-      await updateDoc(goalRef, updatedGoalData);
 
-      toast.success(`Goal ${category} updated successfully!`, {
-        position: "bottom-right",
-        autoClose: 2000,
-      });
+            if (category === "project") {
+                const updatedBreakdownContent =
+                    Aditor_Goal_Checkbox.current?.innerHTML || "";
+  const updatedGoalData = {
+                goalName: goalName.trim(),
+                category: "goal",
+                subCategory: category,
+                done: false,
+                note: updatedNoteContent,
+               breakdown: updatedBreakdownContent,
+                createdAt: new Date().toISOString(),
+                estimatedTime: selectedDate
+                    ? Timestamp.fromDate(new Date(selectedDate))
+                    : null,
 
-      setTimeout(() => {
-        resetForm();
-        setAddSection(""); // Hide the form
-      }, 1200);
-    } catch (e) {
-      console.error("Error updating goal:", e);
-      toast.error("Failed to update goal. Please try again.", {
-        position: "bottom-right",
-        autoClose: 2000,
-      });
-    }
-  };
+                };
+ await updateDoc(goalRef, updatedGoalData);
 
-  const deleteGoal = async () => {
-    if (!selectedItem) return;
 
-    toast.warn(
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          textAlign: "center",
-        }}
-      >
-        <p>Are you sure you want to delete this goal?</p>
-        <div>
-          <button
-            onClick={async () => {
-              try {
-                const userID = getUser().uid;
-                const goalRef = doc(db, userID, selectedItem.id);
-                await deleteDoc(goalRef);
-                toast.success("Goal deleted successfully!", {
-                  position: "bottom-right",
-                  autoClose: 500,
+            }
+
+
+
+                       toast.success(`Goal ${category} updated successfully!`, {
+                position: "bottom-right",
+                autoClose: 2000,
+            });
+
+            setTimeout(() => {
+                resetForm();
+                setAddSection(""); // Hide the form
+            }, 1200);
+        } catch (e) {
+            console.error("Error updating goal:", e);
+            toast.error("Failed to update goal. Please try again.", {
+                position: "bottom-right",
+                autoClose: 2000,
+            });
+        }
+    };
+
+ const updateDailyGoal = async () => {
+        try {
+        // Get existing note data from Firestore
+            const userID = getUser().uid;
+            const goalRef = doc(db, userID, selectedItem.id);
+            const goalSnap = await getDoc(goalRef);
+
+            if (goalSnap.exists()) {
+                const existingNoteHTML = goalSnap.data().note || "";
+                const updatedDailyNoteContent = Aditor_DailyGoal.current?.innerHTML || "";
+
+                // Parse both HTML strings into DOM
+                const parser = new DOMParser();
+                const existingDoc = parser.parseFromString(existingNoteHTML, "text/html");
+                const updatedDoc = parser.parseFromString(updatedDailyNoteContent, "text/html");
+
+                // Get `.aditor` from existing note
+                const existingAditor = existingDoc.querySelector(".aditor");
+
+                // Get all `.line` divs from updated note
+                const newLines = updatedDoc.querySelectorAll(".line");
+
+                // Append new lines to existing .aditor
+                newLines.forEach(line => {
+                    existingAditor?.appendChild(line.cloneNode(true));
                 });
 
-                setTimeout(() => {
-                  resetForm();
-                  setAddSection(""); // Hide the form
-                }, 1000);
-              } catch (error) {
-                console.error("Error deleting goal:", error);
-                toast.error("Failed to delete goal. Please try again.", {
-                  position: "bottom-right",
-                  autoClose: 1000,
-                });
-              }
-            }}
-            style={{
-              backgroundColor: "#28a745",
-              color: "white",
-              padding: "8px 16px",
-              borderRadius: "4px",
-              cursor: "pointer",
-              marginRight: "10px",
-            }}
-          >
-            Yes
-          </button>
-          <button
-            onClick={() => toast.dismiss()}
-            style={{
-              backgroundColor: "#dc3545",
-              color: "white",
-              padding: "8px 16px",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
-            No
-          </button>
-        </div>
-      </div>,
-      {
-        position: "bottom-right",
-        autoClose: 5000,
-        closeOnClick: false,
-        draggable: false,
-        pauseOnHover: false,
-        hideProgressBar: true,
-      }
-    );
-  };
+                // Use dropdown from original note
+                const dropdownMenu = existingDoc.querySelector(".dropdownMenu");
+                const updatedNoteHTML = existingAditor.outerHTML + (dropdownMenu ? dropdownMenu.outerHTML : "");
 
-  const handleCloseGoal = () => {
-    onClose(); // Call the passed onClose function
-  };
+                // Prepare updated data
+                const updatedGoalData = {
+                    goalName: goalName.trim(),
+                    category: "goal",
+                    subCategory: category,
+                    done: false,
+                    daily: status == "checked" ? true : false,
+                    status: "unchecked",
+                    checkedDate: "",
+                    note: updatedNoteHTML,
+                    createdAt: new Date().toISOString(),
+                };
 
-  const addActiveSection = (section) => {
-    setActiveSection((prev) =>
-      prev.includes(section)
-        ? prev.filter((s) => s !== section)
-        : [...prev, section]
-    );
-  };
+                // Update Firestore
+                await updateDoc(goalRef, updatedGoalData);
+            }
+               toast.success(`Goal ${category} updated successfully!`, {
+                position: "bottom-right",
+                autoClose: 2000,
+            });
 
-  const resetForm = () => {
-    setGoalName("");
-    setNote("");
-    setBreakdownContent("");
-    setActiveSection([]);
-    setCategory("Goal");
-    setSelectedDate("");
-    setSelectedItem(null);
-  };
+            setTimeout(() => {
+                resetForm();
+                setAddSection(""); // Hide the form
+            }, 1200);
 
-  return (
-    <div
-      className={`addGoal ${fullScreenMode ? "fullScreen" : ""}`}
-      ref={addGoalRef}
-    >
-      <div className="panel">
-        <button className="closeBtn" onClick={() => handleCloseGoal()}>
-          <FontAwesomeIcon icon={faTimes} />
-        </button>
-        {/* <div className="contentSection"> */}
-        {defaultCategory === "" && (
-          <select
-            value={category}
-            onChange={handleCategoryChange}
-            className="goal-dropdown"
-          >
-            <option value="" disabled>
-              Select Category
-            </option>
-            <option value="Habit">Habit</option>
-            <option value="Project">Project</option>
-          </select>
-        )}
-        <input
-          type="text"
-          className="goalName"
-          value={goalName}
-          onChange={handleInputChange}
-          placeholder={`Add a ${category} name`}
-        />
+        } catch (e) {
+            console.error("Error updating goal:", e);
+            toast.error("Failed to update goal. Please try again.", {
+                position: "bottom-right",
+                autoClose: 2000,
+            });
+        }
+    };
 
-        {/* </div> */}
 
-        {/* <div className="controlSection"> */}
-        <button
-          className={`note ${activeSection.includes("note") ? "activate" : ""}`}
-          onClick={() => addActiveSection("note")}
-        >
-          <i
-            className={`fa-solid ${
-              activeSection.includes("note")
-                ? "fa-angle-down"
-                : "fa-angle-right"
-            }`}
-          ></i>
-          Note
-        </button>
+    const deleteGoal = async () => {
+        if (!selectedItem) return;
 
-        {/* {activeSection === "details" && ( */}
-        <div
-          ref={Aditor_Goal}
-          className={`Aditor_Goal ${
-            activeSection.includes("note") ? "active" : ""
-          }`}
-        />
-        {category === "project" && (
-          <>
-            <button
-              className={`breakdown ${
-                activeSection.includes("breakdown") ? "activate" : ""
-              }`}
-              onClick={() => addActiveSection("breakdown")}
-            >
-              <i
-                className={`fa-solid ${
-                  activeSection.includes("breakdown")
-                    ? "fa-angle-down"
-                    : "fa-angle-right"
-                }`}
-              ></i>
-              Breakdown
-            </button>
-
-            {/* {activeSection === "breakdown" && ( */}
+        toast.warn(
             <div
-              ref={Aditor_Goal_Checkbox}
-              className={`Aditor_Goal_Checkbox ${
-                activeSection.includes("breakdown") ? "active" : ""
-              }`}
-            />
-            <button
-              className={`details ${
-                activeSection.includes("details") ? "activate" : ""
-              }`}
-              onClick={() => addActiveSection("details")}
+                style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px",
+                    textAlign: "center",
+                }}
             >
-              <i
-                className={`fa-solid ${
-                  activeSection.includes("details")
-                    ? "fa-angle-down"
-                    : "fa-angle-right"
-                }`}
-              ></i>
-              Details
-            </button>
+                <p>Are you sure you want to delete this goal?</p>
+                <div>
+                    <button
+                        onClick={async () => {
+                            try {
+                                const userID = getUser().uid;
+                                const goalRef = doc(db, userID, selectedItem.id);
+                                await deleteDoc(goalRef);
+                                toast.success("Goal deleted successfully!", {
+                                    position: "bottom-right",
+                                    autoClose: 500,
+                                });
 
-            {activeSection.includes("details") && (
-              <>
-                <p>Deadline:</p>
-                <DatePickerComponent
-                  selectedDate={selectedDate ? dayjs(selectedDate) : null}
-                  setSelectedDate={(newValue) => setSelectedDate(newValue)}
+                                setTimeout(() => {
+                                    resetForm();
+                                    setAddSection(""); // Hide the form
+                                }, 1000);
+                            } catch (error) {
+                                console.error("Error deleting goal:", error);
+                                toast.error("Failed to delete goal. Please try again.", {
+                                    position: "bottom-right",
+                                    autoClose: 1000,
+                                });
+                            }
+                        }}
+                        style={{
+                            backgroundColor: "#28a745",
+                            color: "white",
+                            padding: "8px 16px",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            marginRight: "10px",
+                        }}
+                    >
+                        Yes
+                    </button>
+                    <button
+                        onClick={() => toast.dismiss()}
+                        style={{
+                            backgroundColor: "#dc3545",
+                            color: "white",
+                            padding: "8px 16px",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                        }}
+                    >
+                        No
+                    </button>
+                </div>
+            </div>,
+            {
+                position: "bottom-right",
+                autoClose: 5000,
+                closeOnClick: false,
+                draggable: false,
+                pauseOnHover: false,
+                hideProgressBar: true,
+            }
+        );
+    };
+
+    const handleCloseGoal = () => {
+        onClose(); // Call the passed onClose function
+    };
+
+    const addActiveSection = (section) => {
+        setActiveSection((prev) =>
+            prev.includes(section)
+                ? prev.filter((s) => s !== section)
+                : [...prev, section]
+        );
+    };
+
+    const resetForm = () => {
+        setGoalName("");
+        setNote("");
+        setBreakdownContent("");
+        setActiveSection([]);
+        setCategory("Goal");
+        setSelectedDate("");
+        setSelectedItem(null);
+    };
+
+    const handleClick = () =>{
+        if(status == "unchecked")
+    {
+            setStatus("checked");
+        }
+        else if(status == "checked")
+    {
+            setStatus("unchecked");
+
+        }
+    }
+
+    return (
+        <div
+            className={`addGoal ${fullScreenMode ? "fullScreen" : ""}`}
+            ref={addGoalRef}
+        >
+
+            { addSection == "viewDailyTask" && (
+
+            <div className="panel">
+                <button className="closeBtn" onClick={() => handleCloseGoal()}>
+                    <FontAwesomeIcon icon={faTimes} />
+                </button>
+
+                <input
+                    type="text"
+                    className="goalName"
+                    value={goalName}
+                    onChange={handleInputChange}
+                    placeholder={`Add a ${category} name`}
                 />
-              </>
-            )}
-          </>
-        )}
 
-        <div className="controlBtn">
-          {selectedItem ? (
-            <>
-              <button onClick={updateGoal} className="updateBtn">
-                Save
-              </button>
-              <button onClick={deleteGoal} className="deleteBtn">
-                Delete
-              </button>
-            </>
-          ) : (
-            <button onClick={addGoal} className="saveBtn">
-              Save
-            </button>
-          )}
+                {/* </div> */}
+
+                {/* <div className="controlSection"> */}
+                <button
+                    className={`note ${activeSection.includes("note") ? "activate" : ""}`}
+                    onClick={() => addActiveSection("note")}
+                >
+                    <i
+                        className={`fa-solid ${
+activeSection.includes("note")
+? "fa-angle-down"
+: "fa-angle-right"
+}`}
+                        ></i>
+                    Note
+                </button>
+
+                {/* {activeSection === "details" && ( */}
+                <div
+                    ref={Aditor_DailyGoal}
+                    className={`Aditor_DailyGoal ${
+activeSection.includes("note") ? "active" : ""
+}`}
+                />
+                   <div className="dailyCheckbox">
+                    <div className="label">Daily Check:</div>
+                    <div  className={`task-box ${status}`}
+                                onClick={handleClick}></div>
+                  </div>
+                <div className="controlBtn">
+                            <button onClick={updateDailyGoal} className="updateBtn">
+                                Save
+                            </button>
+                            <button onClick={deleteGoal} className="deleteBtn">
+                                Delete
+                            </button>
+                </div>
+                {/* </div> */}
+            </div>
+             )}
+            { addSection != "viewDailyTask" && (
+            <div className="panel">
+                <button className="closeBtn" onClick={() => handleCloseGoal()}>
+                    <FontAwesomeIcon icon={faTimes} />
+                </button>
+                {/* <div className="contentSection"> */}
+                {defaultCategory === "" && (
+                    <select
+                        value={category}
+                        onChange={handleCategoryChange}
+                        className="goal-dropdown"
+                    >
+                        <option value="" disabled>
+                            Select Category
+                        </option>
+                        <option value="habit">Habit</option>
+                        <option value="project">Project</option>
+                    </select>
+                )}
+                <input
+                    type="text"
+                    className="goalName"
+                    value={goalName}
+                    onChange={handleInputChange}
+                    placeholder={`Add a ${category} name`}
+                />
+
+                {/* </div> */}
+
+                {/* <div className="controlSection"> */}
+                <button
+                    className={`note ${activeSection.includes("note") ? "activate" : ""}`}
+                    onClick={() => addActiveSection("note")}
+                >
+                    <i
+                        className={`fa-solid ${
+activeSection.includes("note")
+? "fa-angle-down"
+: "fa-angle-right"
+}`}
+                    ></i>
+                    Note
+                </button>
+
+                {/* {activeSection === "details" && ( */}
+                <div
+                    ref={Aditor_Goal}
+                    className={`Aditor_Goal ${
+activeSection.includes("note") ? "active" : ""
+}`}
+                />
+                {category === "habit" && (
+                    <>
+                        <div className="dailyCheckbox">
+                            <div className="label">Daily Check:
+                            </div>
+                            <div  className={`task-box ${status}`}
+                                onClick={handleClick}></div>
+                        </div>
+                    </>
+                ) }
+                {category === "project" && (
+                    <>
+                        <button
+                            className={`breakdown ${
+activeSection.includes("breakdown") ? "activate" : ""
+}`}
+                            onClick={() => addActiveSection("breakdown")}
+                        >
+                            <i
+                                className={`fa-solid ${
+activeSection.includes("breakdown")
+? "fa-angle-down"
+: "fa-angle-right"
+}`}
+                            ></i>
+                            Breakdown
+                        </button>
+
+                        {/* {activeSection === "breakdown" && ( */}
+                        <div
+                            ref={Aditor_Goal_Checkbox}
+                            className={`Aditor_Goal_Checkbox ${
+activeSection.includes("breakdown") ? "active" : ""
+}`}
+                        />
+                        <button
+                            className={`details ${
+activeSection.includes("details") ? "activate" : ""
+}`}
+                            onClick={() => addActiveSection("details")}
+                        >
+                            <i
+                                className={`fa-solid ${
+activeSection.includes("details")
+? "fa-angle-down"
+: "fa-angle-right"
+}`}
+                            ></i>
+                            Details
+                        </button>
+
+                        {activeSection.includes("details") && (
+                            <>
+                                <p>Deadline:</p>
+                                <DatePickerComponent
+                                    selectedDate={selectedDate ? dayjs(selectedDate) : null}
+                                    setSelectedDate={(newValue) => setSelectedDate(newValue)}
+                                />
+                            </>
+                        )}
+                    </>
+                )}
+
+                <div className="controlBtn">
+                    {selectedItem ? (
+                        <>
+                            <button onClick={updateGoal} className="updateBtn">
+                                Save
+                            </button>
+                            <button onClick={deleteGoal} className="deleteBtn">
+                                Delete
+                            </button>
+                        </>
+                    ) : (
+                            <button onClick={addGoal} className="saveBtn">
+                                Save
+                            </button>
+                        )}
+                </div>
+                {/* </div> */}
+            </div>
+           )}
+            {/* <ToastContainer /> */}
         </div>
-        {/* </div> */}
-      </div>
-
-      {/* <ToastContainer /> */}
-    </div>
-  );
+    );
 }
 
 export default AddGoal;

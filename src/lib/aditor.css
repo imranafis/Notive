@@ -111,8 +111,15 @@ h4 {
     background-color: #80868b;
   }
   .icon.headingBtn {
+    /* margin: 0; */
+    /* width: 2rem; */
+    padding-left: 1rem;
+  }
+  .icon.dateBtn {
     margin: 0;
-    width: 5rem;
+    /* width: 2rem; */
+    padding-left: 0.5rem;
+    padding-right: 1.5rem;
     border-right: 4px solid #003554;
   }
 }
@@ -460,3 +467,4 @@ input:checked ~ .bubble::after {
 .options.inactive {
   display: none;
 }
+
