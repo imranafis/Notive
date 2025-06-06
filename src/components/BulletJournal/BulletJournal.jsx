@@ -52,7 +52,12 @@ function BulletJournal() {
     const storedDate = localStorage.getItem("bulletDate") || "";
     let storedContent = localStorage.getItem("bulletContent") || "";
 
-    if (storedDate === "" || storedDate !== todayDate) {
+    if (storedDate === "") {
+      localStorage.setItem("bulletDate", todayDate);
+      localStorage.setItem("bulletContent", "");
+      storedContent = "";
+    } else if (storedDate !== todayDate && storedContent != "") {
+      autoSaveBullet(storedDate, storedContent);
       localStorage.setItem("bulletDate", todayDate);
       localStorage.setItem("bulletContent", "");
       storedContent = "";
@@ -100,6 +105,45 @@ function BulletJournal() {
   const handleSelectedBullet = (bullet) => {
     setSelectedBullet(bullet);
     setViewMode(bullet.bulletDate === todayDate ? "today" : "selected");
+  };
+
+  const autoSaveBullet = async (storedDate, storedContent) => {
+    try {
+      const userID = getUser().uid; // Get user ID
+      const bulletData = {
+        bulletDate: storedDate,
+        category: "bulletJournal",
+        bulletContent: storedContent,
+      };
+
+      const userCollection = collection(db, userID);
+
+      // Check if a document with the same bulletDate exists
+      const q = query(userCollection, where("bulletDate", "==", displayDate));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const docRef = querySnapshot.docs[0].ref;
+        await updateDoc(docRef, bulletData);
+        toast.success("Bullet note auto updated successfully!", {
+          position: "bottom-right",
+          autoClose: 2000,
+        });
+
+        setSelectedBullet(null);
+      } else {
+        await addDoc(userCollection, bulletData);
+        toast.success("Bullet note auto saved successfully!", {
+          position: "bottom-right",
+          autoClose: 2000,
+        });
+      }
+    } catch (e) {
+      toast.error("Failed to auto save Bullet note. Please try again.", {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+    }
   };
 
   const saveBullet = async () => {
