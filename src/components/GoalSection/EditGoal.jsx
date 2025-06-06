@@ -30,7 +30,7 @@ function EditGoal({ goalId, setEditGoal }) {
 
         if (docSnap.exists()) {
           console.log("Goal Data:", docSnap.data()); // Debugging
-          setSelectedGoal(docSnap.data());
+          setGoalData(docSnap.data());
         } else {
           console.log("No such goal found!");
         }

@@ -16,8 +16,6 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
 import { getUser } from "/src/lib/user";
 
-import { initializeAditorX } from "aditorx";
-
 import { toast } from "react-toastify";
 
 import { initializeAditor, initializeAditorCheckbox } from "/src/lib/aditor.js";
