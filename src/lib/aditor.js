@@ -1,6 +1,6 @@
 export function initializeAditorPoint(inputSection, defaultValue) {
   if (defaultValue == "") {
-    inputSection.innerHTML = ` 
+    inputSection.innerHTML = `
   <div class="aditor">
      <div class="line">
        <div class="Head">
@@ -3166,7 +3166,7 @@ export function initializeAditorCheckboxLite(inputSection) {
 }
 
 export function initializeAditorOld(inputSection) {
-  inputSection.innerHTML = ` 
+  inputSection.innerHTML = `
            <div class="aditor">
               <div class="line">
                 <div class="Head">
@@ -4580,10 +4580,12 @@ export function initializeAditorOld(inputSection) {
       return 0;
     } else if (current_Label == "headingLabel") {
       return 1;
-    } else if (current_Label == "pointLabel") {
+    } else if (current_Label == "dateLabel") {
       return 2;
-    } else if (current_Label == "checkboxLabel") {
+    } else if (current_Label == "pointLabel") {
       return 3;
+    } else if (current_Label == "checkboxLabel") {
+      return 4;
     }
   }
 
@@ -4641,7 +4643,7 @@ export function initializeAditorOld(inputSection) {
 
 export function initializeAditor(inputSection, defaultValue) {
   if (defaultValue == "") {
-    inputSection.innerHTML = ` 
+    inputSection.innerHTML = `
       <div class="aditor">
          <div class="line">
            <div class="Head">
@@ -6228,7 +6230,7 @@ export function initializeAditorDate(inputSection) {
   ];
   const finalFormat = `${rest} | ${weekday}`;
 
-  inputSection.innerHTML = ` 
+  inputSection.innerHTML = `
       <div class="aditor">
          <div class="line"><div class="Head">
         <label class="headingLabel"></label>

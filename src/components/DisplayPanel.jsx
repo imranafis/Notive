@@ -32,6 +32,7 @@ function DisplayPanel({
           />
           {addSection === "goal" && (
             <AddGoal
+              addSection={addSection}
               setAddSection={setAddSection}
               defaultCategory={defaultCategory}
               setDefaultCategory={setDefaultCategory}
@@ -72,6 +73,24 @@ function DisplayPanel({
               }}
             />
           )}
+       {(addSection === "dailyspace" || addSection === "viewDailyTask") && (
+             <AddGoal
+              addSection={"viewDailyTask"}
+              setAddSection={setAddSection}
+              defaultCategory={defaultCategory}
+              setDefaultCategory={"habit"}
+              selectedItem={selectedItem}
+              setSelectedItem={setSelectedItem}
+              fullScreenMode={fullScreenMode}
+              onClose={() => {
+                setDefaultCategory("");
+                setAddSection("");
+                setSelectedItem(null);
+                setFullScreenMode(false);
+              }}
+            />
+          )}
+
         </>
       )}
       {activeSection === "taskSection" && (

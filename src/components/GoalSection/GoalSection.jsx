@@ -196,11 +196,11 @@ const GoalSection = ({
       <div className="goalSection">
         {/* Habit Section */}
         <div className="goalSection Habit">
-          <h2 className="goalLabel">Habit</h2>
+          <h2 className="goalLabel">Daily Task</h2>
           <div className="goalContainer">
             <div className="goalGrid">
               {habits.length === 0 ? (
-                <p>No habits added yet.</p>
+                <p>No daily task added yet.</p>
               ) : (
                 habits.map((goal) => (
                   <div

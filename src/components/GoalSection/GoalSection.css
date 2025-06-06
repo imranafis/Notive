@@ -1,364 +1,422 @@
 .goalSection {
-  display: flex;
-  flex-direction: column;
-  height: 100vh; /* Full viewport height */
-  width: 100%; /* Full width */
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Full viewport height */
+    width: 100%; /* Full width */
 }
 
 .goalSection.Habit,
 .goalSection.Project {
-  flex: 1; /* Divide equally between habit and project */
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  overflow: hidden; /* Avoid any vertical overflow */
+    flex: 1; /* Divide equally between habit and project */
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow: hidden; /* Avoid any vertical overflow */
 }
 
 .goalSection.Habit {
-  background-color: #dddddd; /* Optional background for habit section */
+    background-color: #dddddd; /* Optional background for habit section */
 }
 
 .goalSection.Project {
-  background-color: #e9ecef; /* Optional background for project section */
+    background-color: #e9ecef; /* Optional background for project section */
 }
 
 .goalContainer {
-  display: flex;
-  align-items: center;
-  gap: 50px;
-  flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 50px;
+    flex: 1;
 }
 
 .goalLabel {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 10px;
-  text-align: left;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: left;
 }
 .goalGrid {
-  display: flex;
-  flex-wrap: nowrap;
-  height: 80%;
-  gap: 10px;
-  padding: 10px 0;
-  max-width: calc(100% - 120px); /* Ensure space for the label */
-  overflow-x: auto; /* Allow horizontal scrolling */
-  overflow-y: hidden; /* Prevent vertical overflow */
-  padding-right: 50px;
-  scroll-snap-type: x mandatory;
-  flex: 1; /* Allow goalGrid to take full height */
+    display: flex;
+    flex-wrap: nowrap;
+    height: 80%;
+    gap: 10px;
+    padding: 10px 0;
+    max-width: calc(100% - 120px); /* Ensure space for the label */
+    overflow-x: auto; /* Allow horizontal scrolling */
+    overflow-y: hidden; /* Prevent vertical overflow */
+    padding-right: 50px;
+    scroll-snap-type: x mandatory;
+    flex: 1; /* Allow goalGrid to take full height */
 }
 
 .goalGrid::-webkit-scrollbar {
-  height: 8px; /* Scrollbar height */
+    height: 8px; /* Scrollbar height */
 }
 
 .goalGrid::-webkit-scrollbar-thumb {
-  background: #888; /* Scrollbar thumb color */
-  border-radius: 4px;
+    background: #888; /* Scrollbar thumb color */
+    border-radius: 4px;
 }
 
 .goalGrid::-webkit-scrollbar-thumb:hover {
-  background: #555; /* Scrollbar thumb hover color */
+    background: #555; /* Scrollbar thumb hover color */
 }
 
 .goalCard {
-  display: flex;
-  position: relative;
-  min-width: 300px; /* Minimum width of each card */
-  max-width: 300px;
-  height: 100%; /* Take full height of goalGrid */
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
-  text-align: center;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  flex-shrink: 0; /* Prevent shrinking */
-  scroll-snap-align: start; /* Ensure cards align properly while scrolling */
-  cursor: pointer;
+    display: flex;
+    position: relative;
+    min-width: 300px; /* Minimum width of each card */
+    max-width: 300px;
+    height: 100%; /* Take full height of goalGrid */
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0; /* Prevent shrinking */
+    scroll-snap-align: start; /* Ensure cards align properly while scrolling */
+    cursor: pointer;
 }
 
 .goalCard h3 {
-  font-size: 1.2rem;
-  margin: 0;
-  color: #333;
+    font-size: 1.2rem;
+    margin: 0;
+    color: #333;
 }
 
 .goalCard:hover {
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15);
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15);
 }
 
 .goalActions {
-  position: absolute;
-  bottom: 10px;
-  width: 100%;
-  display: flex;
-  font-size: 1.25rem;
-  justify-content: space-between;
-  padding: 0 10px;
-  opacity: 0;
-  transition: opacity 0.1s ease-in-out;
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    display: flex;
+    font-size: 1.25rem;
+    justify-content: space-between;
+    padding: 0 10px;
+    opacity: 0;
+    transition: opacity 0.1s ease-in-out;
 }
 
 .goalCard:hover .goalActions {
-  opacity: 1;
+    opacity: 1;
 }
 
 .starBtn {
-  color: rgb(0, 0, 0);
-  cursor: pointer;
-  transition: color 0.05s ease-in;
+    color: rgb(0, 0, 0);
+    cursor: pointer;
+    transition: color 0.05s ease-in;
 }
 
 .starBtn:hover {
-  transform: scale(1.1);
-  transition: transform 0.1s ease;
+    transform: scale(1.1);
+    transition: transform 0.1s ease;
 }
 
 .menuBtn {
-  color: gray;
-  cursor: pointer;
+    color: gray;
+    cursor: pointer;
 }
 
 /* Dropdown styles */
 .dropdown-container {
-  position: relative;
-  display: inline-block;
+    position: relative;
+    display: inline-block;
 }
 
 .dropdown-menu {
-  position: absolute;
-  right: 20px; /* Adjust as needed */
-  top: -140px;
-  /* transform: translateY(-50%); Center it vertically */
-  background-color: white;
-  min-width: 120px;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  z-index: 1;
-  border-radius: 4px;
-  overflow: hidden;
-  white-space: nowrap;
+    position: absolute;
+    right: 20px; /* Adjust as needed */
+    top: -140px;
+    /* transform: translateY(-50%); Center it vertically */
+    background-color: white;
+    min-width: 120px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border-radius: 4px;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .dropdown-item {
-  font-size: 0.75rem;
-  padding: 8px 16px;
-  cursor: pointer;
-  text-align: left;
+    font-size: 0.75rem;
+    padding: 8px 16px;
+    cursor: pointer;
+    text-align: left;
 }
 
 .dropdown-item:hover {
-  background-color: #f1f1f1;
+    background-color: #f1f1f1;
 }
 
 .menuBtn {
-  cursor: pointer;
-  padding: 4px;
+    cursor: pointer;
+    padding: 4px;
 }
 
 .menuBtn:hover {
-  background-color: #f1f1f1;
-  border-radius: 4px;
+    background-color: #f1f1f1;
+    border-radius: 4px;
 }
 
 .addBtnHabit,
 .addBtnProject {
-  font-size: 2rem;
-  /* margin-top: 4rem; */
-  color: #eee;
-  background-color: var(--primary);
-  padding: 10px;
-  border-radius: 50%;
-  cursor: pointer;
-  opacity: 0.75;
+    font-size: 2rem;
+    /* margin-top: 4rem; */
+    color: #eee;
+    background-color: var(--primary);
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0.75;
 
-  &:hover {
-    opacity: 1;
-  }
+    &:hover {
+        opacity: 1;
+    }
 }
 
 .addGoal {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(202, 202, 202, 0.75);
-  backdrop-filter: blur(2px);
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  position: fixed;
-
-  .panel {
-    position: relative;
     display: flex;
-    flex-direction: column;
-    background-color: #eee;
-    padding: 1.5rem;
-    /* border-radius: 20px; */
-    max-height: 80%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    width: 30rem;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    justify-content: center;
+    align-items: center;
+    background: rgba(202, 202, 202, 0.75);
+    backdrop-filter: blur(2px);
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    position: fixed;
 
-    .closeBtn {
-      position: absolute;
-      top: -7px;
-      left: -3px;
-      background: none;
-      border: none;
-      font-size: 30px;
-      cursor: pointer;
-      color: #333;
-
-      &:hover {
-        color: red;
-      }
-    }
-
-    .Aditor_Goal,
-    .Aditor_Goal_Checkbox {
-      display: none;
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-
-      &.active {
-        display: block;
-        /* min-height: 10rem; */
-        min-height: 6rem;
-        max-height: 15rem;
+    .panel {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        background-color: #eee;
+        padding: 1.5rem;
+        /* border-radius: 20px; */
+        max-height: 80%;
         overflow-y: auto;
-        /* background-color: #f9f9f9; */
-      }
-    }
+        overflow-x: hidden;
+        width: 30rem;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 
-    .goalName {
-      display: block;
-      width: 100%;
-      height: auto;
-      font-size: 1.125rem;
-      padding: 1rem 1.5rem;
-      color: var(--dark);
-      background-color: #fff;
-      border-radius: 0.5rem;
-      border: none;
-      outline: none;
-      resize: none;
-      margin-top: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
+        .closeBtn {
+            position: absolute;
+            top: -7px;
+            left: -3px;
+            background: none;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            color: #333;
 
-    /* .controlSection {
-      display: flex;
-      flex-direction: column;
-      align-items: center; */
-
-    .note,
-    .breakdown,
-    .details {
-      display: block;
-      text-align: left;
-      align-items: flex-start;
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      margin-top: 1.25rem;
-      cursor: pointer;
-      &.activate {
-        color: rgb(27, 97, 219);
-      }
-    }
-
-    .controlBtn {
-      display: flex;
-      width: 100%;
-      gap: 20px;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-
-      button {
-        display: block;
-        font-size: 1.125rem;
-        font-weight: 600;
-        padding: 1rem 1.125rem;
-        color: #fff;
-        border-radius: 0.5rem;
-        box-shadow: var(--gray);
-        cursor: pointer;
-        margin-top: 1.5rem;
-        opacity: 0.35;
-
-        &:hover {
-          opacity: 1;
+            &:hover {
+                color: red;
+            }
         }
-      }
 
-      .saveBtn,
-      .updateBtn {
-        background-color: var(--greenM);
-      }
+        .Aditor_Goal,
+        .Aditor_Goal_Checkbox {
+            display: none;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
 
-      .deleteBtn {
-        background-color: var(--primary);
-      }
+            &.active {
+                display: block;
+                /* min-height: 10rem; */
+                min-height: 6rem;
+                max-height: 15rem;
+                overflow-y: auto;
+                /* background-color: #f9f9f9; */
+            }
+        }
+
+        .goalName {
+            display: block;
+            width: 100%;
+            height: auto;
+            font-size: 1.125rem;
+            padding: 1rem 1.5rem;
+            color: var(--dark);
+            background-color: #fff;
+            border-radius: 0.5rem;
+            border: none;
+            outline: none;
+            resize: none;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* .controlSection      {
+        display: flex;
+        flex-direction: column;
+         align-items: center; */
+
+        .note,
+        .breakdown,
+        .details {
+            display: block;
+            text-align: left;
+            align-items: flex-start;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            margin-top: 1.25rem;
+            cursor: pointer;
+            &.activate {
+                color: rgb(27, 97, 219);
+            }
+        }
+
+        .dailyCheckbox{
+            display:flex;
+            gap:1rem;
+            align-items:center;
+            padding: 1rem 1rem 1rem 0;
+
+            .label{
+                font-weight:bold;
+            }
+        }
+
+        .task-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 25%;
+            border: 3.5px solid var(--medium);
+            box-shadow: var(--medium-glow);
+            transition: 0.2s ease-in-out;
+        }
+
+        .unchecked {
+            border-color: var(--medium);
+            box-shadow: var(--medium-glow);
+        }
+
+         .checked {
+            border-color: var(--greenS);
+            box-shadow: var(--greenS-glow);
+        }
+
+        .working::after {
+            content: "";
+            display: block;
+            opacity: 1;
+            width: 10px;
+            height: 10px;
+            background-color: var(--yellow);
+            box-shadow: var(--yellow-glow);
+            border-radius: 50%;
+            transition: 0.2s ease-in-out;
+        }
+        .checked::after {
+            content : "";
+            display: block;
+            opacity: 1;
+            width: 10px;
+            height: 10px;
+            background-color: var(--greenS);
+            box-shadow: var(--greenS-glow);
+            border-radius: 25%;
+            transition: 0.2s ease-in-out;
+        }
+
+
+
+        .controlBtn {
+            display: flex;
+            width: 100%;
+            gap: 20px;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+
+            button {
+                display: block;
+                font-size: 1.125rem;
+                font-weight: 600;
+                padding: 1rem 1.125rem;
+                color: #fff;
+                border-radius: 0.5rem;
+                box-shadow: var(--gray);
+                cursor: pointer;
+                margin-top: 1.5rem;
+                opacity: 0.35;
+
+                &:hover {
+                    opacity: 1;
+                }
+            }
+
+            .saveBtn,
+            .updateBtn {
+                background-color: var(--greenM);
+            }
+
+            .deleteBtn {
+                background-color: var(--primary);
+            }
+        }
+        /* } */
     }
-    /* } */
-  }
 
-  .goal-dropdown {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #fff;
-    cursor: pointer;
-    outline: none;
-    transition: border 0.2s ease-in-out;
-  }
+    .goal-dropdown {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fff;
+        cursor: pointer;
+        outline: none;
+        transition: border 0.2s ease-in-out;
+    }
 
-  .goal-dropdown:hover,
-  .goal-dropdown:focus {
-    border-color: #007bff;
-  }
+    .goal-dropdown:hover,
+    .goal-dropdown:focus {
+        border-color: #007bff;
+    }
 
-  .goal-dropdown option[value=""] {
-    color: #aaa;
-  }
+    .goal-dropdown option[value=""] {
+        color: #aaa;
+    }
 
-  input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    outline: none;
-    transition: border 0.2s ease-in-out;
-  }
+    input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        outline: none;
+        transition: border 0.2s ease-in-out;
+    }
 
-  input[type="text"]:focus {
-    border-color: #007bff;
-  }
+    input[type="text"]:focus {
+        border-color: #007bff;
+    }
 }
 
 /* Add to your GoalSection.css */
 /* .addGoal.fullScreen {
-  left: 0;
-  width: 100%;
+left: 0;
+width: 100%;
 } */
 
 .addGoal.fullScreen .panel {
-  width: 60rem;
-  max-height: 90%;
-  height: 90%;
+    width: 60rem;
+    max-height: 90%;
+    height: 90%;
 }
 
 .Toastify {
-  padding: 0;
-  margin: 0;
+    padding: 0;
+    margin: 0;
 }

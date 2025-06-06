@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   collection,
   addDoc,
+  getDoc,
   updateDoc,
   Timestamp,
   doc,
@@ -18,11 +19,16 @@ import { getUser } from "/src/lib/user";
 
 import { toast } from "react-toastify";
 
-import { initializeAditor, initializeAditorCheckbox } from "/src/lib/aditor.js";
+import {
+  initializeAditor,
+  initializeAditorCheckbox,
+  initializeAditorDate,
+} from "/src/lib/aditor.js";
 import "/src/lib/aditor.css";
 import "./GoalSection.css";
 
 function AddGoal({
+  addSection,
   setAddSection,
   defaultCategory,
   setDefaultCategory,
@@ -34,13 +40,18 @@ function AddGoal({
   const addGoalRef = useRef(null);
 
   const Aditor_Goal = useRef(null);
+
+  const Aditor_DailyGoal = useRef(null);
+
   const Aditor_Goal_Checkbox = useRef(null);
   const [goalName, setGoalName] = useState("");
-  const [category, setCategory] = useState("Habit");
+  const [category, setCategory] = useState("habit");
   const [activeSection, setActiveSection] = useState([]);
   const [Note, setNote] = useState("");
   const [BreakdownContent, setBreakdownContent] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
+
+  const [status, setStatus] = useState("unchecked");
 
   // useEffect(() => {
   //   function handleClickOutside(event) {
@@ -115,6 +126,13 @@ function AddGoal({
         selectedItem?.breakdown || ""
       );
     }
+    if (
+      Aditor_DailyGoal.current &&
+      !Aditor_DailyGoal.current.innerHTML.trim()
+    ) {
+      initializeAditorDate(Aditor_DailyGoal.current);
+    }
+    console.log(addSection);
   }, [activeSection]);
 
   useEffect(() => {
@@ -122,6 +140,7 @@ function AddGoal({
       if (selectedItem.subCategory === "habit") {
         setGoalName(selectedItem.goalName);
         setNote(selectedItem.note);
+        setStatus(selectedItem.daily ? "checked" : "unchecked");
       } else if (selectedItem.subCategory === "project") {
         // Convert Firestore Timestamp to Day.js
         const estimatedTime = selectedItem.estimatedTime
@@ -216,26 +235,39 @@ function AddGoal({
       const userID = getUser().uid;
       const updatedNoteContent = Aditor_Goal.current?.innerHTML || "";
 
-      const goalData = {
-        goalName: goalName.trim(),
-        category: "goal",
-        subCategory: category,
-        done: false,
-        note: updatedNoteContent,
-        createdAt: new Date().toISOString(),
-      };
-
-      if (category === "Project") {
-        const updatedBreakdownContent =
-          Aditor_Goal_Checkbox.current?.innerHTML || "";
-
-        goalData.estimatedTime = selectedDate
-          ? Timestamp.fromDate(new Date(selectedDate))
-          : null;
-        goalData.breakdown = updatedBreakdownContent;
+      if (category == "habit") {
+        const goalData = {
+          goalName: goalName.trim(),
+          category: "goal",
+          subCategory: category,
+          done: false,
+          daily: status == "checked" ? true : false,
+          status: "unchecked",
+          checkedDate: "",
+          note: updatedNoteContent,
+          createdAt: new Date().toISOString(),
+        };
+        await addDoc(collection(db, userID), goalData);
       }
 
-      await addDoc(collection(db, userID), goalData);
+      if (category === "project") {
+        const updatedBreakdownContent =
+          Aditor_Goal_Checkbox.current?.innerHTML || "";
+        const goalData = {
+          goalName: goalName.trim(),
+          category: "goal",
+          subCategory: category,
+          done: false,
+          note: updatedNoteContent,
+          breakdown: updatedBreakdownContent,
+          createdAt: new Date().toISOString(),
+          estimatedTime: selectedDate
+            ? Timestamp.fromDate(new Date(selectedDate))
+            : null,
+        };
+
+        await addDoc(collection(db, userID), goalData);
+      }
 
       toast.success(`Goal ${category} saved successfully!`, {
         position: "bottom-right",
@@ -252,6 +284,7 @@ function AddGoal({
       setActiveSection([]);
       setCategory("Goal");
       setSelectedDate("");
+      setStatus("unchecked");
     } catch (e) {
       console.error("Error saving goal:", e);
       toast.error("Failed to save goal. Please try again.", {
@@ -291,26 +324,113 @@ function AddGoal({
       const goalRef = doc(db, userID, selectedItem.id);
       const updatedNoteContent = Aditor_Goal.current?.innerHTML || "";
 
-      const updatedGoalData = {
-        goalName: goalName.trim(),
-        category: "goal",
-        subCategory: category,
-        done: false,
-        note: updatedNoteContent,
-        createdAt: new Date().toISOString(),
-      };
+      if (category == "habit") {
+        const updatedGoalData = {
+          goalName: goalName.trim(),
+          category: "goal",
+          subCategory: category,
+          done: false,
+          daily: status == "checked" ? true : false,
+          status: "unchecked",
+          checkedDate: "",
+          note: updatedNoteContent,
+          createdAt: new Date().toISOString(),
+        };
+        await updateDoc(goalRef, updatedGoalData);
+      }
 
       if (category === "project") {
         const updatedBreakdownContent =
           Aditor_Goal_Checkbox.current?.innerHTML || "";
-        updatedGoalData.estimatedTime = selectedDate
-          ? Timestamp.fromDate(new Date(selectedDate))
-          : null;
-        updatedGoalData.breakdown = updatedBreakdownContent;
+        const updatedGoalData = {
+          goalName: goalName.trim(),
+          category: "goal",
+          subCategory: category,
+          done: false,
+          note: updatedNoteContent,
+          breakdown: updatedBreakdownContent,
+          createdAt: new Date().toISOString(),
+          estimatedTime: selectedDate
+            ? Timestamp.fromDate(new Date(selectedDate))
+            : null,
+        };
+        await updateDoc(goalRef, updatedGoalData);
       }
 
-      await updateDoc(goalRef, updatedGoalData);
+      toast.success(`Goal ${category} updated successfully!`, {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
 
+      setTimeout(() => {
+        resetForm();
+        setAddSection(""); // Hide the form
+      }, 1200);
+    } catch (e) {
+      console.error("Error updating goal:", e);
+      toast.error("Failed to update goal. Please try again.", {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+    }
+  };
+
+  const updateDailyGoal = async () => {
+    try {
+      // Get existing note data from Firestore
+      const userID = getUser().uid;
+      const goalRef = doc(db, userID, selectedItem.id);
+      const goalSnap = await getDoc(goalRef);
+
+      if (goalSnap.exists()) {
+        const existingNoteHTML = goalSnap.data().note || "";
+        const updatedDailyNoteContent =
+          Aditor_DailyGoal.current?.innerHTML || "";
+
+        // Parse both HTML strings into DOM
+        const parser = new DOMParser();
+        const existingDoc = parser.parseFromString(
+          existingNoteHTML,
+          "text/html"
+        );
+        const updatedDoc = parser.parseFromString(
+          updatedDailyNoteContent,
+          "text/html"
+        );
+
+        // Get `.aditor` from existing note
+        const existingAditor = existingDoc.querySelector(".aditor");
+
+        // Get all `.line` divs from updated note
+        const newLines = updatedDoc.querySelectorAll(".line");
+
+        // Append new lines to existing .aditor
+        newLines.forEach((line) => {
+          existingAditor?.appendChild(line.cloneNode(true));
+        });
+
+        // Use dropdown from original note
+        const dropdownMenu = existingDoc.querySelector(".dropdownMenu");
+        const updatedNoteHTML =
+          existingAditor.outerHTML +
+          (dropdownMenu ? dropdownMenu.outerHTML : "");
+
+        // Prepare updated data
+        const updatedGoalData = {
+          goalName: goalName.trim(),
+          category: "goal",
+          subCategory: category,
+          done: false,
+          daily: status == "checked" ? true : false,
+          status: "unchecked",
+          checkedDate: "",
+          note: updatedNoteHTML,
+          createdAt: new Date().toISOString(),
+        };
+
+        // Update Firestore
+        await updateDoc(goalRef, updatedGoalData);
+      }
       toast.success(`Goal ${category} updated successfully!`, {
         position: "bottom-right",
         autoClose: 2000,
@@ -424,133 +544,210 @@ function AddGoal({
     setSelectedItem(null);
   };
 
+  const handleClick = () => {
+    if (status == "unchecked") {
+      setStatus("checked");
+    } else if (status == "checked") {
+      setStatus("unchecked");
+    }
+  };
+
   return (
     <div
       className={`addGoal ${fullScreenMode ? "fullScreen" : ""}`}
       ref={addGoalRef}
     >
-      <div className="panel">
-        <button className="closeBtn" onClick={() => handleCloseGoal()}>
-          <FontAwesomeIcon icon={faTimes} />
-        </button>
-        {/* <div className="contentSection"> */}
-        {defaultCategory === "" && (
-          <select
-            value={category}
-            onChange={handleCategoryChange}
-            className="goal-dropdown"
-          >
-            <option value="" disabled>
-              Select Category
-            </option>
-            <option value="Habit">Habit</option>
-            <option value="Project">Project</option>
-          </select>
-        )}
-        <input
-          type="text"
-          className="goalName"
-          value={goalName}
-          onChange={handleInputChange}
-          placeholder={`Add a ${category} name`}
-        />
+      {addSection == "viewDailyTask" && (
+        <div className="panel">
+          <button className="closeBtn" onClick={() => handleCloseGoal()}>
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
 
-        {/* </div> */}
+          <input
+            type="text"
+            className="goalName"
+            value={goalName}
+            onChange={handleInputChange}
+            placeholder={`Add a ${category} name`}
+          />
 
-        {/* <div className="controlSection"> */}
-        <button
-          className={`note ${activeSection.includes("note") ? "activate" : ""}`}
-          onClick={() => addActiveSection("note")}
-        >
-          <i
-            className={`fa-solid ${
-              activeSection.includes("note")
-                ? "fa-angle-down"
-                : "fa-angle-right"
+          {/* </div> */}
+
+          {/* <div className="controlSection"> */}
+          <button
+            className={`note ${
+              activeSection.includes("note") ? "activate" : ""
             }`}
-          ></i>
-          Note
-        </button>
-
-        {/* {activeSection === "details" && ( */}
-        <div
-          ref={Aditor_Goal}
-          className={`Aditor_Goal ${
-            activeSection.includes("note") ? "active" : ""
-          }`}
-        />
-        {category === "project" && (
-          <>
-            <button
-              className={`breakdown ${
-                activeSection.includes("breakdown") ? "activate" : ""
+            onClick={() => addActiveSection("note")}
+          >
+            <i
+              className={`fa-solid ${
+                activeSection.includes("note")
+                  ? "fa-angle-down"
+                  : "fa-angle-right"
               }`}
-              onClick={() => addActiveSection("breakdown")}
-            >
-              <i
-                className={`fa-solid ${
-                  activeSection.includes("breakdown")
-                    ? "fa-angle-down"
-                    : "fa-angle-right"
-                }`}
-              ></i>
-              Breakdown
-            </button>
+            ></i>
+            Note
+          </button>
 
-            {/* {activeSection === "breakdown" && ( */}
-            <div
-              ref={Aditor_Goal_Checkbox}
-              className={`Aditor_Goal_Checkbox ${
-                activeSection.includes("breakdown") ? "active" : ""
-              }`}
-            />
-            <button
-              className={`details ${
-                activeSection.includes("details") ? "activate" : ""
-              }`}
-              onClick={() => addActiveSection("details")}
-            >
-              <i
-                className={`fa-solid ${
-                  activeSection.includes("details")
-                    ? "fa-angle-down"
-                    : "fa-angle-right"
-                }`}
-              ></i>
-              Details
-            </button>
-
-            {activeSection.includes("details") && (
-              <>
-                <p>Deadline:</p>
-                <DatePickerComponent
-                  selectedDate={selectedDate ? dayjs(selectedDate) : null}
-                  setSelectedDate={(newValue) => setSelectedDate(newValue)}
-                />
-              </>
-            )}
-          </>
-        )}
-
-        <div className="controlBtn">
-          {selectedItem ? (
-            <>
-              <button onClick={updateGoal} className="updateBtn">
-                Save
-              </button>
-              <button onClick={deleteGoal} className="deleteBtn">
-                Delete
-              </button>
-            </>
-          ) : (
-            <button onClick={addGoal} className="saveBtn">
+          {/* {activeSection === "details" && ( */}
+          <div
+            ref={Aditor_DailyGoal}
+            className={`Aditor_DailyGoal ${
+              activeSection.includes("note") ? "active" : ""
+            }`}
+          />
+          <div className="dailyCheckbox">
+            <div className="label">Daily Check:</div>
+            <div className={`task-box ${status}`} onClick={handleClick}></div>
+          </div>
+          <div className="controlBtn">
+            <button onClick={updateDailyGoal} className="updateBtn">
               Save
             </button>
-          )}
+            <button onClick={deleteGoal} className="deleteBtn">
+              Delete
+            </button>
+          </div>
+          {/* </div> */}
         </div>
-        {/* </div> */}
-      </div>
+      )}
+      {addSection != "viewDailyTask" && (
+        <div className="panel">
+          <button className="closeBtn" onClick={() => handleCloseGoal()}>
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+          {/* <div className="contentSection"> */}
+          {defaultCategory === "" && (
+            <select
+              value={category}
+              onChange={handleCategoryChange}
+              className="goal-dropdown"
+            >
+              <option value="" disabled>
+                Select Category
+              </option>
+              <option value="habit">Habit</option>
+              <option value="project">Project</option>
+            </select>
+          )}
+          <input
+            type="text"
+            className="goalName"
+            value={goalName}
+            onChange={handleInputChange}
+            placeholder={`Add a ${category} name`}
+          />
 
+          {/* </div> */}
+
+          {/* <div className="controlSection"> */}
+          <button
+            className={`note ${
+              activeSection.includes("note") ? "activate" : ""
+            }`}
+            onClick={() => addActiveSection("note")}
+          >
+            <i
+              className={`fa-solid ${
+                activeSection.includes("note")
+                  ? "fa-angle-down"
+                  : "fa-angle-right"
+              }`}
+            ></i>
+            Note
+          </button>
+
+          {/* {activeSection === "details" && ( */}
+          <div
+            ref={Aditor_Goal}
+            className={`Aditor_Goal ${
+              activeSection.includes("note") ? "active" : ""
+            }`}
+          />
+          {category === "habit" && (
+            <>
+              <div className="dailyCheckbox">
+                <div className="label">Daily Check:</div>
+                <div
+                  className={`task-box ${status}`}
+                  onClick={handleClick}
+                ></div>
+              </div>
+            </>
+          )}
+          {category === "project" && (
+            <>
+              <button
+                className={`breakdown ${
+                  activeSection.includes("breakdown") ? "activate" : ""
+                }`}
+                onClick={() => addActiveSection("breakdown")}
+              >
+                <i
+                  className={`fa-solid ${
+                    activeSection.includes("breakdown")
+                      ? "fa-angle-down"
+                      : "fa-angle-right"
+                  }`}
+                ></i>
+                Breakdown
+              </button>
+
+              {/* {activeSection === "breakdown" && ( */}
+              <div
+                ref={Aditor_Goal_Checkbox}
+                className={`Aditor_Goal_Checkbox ${
+                  activeSection.includes("breakdown") ? "active" : ""
+                }`}
+              />
+              <button
+                className={`details ${
+                  activeSection.includes("details") ? "activate" : ""
+                }`}
+                onClick={() => addActiveSection("details")}
+              >
+                <i
+                  className={`fa-solid ${
+                    activeSection.includes("details")
+                      ? "fa-angle-down"
+                      : "fa-angle-right"
+                  }`}
+                ></i>
+                Details
+              </button>
+
+              {activeSection.includes("details") && (
+                <>
+                  <p>Deadline:</p>
+                  <DatePickerComponent
+                    selectedDate={selectedDate ? dayjs(selectedDate) : null}
+                    setSelectedDate={(newValue) => setSelectedDate(newValue)}
+                  />
+                </>
+              )}
+            </>
+          )}
+
+          <div className="controlBtn">
+            {selectedItem ? (
+              <>
+                <button onClick={updateGoal} className="updateBtn">
+                  Save
+                </button>
+                <button onClick={deleteGoal} className="deleteBtn">
+                  Delete
+                </button>
+              </>
+            ) : (
+              <button onClick={addGoal} className="saveBtn">
+                Save
+              </button>
+            )}
+          </div>
+          {/* </div> */}
+        </div>
+      )}
       {/* <ToastContainer /> */}
     </div>
   );
