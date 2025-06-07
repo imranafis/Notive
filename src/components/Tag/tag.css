@@ -112,8 +112,7 @@
   margin-bottom: 1.5rem;
   /* margin-left: 1rem; */
 
-  input[type="text"]
-  {
+  input[type="text"] {
     display: block;
     width: 100%;
     height: auto;
@@ -135,6 +134,8 @@
   /* width: 25%;  */
   min-width: 12rem;
   max-width: 12rem;
+  min-height: 7rem;
+  max-height: 7rem;
   overflow-x: auto;
   bottom: 90%;
   left: 10%;

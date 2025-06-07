@@ -20,6 +20,8 @@ import TaskBox from "/src/components/others/TaskBox";
 import "./TaskSection.css";
 import { toast } from "react-toastify";
 
+import dayjs from "dayjs";
+
 const TaskSection = ({
   addSection,
   setAddSection,
@@ -37,7 +39,7 @@ const TaskSection = ({
         const userID = getUser().uid;
         const tasksQuery = query(
           collection(db, userID),
-          where("Category", "==", "task")
+          where("category", "==", "task")
         );
         const querySnapshot = await getDocs(tasksQuery);
 
@@ -55,15 +57,16 @@ const TaskSection = ({
   }, [addSection]);
 
   const handleTaskStatusChange = async (taskId, newStatus) => {
-    // setTaskStatuses((prevStatuses) => ({
-    //   ...prevStatuses,
-    //   [taskId]: newStatus,
-    // }));
-
     try {
       const userID = getUser().uid;
       const taskRef = doc(db, userID, taskId);
-      await updateDoc(taskRef, { status: newStatus });
+
+      const updateData = {
+        status: newStatus,
+        doneDate: newStatus === "checked" ? dayjs().format("DD-MM-YY") : "",
+      };
+
+      await updateDoc(taskRef, updateData);
     } catch (error) {
       console.error("Failed to update task status:", error);
       toast.error("Failed to update status. Please try again.");

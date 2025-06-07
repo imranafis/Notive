@@ -243,7 +243,7 @@ function AddGoal({
           done: false,
           daily: status == "checked" ? true : false,
           status: "unchecked",
-          checkedDate: "",
+          doneDate: "",
           note: updatedNoteContent,
           createdAt: new Date().toISOString(),
         };

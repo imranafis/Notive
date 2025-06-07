@@ -47,6 +47,7 @@ function NoteSection() {
 
     fetchAllNotes();
     setActiveDropdown(null);
+    Aditor_NoteSection.current.querySelector(".inputContent").focus();
   }, [ViewMode]);
 
   // Update local storage on content change

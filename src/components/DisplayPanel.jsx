@@ -73,8 +73,8 @@ function DisplayPanel({
               }}
             />
           )}
-       {(addSection === "dailyspace" || addSection === "viewDailyTask") && (
-             <AddGoal
+          {addSection === "viewDailyTask" && (
+            <AddGoal
               addSection={"viewDailyTask"}
               setAddSection={setAddSection}
               defaultCategory={defaultCategory}
@@ -90,7 +90,6 @@ function DisplayPanel({
               }}
             />
           )}
-
         </>
       )}
       {activeSection === "taskSection" && (

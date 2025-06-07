@@ -30,7 +30,7 @@ const SelectTask = ({ setActivePanel }) => {
         // Query Firestore where Category is 'task'
         const tasksQuery = query(
           collection(db, userID),
-          where("Category", "==", "task")
+          where("category", "==", "task")
         );
         const querySnapshot = await getDocs(tasksQuery);
 

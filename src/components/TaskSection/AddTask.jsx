@@ -5,6 +5,9 @@ import {
   updateDoc,
   Timestamp,
   doc,
+  query,
+  where,
+  getDocs,
   deleteDoc,
 } from "firebase/firestore";
 import { db } from "/src/lib/firebase";
@@ -32,7 +35,7 @@ const AddTask = ({
   const Aditor_Task_Checkbox = useRef(null);
 
   const [addedTags, setAddedTags] = useState([]);
-  const tagSuggestions = ["YESTERDAY", "TODAY", "TOMORROW"];
+  const [tagSuggestions, setTagSuggestions] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [selectedPriority, setSelectedPriority] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
@@ -104,6 +107,34 @@ const AddTask = ({
         initializeAditorCheckbox(Aditor_Task_Checkbox.current, "");
     }
   }, [selectedItem]);
+
+  useEffect(() => {
+    fetchTagsSuggestions();
+  }, []);
+
+  const fetchTagsSuggestions = async () => {
+    try {
+      const userID = getUser().uid;
+
+      const tagSuggestionsQuery = query(
+        collection(db, userID),
+        where("category", "==", "goal"),
+        where("subCategory", "==", "project")
+      );
+
+      const snapshot = await getDocs(tagSuggestionsQuery);
+
+      const defaults = ["Personal", "Work", "Others"];
+      const dynamic = snapshot.docs
+        .map((doc) => doc.data().goalName)
+        .filter(Boolean);
+      const combined = [...new Set([...defaults, ...dynamic])];
+      setTagSuggestions(combined);
+    } catch (error) {
+      console.error("Error fetching task suggestions:", error);
+    }
+  };
+
   const addSection = (section) => {
     setActiveSection((prev) =>
       prev.includes(section)
@@ -143,7 +174,7 @@ const AddTask = ({
       const taskData = {
         name: inputValue.trim(),
         priority: selectedPriority,
-        Category: "task",
+        category: "task",
         size: selectedLevel,
         tags: addedTags,
         note: updatedNoteContent,
@@ -153,6 +184,7 @@ const AddTask = ({
           ? Timestamp.fromDate(new Date(selectedDate))
           : null,
         createdAt: new Date().toISOString(),
+        doneDate: "",
       };
 
       await addDoc(collection(db, userID), taskData);

@@ -191,16 +191,35 @@ const GoalSection = ({
     setFullScreenMode(fullScreen);
   };
 
+  const handleInfo = (goal) => {
+    let createdAtFormatted = "Unknown";
+
+    try {
+      const date =
+        goal.createdAt?.toDate?.() ?? // Firestore Timestamp
+        new Date(goal.createdAt); // ISO string or Date
+
+      createdAtFormatted = date.toLocaleString(); // Or use toLocaleDateString() only
+    } catch (error) {
+      console.error("Error parsing createdAt:", error);
+    }
+
+    toast.info(`Created At: ${createdAtFormatted}`, {
+      position: "bottom-right",
+      autoClose: 3000,
+    });
+  };
+
   return (
     <>
       <div className="goalSection">
         {/* Habit Section */}
         <div className="goalSection Habit">
-          <h2 className="goalLabel">Daily Task</h2>
+          <h2 className="goalLabel">Daily Focus</h2>
           <div className="goalContainer">
             <div className="goalGrid">
               {habits.length === 0 ? (
-                <p>No daily task added yet.</p>
+                <p>No daily focus added yet.</p>
               ) : (
                 habits.map((goal) => (
                   <div
@@ -276,7 +295,7 @@ const GoalSection = ({
                               className="dropdown-item"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                // handleDeleteGoal(goal.id);
+                                handleInfo(goal);
                               }}
                             >
                               Info
@@ -379,7 +398,7 @@ const GoalSection = ({
                               className="dropdown-item"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                // handleDeleteGoal(goal.id);
+                                handleInfo(goal);
                               }}
                             >
                               Info

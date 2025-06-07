@@ -43,7 +43,7 @@ function Tag({ tagSuggestions, onTagChange, initialTags }) {
   };
 
   const handleInputChange = (e) => {
-    const input = e.target.value.toUpperCase();
+    const input = e.target.value;
     setInputValue(input);
 
     const filtered = tagSuggestions.filter((tag) => tag.startsWith(input));
