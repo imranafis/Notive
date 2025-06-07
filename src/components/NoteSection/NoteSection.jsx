@@ -43,11 +43,11 @@ function NoteSection() {
     if (Aditor_NoteSection.current) {
       initializeAditor(Aditor_NoteSection.current, storedContent);
       // Aditor_NoteSection.current.innerHTML = storedContent;
+      Aditor_NoteSection.current.querySelector(".inputContent").focus();
     }
 
     fetchAllNotes();
     setActiveDropdown(null);
-    Aditor_NoteSection.current.querySelector(".inputContent").focus();
   }, [ViewMode]);
 
   // Update local storage on content change
