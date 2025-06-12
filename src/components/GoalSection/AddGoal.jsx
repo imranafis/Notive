@@ -42,6 +42,8 @@ function AddGoal({
   const Aditor_Goal = useRef(null);
 
   const Aditor_DailyGoal = useRef(null);
+  const DailyNoteRef = useRef(null);
+  const allDailyNoteDivsRef = useRef([]);
 
   const Aditor_Goal_Checkbox = useRef(null);
   const [goalName, setGoalName] = useState("");
@@ -53,65 +55,14 @@ function AddGoal({
 
   const [status, setStatus] = useState("unchecked");
 
-  // useEffect(() => {
-  //   function handleClickOutside(event) {
-  //     if (addGoalRef.current && !addGoalRef.current.contains(event.target)) {
-  //       handleCloseGoal();
-  //     }
-  //   }
-
-  //   // Bind the event listener
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => {
-  //     // Unbind the event listener on clean up
-  //     document.removeEventListener("mousedown", handleClickOutside);
-  //   };
-  // }, [onClose]); // Add onClose to dependency array
-
-  // useEffect(() => {
-  //   console.log(selectedItem);
-  //   if (selectedItem) {
-  //     // const newActiveSections = [];
-  //     // if (selectedItem.note) newActiveSections.push("note");
-  //     // if (selectedItem.breakdown) newActiveSections.push("breakdown");
-  //     // if (selectedItem.estimatedTime) newActiveSections.push("details");
-
-  //     // setActiveSection(newActiveSections);
-  //     if (selectedItem.subCategory === "Habit") {
-  //       setGoalName(selectedItem.goalName);
-  //       setNote(selectedItem.note);
-  //     } else if (selectedItem.subCategory === "Project") {
-  //       // Convert Firestore Timestamp to Day.js
-  //       const estimatedTime = selectedItem.estimatedTime
-  //         ? dayjs(selectedItem.estimatedTime.toDate()) // Convert if it's a Timestamp
-  //         : null;
-
-  //       setSelectedDate(estimatedTime);
-  //       setGoalName(selectedItem.goalName);
-  //       setNote(selectedItem.note);
-  //       setBreakdownContent(selectedItem.breakdown);
-  //     }
-  //   }
-
-  //   if (Aditor_Goal.current && !Aditor_Goal.current.innerHTML.trim()) {
-  //     initializeAditor(Aditor_Goal.current, selectedItem?.note || "");
-  //   }
-  //   if (
-  //     Aditor_Goal_Checkbox.current &&
-  //     !Aditor_Goal_Checkbox.current.innerHTML.trim()
-  //   ) {
-  //     initializeAditorCheckbox(
-  //       Aditor_Goal_Checkbox.current,
-  //       selectedItem?.breakdown || ""
-  //     );
-  //   }
-
-  //   // Automatically expand sections if data exists
-  // }, [activeSection, selectedItem]);
-
-  // useEffect(() => {
-  //   onClose();
-  // }, [setAddSection]);
+  const currentDate = new Date();
+  const weekday = currentDate.toLocaleDateString("en-US", { weekday: "long" });
+  const monthDayYear = currentDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const todayKey = `${monthDayYear} | ${weekday}`;
 
   useEffect(() => {
     if (Aditor_Goal.current && !Aditor_Goal.current.innerHTML.trim()) {
@@ -132,7 +83,6 @@ function AddGoal({
     ) {
       initializeAditorDate(Aditor_DailyGoal.current);
     }
-    console.log(addSection);
   }, [activeSection]);
 
   useEffect(() => {
@@ -154,7 +104,6 @@ function AddGoal({
       }
 
       // Dynamically set active sections based on content
-      // setActiveSection((prev) => {
       const newActiveSections = [];
 
       const parser = new DOMParser();
@@ -167,7 +116,6 @@ function AddGoal({
       const breakdownContent =
         docbreakdown.querySelector(".inputContent")?.innerText;
 
-      // const updatedSections = [...prev];
       if (
         selectedItem.note &&
         !newActiveSections.includes("note") &&
@@ -188,12 +136,22 @@ function AddGoal({
       ) {
         newActiveSections.push("details");
       }
-      // return updatedSections;
+
+      // Auto-expand daily note section when viewing daily task
+      if (addSection === "viewDailyTask") {
+        if (!newActiveSections.includes("dailyNote")) {
+          newActiveSections.push("dailyNote");
+        }
+      }
+
       setActiveSection(newActiveSections);
 
-      // });
+      // Load today's daily note content for viewDailyTask mode
+      if (DailyNoteRef.current && selectedItem.dailyNotes?.[todayKey]) {
+        DailyNoteRef.current.innerHTML = selectedItem.dailyNotes[todayKey];
+      }
     }
-  }, [selectedItem]);
+  }, [selectedItem, addSection]);
 
   const handleInputChange = (e) => {
     setGoalName(e.target.value);
@@ -322,40 +280,54 @@ function AddGoal({
     try {
       const userID = getUser().uid;
       const goalRef = doc(db, userID, selectedItem.id);
+
+      // Get existing goal data to avoid erasing anything
+      const goalSnap = await getDoc(goalRef);
+      if (!goalSnap.exists()) throw new Error("Goal not found.");
+
+      const existingData = goalSnap.data();
       const updatedNoteContent = Aditor_Goal.current?.innerHTML || "";
 
-      if (category == "habit") {
-        const updatedGoalData = {
-          goalName: goalName.trim(),
-          category: "goal",
-          subCategory: category,
-          done: false,
-          daily: status == "checked" ? true : false,
-          status: "unchecked",
-          checkedDate: "",
-          note: updatedNoteContent,
-          createdAt: new Date().toISOString(),
-        };
-        await updateDoc(goalRef, updatedGoalData);
+      // Start with existing daily notes
+      const updatedDailyNotes = { ...(existingData.dailyNotes || {}) };
+
+      // Capture ALL edited daily notes from the refs
+      if (allDailyNoteDivsRef.current) {
+        Object.entries(allDailyNoteDivsRef.current).forEach(
+          ([dateKey, element]) => {
+            if (element && element.innerHTML) {
+              updatedDailyNotes[dateKey] = element.innerHTML;
+            }
+          }
+        );
       }
 
+      // Capture today's note from DailyNoteRef (used in viewDailyTask mode)
+      if (DailyNoteRef.current) {
+        updatedDailyNotes[todayKey] = DailyNoteRef.current.innerHTML || "";
+      }
+
+      // Prepare update data
+      const updatedGoalData = {
+        ...existingData, // Preserve all existing fields
+        goalName: goalName.trim(),
+        note: updatedNoteContent,
+        dailyNotes: updatedDailyNotes,
+        daily: status === "checked",
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Handle project-specific fields
       if (category === "project") {
         const updatedBreakdownContent =
           Aditor_Goal_Checkbox.current?.innerHTML || "";
-        const updatedGoalData = {
-          goalName: goalName.trim(),
-          category: "goal",
-          subCategory: category,
-          done: false,
-          note: updatedNoteContent,
-          breakdown: updatedBreakdownContent,
-          createdAt: new Date().toISOString(),
-          estimatedTime: selectedDate
-            ? Timestamp.fromDate(new Date(selectedDate))
-            : null,
-        };
-        await updateDoc(goalRef, updatedGoalData);
+        updatedGoalData.breakdown = updatedBreakdownContent;
+        updatedGoalData.estimatedTime = selectedDate
+          ? Timestamp.fromDate(new Date(selectedDate))
+          : existingData.estimatedTime; // Preserve existing if not changed
       }
+
+      await updateDoc(goalRef, updatedGoalData);
 
       toast.success(`Goal ${category} updated successfully!`, {
         position: "bottom-right",
@@ -364,7 +336,7 @@ function AddGoal({
 
       setTimeout(() => {
         resetForm();
-        setAddSection(""); // Hide the form
+        setAddSection("");
       }, 1200);
     } catch (e) {
       console.error("Error updating goal:", e);
@@ -571,45 +543,38 @@ function AddGoal({
             placeholder={`Add a ${category} name`}
           />
 
-          {/* </div> */}
-
-          {/* <div className="controlSection"> */}
           <button
-            className={`note ${
-              activeSection.includes("note") ? "activate" : ""
+            className={`dailyNoteBtn ${
+              activeSection.includes("dailyNote") ? "activate" : ""
             }`}
-            onClick={() => addActiveSection("note")}
+            onClick={() => addActiveSection("dailyNote")}
           >
             <i
               className={`fa-solid ${
-                activeSection.includes("note")
+                activeSection.includes("dailyNote")
                   ? "fa-angle-down"
                   : "fa-angle-right"
               }`}
             ></i>
-            Note
+            Daily Note ({monthDayYear})
           </button>
 
-          {/* {activeSection === "details" && ( */}
           <div
-            ref={Aditor_DailyGoal}
-            className={`Aditor_DailyGoal ${
-              activeSection.includes("note") ? "active" : ""
+            ref={DailyNoteRef}
+            className={`dailyNote ${
+              activeSection.includes("dailyNote") ? "active" : ""
             }`}
-          />
-          <div className="dailyCheckbox">
-            <div className="label">Daily Check:</div>
-            <div className={`task-box ${status}`} onClick={handleClick}></div>
-          </div>
+            contentEditable={true}
+          ></div>
+
           <div className="controlBtn">
-            <button onClick={updateDailyGoal} className="updateBtn">
+            <button onClick={updateGoal} className="updateBtn">
               Save
             </button>
             <button onClick={deleteGoal} className="deleteBtn">
               Delete
             </button>
           </div>
-          {/* </div> */}
         </div>
       )}
       {addSection != "viewDailyTask" && (
@@ -617,7 +582,6 @@ function AddGoal({
           <button className="closeBtn" onClick={() => handleCloseGoal()}>
             <FontAwesomeIcon icon={faTimes} />
           </button>
-          {/* <div className="contentSection"> */}
           {defaultCategory === "" && (
             <select
               value={category}
@@ -639,9 +603,6 @@ function AddGoal({
             placeholder={`Add a ${category} name`}
           />
 
-          {/* </div> */}
-
-          {/* <div className="controlSection"> */}
           <button
             className={`note ${
               activeSection.includes("note") ? "activate" : ""
@@ -658,7 +619,6 @@ function AddGoal({
             Note
           </button>
 
-          {/* {activeSection === "details" && ( */}
           <div
             ref={Aditor_Goal}
             className={`Aditor_Goal ${
@@ -674,6 +634,56 @@ function AddGoal({
                   onClick={handleClick}
                 ></div>
               </div>
+
+              {selectedItem?.dailyNotes && (
+                <div className="dailyNotesSection">
+                  <button
+                    className={`dailyNoteBtn ${
+                      activeSection.includes("dailyNotes") ? "activate" : ""
+                    }`}
+                    onClick={() => addActiveSection("dailyNotes")}
+                  >
+                    <i
+                      className={`fa-solid ${
+                        activeSection.includes("dailyNotes")
+                          ? "fa-angle-down"
+                          : "fa-angle-right"
+                      }`}
+                    ></i>
+                    Daily Notes
+                  </button>
+
+                  <div
+                    className={`dailyNotes ${
+                      activeSection.includes("dailyNotes") ? "active" : ""
+                    }`}
+                  >
+                    {Object.keys(selectedItem.dailyNotes).length === 0 ? (
+                      <p>No daily note available</p>
+                    ) : (
+                      Object.entries(selectedItem.dailyNotes).map(
+                        ([date, note]) => (
+                          <div key={date}>
+                            <p>
+                              <strong>{date}</strong>
+                            </p>
+                            <div
+                              className="dailyNoteDisplay"
+                              contentEditable={true}
+                              ref={(el) => {
+                                if (el) {
+                                  allDailyNoteDivsRef.current[date] = el;
+                                }
+                              }}
+                              dangerouslySetInnerHTML={{ __html: note }}
+                            />
+                          </div>
+                        )
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
             </>
           )}
           {category === "project" && (
@@ -694,7 +704,6 @@ function AddGoal({
                 Breakdown
               </button>
 
-              {/* {activeSection === "breakdown" && ( */}
               <div
                 ref={Aditor_Goal_Checkbox}
                 className={`Aditor_Goal_Checkbox ${
@@ -728,12 +737,11 @@ function AddGoal({
               )}
             </>
           )}
-
           <div className="controlBtn">
             {selectedItem ? (
               <>
                 <button onClick={updateGoal} className="updateBtn">
-                  Save
+                  Update
                 </button>
                 <button onClick={deleteGoal} className="deleteBtn">
                   Delete
@@ -745,10 +753,8 @@ function AddGoal({
               </button>
             )}
           </div>
-          {/* </div> */}
         </div>
       )}
-      {/* <ToastContainer /> */}
     </div>
   );
 }

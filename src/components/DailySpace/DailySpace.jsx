@@ -34,6 +34,7 @@ const DailySpace = ({
 }) => {
   const [activePanel, setActivePanel] = useState("");
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [taskMenuOpen, setTaskMenuOpen] = useState(false);
 
   const [workingTasks, setWorkingTasks] = useState([]);
   const [doneTasks, setDoneTasks] = useState([]);
@@ -466,12 +467,40 @@ const DailySpace = ({
       <div className="taskBar">
         <FontAwesomeIcon icon={faAnglesRight} />
         Today's Task
-        <FontAwesomeIcon
-          icon={faPlus}
-          className="taskPlus"
-          onClick={() => setActivePanel("SelectTask")}
-        />
+        <div className="taskBarMenu">
+          <FontAwesomeIcon
+            icon={faEllipsisV}
+            className="taskMenuIcon"
+            onClick={() => setTaskMenuOpen(!taskMenuOpen)}
+          />
+          {taskMenuOpen && (
+            <div
+              className="taskMenuDropdown"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                className="dropdown-item"
+                onClick={() => {
+                  setActivePanel("SelectTask");
+                  setTaskMenuOpen(false);
+                }}
+              >
+                Select Task
+              </div>
+              <div
+                className="dropdown-item"
+                onClick={() => {
+                  setAddSection("AddTask");
+                  setTaskMenuOpen(false);
+                }}
+              >
+                Add Task
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
       <div className="taskContainer">
         {workingTasks.length === 0 ? (
           <p>No daily tasks available</p>

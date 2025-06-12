@@ -4671,9 +4671,6 @@ export function initializeAditor(inputSection, defaultValue) {
        <div class="icon headingBtn" tabindex="0">
          <span><i class="fa-solid fa-heading"></i></span>
        </div>
-       <div class="icon dateBtn" tabindex="0">
-         <span><i class="fa-solid fa-calendar"></i></span>
-       </div>
          <div class="icon textBtn active" tabindex="0">
            <span><i class="fa-solid fa-paragraph"></i></span>
          </div>
@@ -4683,6 +4680,9 @@ export function initializeAditor(inputSection, defaultValue) {
          <div class="icon checkboxBtn" tabindex="0">
            <span><i class="fa-solid fa-square-check"></i></span>
          </div>
+         <div class="icon dateBtn" tabindex="0">
+            <span><i class="fa-solid fa-calendar"></i></span>
+          </div>
          <div class="icon indentBtn" tabindex="0">
            <span><i class="fa-solid fa-indent"></i></span>
          </div>
@@ -6085,8 +6085,6 @@ export function initializeAditor(inputSection, defaultValue) {
 
     if (current_Label == "headingLabel") {
       headingBtn.classList.add("active");
-    } else if (current_Label == "dateLabel") {
-      dateBtn.classList.add("active");
     } else if (current_Label == "textLabel") {
       textBtn.classList.add("active");
     } else if (current_Label == "pointLabel") {
@@ -6104,13 +6102,13 @@ export function initializeAditor(inputSection, defaultValue) {
   function currentLabelActive() {
     if (current_Label == "headingLabel") {
       return 0;
-    } else if (current_Label == "dateLabel") {
-      return 1;
     } else if (current_Label == "textLabel") {
-      return 2;
+      return 1;
     } else if (current_Label == "pointLabel") {
-      return 3;
+      return 2;
     } else if (current_Label == "checkboxLabel") {
+      return 3;
+    } else if (current_Label == "dateLabel") {
       return 4;
     }
   }
@@ -6160,25 +6158,48 @@ export function initializeAditor(inputSection, defaultValue) {
     }
   });
 
+  // dateBtn.addEventListener("click", (e) => {
+  //   if (!subLineActive) {
+  //     current_Label = "headingLabel";
+  //     headingFunc(current_Label);
+  //     const date = new Date();
+  //     const options = {
+  //       month: "short",
+  //       day: "numeric",
+  //       year: "numeric",
+  //       weekday: "long",
+  //     };
+
+  //     const formattedDate = date.toLocaleDateString("en-US", options);
+
+  //     // Split into parts
+  //     const [weekday, datePart] = formattedDate.split(", ");
+  //     const finalFormat = `${datePart} | ${weekday}`;
+
+  //     console.log(finalFormat);
+
+  //     current_Editable.innerHTML = finalFormat;
+  //     window.getSelection().selectAllChildren(current_Editable);
+  //     window.getSelection().collapseToEnd();
+  //   } else {
+  //     // current_subEditable = current_subHead.querySelector(".inputSubContent");
+  //     current_subEditable.focus();
+  //     window.getSelection().selectAllChildren(current_subEditable);
+  //     window.getSelection().collapseToEnd();
+  //   }
+  // });
+
   dateBtn.addEventListener("click", (e) => {
     if (!subLineActive) {
-      current_Label = "headingLabel";
-      headingFunc(current_Label);
       const date = new Date();
-      const options = {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        weekday: "long",
-      };
-      const formattedDate = date.toLocaleDateString("en-US", options);
-      const [weekday, rest] = [
-        formattedDate.split(", ")[0],
-        formattedDate.split(", ")[1],
-      ];
-      const finalFormat = `${rest} | ${weekday}`;
 
-      current_Editable.innerHTML = finalFormat;
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+      const year = date.getFullYear();
+
+      const finalFormat = ` (${day}-${month}-${year})`;
+
+      current_Editable.innerHTML += finalFormat;
       window.getSelection().selectAllChildren(current_Editable);
       window.getSelection().collapseToEnd();
     } else {

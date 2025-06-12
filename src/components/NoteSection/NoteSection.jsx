@@ -10,53 +10,49 @@ import {
   Timestamp,
   deleteDoc,
 } from "firebase/firestore";
-import { db } from "/src/lib/firebase"; // Adjust the path to your firebase.js file
-
+import { db } from "/src/lib/firebase";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { getUser } from "/src/lib/user";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
-
 import { initializeAditor } from "/src/lib/aditor.js";
 import "/src/lib/aditor.css";
 import "./NoteSection.css";
+import Tag from "../Tag/Tag.jsx";
 
 function NoteSection() {
   const Aditor_NoteSection = useRef(null);
   const [NoteName, setNoteName] = useState("");
-  // const [noteContent, noteContent] = useState("");
   const [NoteSections, setNoteSections] = useState([]);
   const [ViewMode, setViewMode] = useState("currentNote");
   const [SelectedNote, setSelectedNote] = useState(null);
-
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [addedTags, setAddedTags] = useState([]);
+  const [tagSuggestions, setTagSuggestions] = useState([]);
 
-  // Load data from local storage
   useEffect(() => {
     let storedContent = localStorage.getItem("noteContent") || "";
-
     setNoteName(localStorage.getItem("noteName") || "");
 
     if (Aditor_NoteSection.current) {
       initializeAditor(Aditor_NoteSection.current, storedContent);
-      // Aditor_NoteSection.current.innerHTML = storedContent;
       Aditor_NoteSection.current.querySelector(".inputContent").focus();
     }
 
+    setTagSuggestions([]);
+    setAddedTags([]);
     fetchAllNotes();
+    fetchTagsSuggestions();
     setActiveDropdown(null);
   }, [ViewMode]);
 
-  // Update local storage on content change
   useEffect(() => {
-    if (ViewMode != "selected" && Aditor_NoteSection.current) {
+    if (ViewMode !== "selected" && Aditor_NoteSection.current) {
       const aditorElement = Aditor_NoteSection.current;
       const handleKeyUp = () => {
         const updatedContent = aditorElement.innerHTML;
-        // noteContent(updatedContent);
         localStorage.setItem("noteContent", updatedContent);
       };
 
@@ -68,9 +64,34 @@ function NoteSection() {
   useEffect(() => {
     if (ViewMode === "selected" && SelectedNote && Aditor_NoteSection.current) {
       setNoteName(SelectedNote.noteName);
+      setAddedTags(SelectedNote.tags || []);
       initializeAditor(Aditor_NoteSection.current, SelectedNote.noteContent);
     }
   }, [SelectedNote]);
+
+  const fetchTagsSuggestions = async () => {
+    try {
+      const userID = getUser().uid;
+      const tagSuggestionsQuery = query(
+        collection(db, userID),
+        where("category", "==", "NoteSection")
+      );
+
+      const snapshot = await getDocs(tagSuggestionsQuery);
+      const defaults = ["Personal", "Work", "Others"];
+      const dynamic = snapshot.docs
+        .flatMap((doc) => doc.data().tags || [])
+        .filter(Boolean);
+      const combined = [...new Set([...defaults, ...dynamic])];
+      setTagSuggestions(combined);
+    } catch (error) {
+      console.error("Error fetching note tags:", error);
+    }
+  };
+
+  const handleTagChange = (newTags) => {
+    setAddedTags(newTags);
+  };
 
   const handleSelectedNote = (Note) => {
     setSelectedNote(Note);
@@ -79,7 +100,6 @@ function NoteSection() {
 
   const saveNote = async () => {
     const aditorElement = Aditor_NoteSection.current;
-
     const defaultValue =
       aditorElement?.querySelector(".inputContent")?.innerText;
 
@@ -93,38 +113,28 @@ function NoteSection() {
 
     try {
       const updatedContent = aditorElement.innerHTML;
-      const userID = getUser().uid; // Get user ID
+      const userID = getUser().uid;
+
+      const NoteData = {
+        category: "NoteSection",
+        noteName:
+          NoteName === "" ? truncateContent(updatedContent).trim() : NoteName,
+        noteContent: updatedContent,
+        tags: addedTags,
+        createdAt: new Date().toISOString(),
+      };
 
       if (SelectedNote) {
         const docRef = doc(db, userID, SelectedNote.id);
-
-        const NoteData = {
-          category: "NoteSection",
-          noteName:
-            NoteName == "" ? truncateContent(updatedContent).trim() : NoteName,
-          noteContent: updatedContent,
-          createdAt: new Date().toISOString(),
-        };
-
         await updateDoc(docRef, NoteData);
         toast.success("Note updated successfully!", {
           position: "bottom-right",
           autoClose: 2000,
         });
-
         setSelectedNote(null);
       } else {
-        const NoteData = {
-          category: "NoteSection",
-          noteName:
-            NoteName == "" ? truncateContent(updatedContent).trim() : NoteName,
-          noteContent: updatedContent,
-          createdAt: new Date().toISOString(),
-        };
-
         const userCollection = collection(db, userID);
         await addDoc(userCollection, NoteData);
-
         toast.success("Note saved successfully!", {
           position: "bottom-right",
           autoClose: 2000,
@@ -132,9 +142,8 @@ function NoteSection() {
 
         localStorage.setItem("noteContent", "");
         localStorage.setItem("noteName", "");
-
         setNoteName("");
-
+        setAddedTags([]);
         if (Aditor_NoteSection.current) {
           initializeAditor(Aditor_NoteSection.current, "");
         }
@@ -159,7 +168,6 @@ function NoteSection() {
         ...doc.data(),
       }));
       setNoteSections(Notes);
-      // setViewAll(true);
     } catch (error) {
       toast.error("Failed to load Notes.", {
         position: "bottom-right",
@@ -168,28 +176,13 @@ function NoteSection() {
     }
   };
 
-  // const truncateContent = (content) => {
-  //   const plainText = content.replace(/<[^>]*>/g, "");
-  //   const firstLine = plainText.split("\n")[0];
-  //   const words = firstLine.trim().split(/\s+/).slice(0, 4).join(" ");
-  //   return words + "...";
-  // };
   const truncateContent = (content) => {
-    // Create a DOM parser
     const parser = new DOMParser();
     const doc = parser.parseFromString(content, "text/html");
-
-    // Find the UL with the class "inputContent"
     const ulElement = doc.querySelector("ul.inputContent");
-
     if (!ulElement) return "";
-
-    // Get the text content
     const text = ulElement.textContent.trim();
-
-    // Extract the first 4 words
     const words = text.split(/\s+/).slice(0, 4).join(" ");
-
     return words;
   };
 
@@ -280,14 +273,14 @@ function NoteSection() {
 
   const handleInputChange = (e) => {
     setNoteName(e.target.value);
-    if (ViewMode == "currentNote") {
+    if (ViewMode === "currentNote") {
       localStorage.setItem("noteName", e.target.value);
     }
   };
 
   return (
     <div className="NoteSection">
-      {ViewMode == "currentNote" && (
+      {(ViewMode === "currentNote" || ViewMode === "selected") && (
         <>
           <div className="NoteHeader">
             <input
@@ -296,7 +289,6 @@ function NoteSection() {
               placeholder={"Note name"}
               onChange={handleInputChange}
             />
-
             <button
               onClick={() => {
                 setViewMode("all");
@@ -305,116 +297,105 @@ function NoteSection() {
             >
               View All
             </button>
-          </div>
-          <div ref={Aditor_NoteSection} className="Aditor_NoteSection"></div>
-          <button className="saveNote" onClick={saveNote}>
-            Save
-          </button>
-        </>
-      )}
-      {ViewMode == "all" && (
-        <>
-          <div className="NoteSection all">
-            <div className="NoteHeader">
+            {ViewMode === "selected" && (
               <button
                 onClick={() => {
                   setViewMode("currentNote");
+                  setSelectedNote(null);
                 }}
               >
                 Create new
               </button>
-            </div>
-            <div className="NoteContainer">
-              <div className="NoteGrid">
-                {NoteSections.length === 0 ? (
-                  <p>No Note Journal added yet.</p>
-                ) : (
-                  NoteSections.map((Note) => (
-                    <div
-                      key={Note.id}
-                      className="NoteCard"
-                      onClick={() => {
-                        handleSelectedNote(Note);
-                      }}
-                    >
-                      <div className="content">{Note.noteName}</div>
+            )}
+          </div>
 
-                      <div
-                        className="NoteActions"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <div className="dropdown-container">
-                          <FontAwesomeIcon
-                            className="menuBtn"
-                            icon={faEllipsisV}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleDropdown(Note.id, e);
-                            }}
-                          />
-                          {activeDropdown === Note.id && (
-                            <div
-                              className="dropdown-menu"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <div
-                                className="dropdown-item"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleSelectedNote(Note);
-                                }}
-                              >
-                                View
-                              </div>
-
-                              <div
-                                className="dropdown-item"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteNote(Note.id);
-                                }}
-                              >
-                                Delete
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+          <div ref={Aditor_NoteSection} className="Aditor_NoteSection"></div>
+          <div className="noteHeaderControls">
+            <div className="tagContainer">
+              <Tag
+                tagSuggestions={tagSuggestions}
+                onTagChange={handleTagChange}
+                initialTags={addedTags}
+              />
             </div>
+            <button className="saveNote" onClick={saveNote}>
+              Save
+            </button>
           </div>
         </>
       )}
-      {ViewMode == "selected" && (
-        <>
-          <div className="NoteHeader">
-            <input type="text" value={NoteName} onChange={handleInputChange} />
 
-            <button
-              onClick={() => {
-                setViewMode("all");
-                setSelectedNote(null);
-              }}
-            >
-              View All
-            </button>
+      {ViewMode === "all" && (
+        <div className="NoteSection all">
+          <div className="NoteHeader">
             <button
               onClick={() => {
                 setViewMode("currentNote");
-                setSelectedNote(null);
               }}
             >
               Create new
             </button>
           </div>
-          <div ref={Aditor_NoteSection} className="Aditor_NoteSection"></div>
-          <button className="saveNote" onClick={saveNote}>
-            Save
-          </button>
-        </>
+          <div className="NoteContainer">
+            <div className="NoteGrid">
+              {NoteSections.length === 0 ? (
+                <p>No Note Journal added yet.</p>
+              ) : (
+                NoteSections.map((Note) => (
+                  <div
+                    key={Note.id}
+                    className="NoteCard"
+                    onClick={() => {
+                      handleSelectedNote(Note);
+                    }}
+                  >
+                    <div className="content">{Note.noteName}</div>
+                    <div
+                      className="NoteActions"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="dropdown-container">
+                        <FontAwesomeIcon
+                          className="menuBtn"
+                          icon={faEllipsisV}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleDropdown(Note.id, e);
+                          }}
+                        />
+                        {activeDropdown === Note.id && (
+                          <div
+                            className="dropdown-menu"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div
+                              className="dropdown-item"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSelectedNote(Note);
+                              }}
+                            >
+                              View
+                            </div>
+                            <div
+                              className="dropdown-item"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteNote(Note.id);
+                              }}
+                            >
+                              Delete
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

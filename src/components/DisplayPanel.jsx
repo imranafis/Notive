@@ -60,7 +60,7 @@ function DisplayPanel({
             fullScreenMode={fullScreenMode}
             setFullScreenMode={setFullScreenMode}
           />
-          {(addSection === "dailyspace" || addSection === "viewTask") && (
+          {(addSection === "AddTask" || addSection === "viewTask") && (
             <AddTask
               setAddSection={setAddSection}
               selectedItem={selectedItem}

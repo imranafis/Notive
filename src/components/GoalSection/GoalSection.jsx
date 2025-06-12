@@ -29,25 +29,25 @@ const GoalSection = ({
   const [fullScreenMode, setFullScreenMode] = useState(false);
 
   useEffect(() => {
-    const fetchGoals = async () => {
-      try {
-        const userID = getUser().uid;
-        const querySnapshot = await getDocs(collection(db, userID));
-        const goalList = querySnapshot.docs
-          .map((doc) => ({ id: doc.id, ...doc.data() }))
-          .filter((goal) => goal.category === "goal");
-
-        goalList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-        setHabits(goalList.filter((goal) => goal.subCategory === "habit"));
-        setProjects(goalList.filter((goal) => goal.subCategory === "project"));
-      } catch (error) {
-        console.error("Error fetching goals:", error);
-      }
-    };
-
     fetchGoals();
   }, [addSection]);
+
+  const fetchGoals = async () => {
+    try {
+      const userID = getUser().uid;
+      const querySnapshot = await getDocs(collection(db, userID));
+      const goalList = querySnapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((goal) => goal.category === "goal");
+
+      goalList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      setHabits(goalList.filter((goal) => goal.subCategory === "habit"));
+      setProjects(goalList.filter((goal) => goal.subCategory === "project"));
+    } catch (error) {
+      console.error("Error fetching goals:", error);
+    }
+  };
 
   const handleDeleteGoal = async (goalId) => {
     const toastId = toast.warn(
