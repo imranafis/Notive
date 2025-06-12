@@ -60,8 +60,9 @@ function DisplayPanel({
             fullScreenMode={fullScreenMode}
             setFullScreenMode={setFullScreenMode}
           />
-          {(addSection === "AddTask" || addSection === "viewTask") && (
+          {addSection === "viewTask" && (
             <AddTask
+              addSection={"viewTask"}
               setAddSection={setAddSection}
               selectedItem={selectedItem}
               setSelectedItem={setSelectedItem}

@@ -290,7 +290,7 @@ const DailySpace = ({
   useEffect(() => {
     fetchDailyTasks();
     fetchTasks();
-  }, [activePanel]);
+  }, [addSection,activePanel]);
 
   // useEffect(() => {
   // }, [activePanel]);
@@ -490,7 +490,7 @@ const DailySpace = ({
               <div
                 className="dropdown-item"
                 onClick={() => {
-                  setAddSection("AddTask");
+                  setAddSection("viewTask");
                   setTaskMenuOpen(false);
                 }}
               >

@@ -25,6 +25,7 @@ import { toast } from "react-toastify";
 import "./addTask.css";
 
 const AddTask = ({
+  addSection,
   setAddSection,
   selectedItem,
   setSelectedItem,
@@ -135,7 +136,7 @@ const AddTask = ({
     }
   };
 
-  const addSection = (section) => {
+  const addActiveSection = (section) => {
     setActiveSection((prev) =>
       prev.includes(section)
         ? prev.filter((s) => s !== section)
@@ -178,7 +179,7 @@ const AddTask = ({
         size: selectedLevel,
         tags: addedTags,
         note: updatedNoteContent,
-        status: "unchecked",
+        status: addSection == "viewTask" ? "working" : "unchecked",
         breakdown: updatedBreakdownContent,
         deadline: selectedDate
           ? Timestamp.fromDate(new Date(selectedDate))
@@ -244,7 +245,7 @@ const AddTask = ({
       toast.error("Failed to update task. Please try again.", {
         position: "bottom-right",
       });
-    }
+     }
   };
 
   const deleteTask = async () => {
@@ -348,7 +349,7 @@ const AddTask = ({
         </div>
         <button
           className={`note ${activeSection.includes("note") ? "activate" : ""}`}
-          onClick={() => addSection("note")}
+          onClick={() => addActiveSection("note")}
         >
           <i
             className={`fa-solid ${
@@ -371,7 +372,7 @@ const AddTask = ({
           className={`breakdown ${
             activeSection.includes("breakdown") ? "activate" : ""
           }`}
-          onClick={() => addSection("breakdown")}
+          onClick={() => addActiveSection("breakdown")}
         >
           <i
             className={`fa-solid ${
@@ -394,7 +395,7 @@ const AddTask = ({
           className={`details ${
             activeSection.includes("details") ? "activate" : ""
           }`}
-          onClick={() => addSection("details")}
+          onClick={() => addActiveSection("details")}
         >
           <i
             className={`fa-solid ${
