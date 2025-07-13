@@ -11,6 +11,7 @@ import {
   deleteDoc,
   query,
   where,
+  getDoc,
   getDocs,
 } from "firebase/firestore";
 import { db } from "/src/lib/firebase";
@@ -41,21 +42,97 @@ const DailySpace = ({
   const [dailyTasks, setDailyTasks] = useState([]);
   const [doneDailyTasks, setDoneDailyTasks] = useState([]);
 
+  const updateProjectTaskStatusChange = async (
+    userID,
+    goalId,
+    lineId,
+    newStatus
+  ) => {
+    try {
+      const breakdownRef = doc(db, userID, goalId);
+      const breakdownSnap = await getDoc(breakdownRef);
+      const breakdown = breakdownSnap.data().breakdown;
+
+      const parser = new DOMParser();
+      const docRef = parser.parseFromString(breakdown, "text/html");
+
+      const lineElement = docRef.querySelector(`#${lineId}`);
+      if (!lineElement) return;
+
+      const mainSpan = lineElement.querySelector(".Head .checkboxLabel span");
+      if (mainSpan) {
+        mainSpan.classList.remove("checked", "unchecked");
+        mainSpan.classList.add(newStatus);
+      }
+
+      const subLine = lineElement.querySelector(".sub-line");
+      if (subLine) {
+        const subSpans = lineElement.querySelectorAll(
+          ".sub-Head .checkboxLabel span"
+        );
+        subSpans.forEach((span) => {
+          span.classList.remove("checked", "unchecked");
+          span.classList.add(newStatus);
+        });
+      }
+
+      const newBreakdown = docRef.body.innerHTML;
+
+      await updateDoc(breakdownRef, {
+        breakdown: newBreakdown,
+      });
+    } catch (error) {
+      console.error("Error updating task status in breakdown:", error);
+    }
+  };
+
+  const deleteProjectTask = async (userID, goalId, lineId) => {
+    try {
+      const breakdownRef = doc(db, userID, goalId);
+      const breakdownSnap = await getDoc(breakdownRef);
+      const breakdown = breakdownSnap.data().breakdown;
+
+      const parser = new DOMParser();
+      const docRef = parser.parseFromString(breakdown, "text/html");
+
+      const lineElement = docRef.querySelector(`#${lineId}`);
+
+      if (lineElement && lineElement.parentNode) {
+        lineElement.parentNode.removeChild(lineElement);
+      }
+
+      const newBreakdown = docRef.body.innerHTML;
+
+      await updateDoc(breakdownRef, {
+        breakdown: newBreakdown,
+      });
+    } catch (error) {
+      console.error("Failed to delete project task line:", error);
+    }
+  };
+
   const handleTaskStatusChange = async (itemId, newStatus, itemCategory) => {
     const today = dayjs().format("DD-MM-YY");
 
     try {
       const userID = getUser().uid;
-      const itemRef = doc(db, userID, itemId);
+      const taskRef = doc(db, userID, itemId);
+      const taskSnap = await getDoc(taskRef);
+      const goalId = taskSnap.data().goalId;
+
+      if (goalId && (newStatus === "checked" || newStatus === "unchecked")) {
+        const lineId = taskSnap.id;
+        updateProjectTaskStatusChange(userID, goalId, lineId, newStatus);
+      }
 
       if (itemCategory === "task") {
-        await updateDoc(itemRef, {
+        await updateDoc(taskRef, {
           status: newStatus,
           doneDate: newStatus === "checked" ? today : "",
         });
         fetchTasks();
       } else if (itemCategory === "goal") {
-        await updateDoc(itemRef, {
+        await updateDoc(taskRef, {
           status: newStatus,
           doneDate: newStatus === "checked" ? today : "",
         });
@@ -130,7 +207,18 @@ const DailySpace = ({
               try {
                 const userID = getUser().uid;
                 const taskRef = doc(db, userID, taskId);
-                await deleteDoc(taskRef);
+
+                const taskSnap = await getDoc(taskRef);
+                const goalId = taskSnap.data().goalId;
+
+                if (goalId) {
+                  const lineId = taskSnap.id;
+                  deleteProjectTask(userID, goalId, lineId);
+                  await deleteDoc(taskRef);
+                } else {
+                  await deleteDoc(taskRef);
+                }
+
                 setWorkingTasks((prev) =>
                   prev.filter((task) => task.id !== taskId)
                 );
@@ -290,7 +378,7 @@ const DailySpace = ({
   useEffect(() => {
     fetchDailyTasks();
     fetchTasks();
-  }, [addSection,activePanel]);
+  }, [addSection, activePanel]);
 
   // useEffect(() => {
   // }, [activePanel]);

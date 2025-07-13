@@ -1263,33 +1263,37 @@ ${current_subContent}`;
 }
 
 export function initializeAditorCheckbox(inputSection, defaultValue) {
+  function generateLineId() {
+    return `line_${Date.now()}`;
+  }
+
   if (defaultValue == "") {
     inputSection.innerHTML = `
-  <div class="aditor">
-  <div class="line">
-    <div class="Head">
-      <label class="checkboxLabel">
-        <input type="checkbox"><span class="unchecked"></span></label>
-      <div class="content">
-        <ul class="inputContent" contenteditable="true"></ul>
-      </div>
-      <div class="actionsOff">
-        <button class="expand">
-          <i class="fa-solid fa-caret-down"></i>
-        </button>
-      </div>
-    </div>
-    <div class="sub-line-off">
-      <div class="sub-Head">
-        <label class="checkboxLabel">
-          <input type="checkbox"><span class="unchecked"></span></label>
-        <div class="sub-content">
-          <ul class="inputSubContent" contenteditable="true"></ul>
+    <div class="aditor">
+      <div class="line" id="${generateLineId()}">
+        <div class="Head">
+          <label class="checkboxLabel">
+            <input type="checkbox"><span class="unchecked"></span></label>
+          <div class="content">
+            <ul class="inputContent" contenteditable="true"></ul>
+          </div>
+          <div class="actionsOff">
+            <button class="expand">
+              <i class="fa-solid fa-caret-down"></i>
+            </button>
+          </div>
+        </div>
+        <div class="sub-line-off">
+          <div class="sub-Head">
+            <label class="checkboxLabel">
+              <input type="checkbox"><span class="unchecked"></span></label>
+            <div class="sub-content">
+              <ul class="inputSubContent" contenteditable="true"></ul>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>`;
+   </div>`;
   } else {
     inputSection.innerHTML = defaultValue;
   }
@@ -1373,7 +1377,7 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
     subAditorActive = false;
 
     aditor.innerHTML = `
-  <div class="line">
+  <div class="line" id="${generateLineId()}"> 
     <div class="Head">
       <label class="checkboxLabel">
         <input type="checkbox"><span class="unchecked"></span></label>
@@ -1954,7 +1958,6 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
       forward("ArrowRight");
     }
     updateElement();
-    activeOption();
   }
 
   function updateLabel(label, current_EditableText) {
@@ -2033,6 +2036,7 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
       // Create new line when sub line is off
       const Div = document.createElement("div");
       Div.classList.add("line");
+      Div.id = generateLineId();
 
       updateLine(current_Label, "", Div);
 
@@ -7762,4 +7766,42 @@ export function initializeAditorDate(inputSection) {
       indentFunc();
     }
   });
+}
+
+export function createAditorCheckbox(subItems) {
+  let lines = "";
+
+  subItems.forEach((subItemGroup) => {
+    subItemGroup.forEach(({ state, text }) => {
+      lines += `<div class="line">
+        <div class="Head">
+          <label class="checkboxLabel">
+            <input type="checkbox"><span class="${state}"></span></label>
+          <div class="content">
+            <ul class="inputContent" contenteditable="true">${text}</ul>
+          </div>
+          <div class="actionsOff">
+            <button class="expand">
+              <i class="fa-solid fa-caret-down"></i>
+            </button>
+          </div>
+        </div>
+        <div class="sub-line-off">
+          <div class="sub-Head">
+            <label class="checkboxLabel">
+              <input type="checkbox"><span class="unchecked"></span></label>
+            <div class="sub-content">
+              <ul class="inputSubContent" contenteditable="true"></ul>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    });
+  });
+
+  const finalAditor = `<div class="aditor">
+                        ${lines}
+                      </div>`;
+
+  return finalAditor;
 }

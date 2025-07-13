@@ -3,8 +3,12 @@ import {
   collection,
   addDoc,
   getDoc,
+  getDocs,
+  query,
+  where,
   updateDoc,
   Timestamp,
+  setDoc,
   doc,
   deleteDoc,
 } from "firebase/firestore";
@@ -22,6 +26,7 @@ import { toast } from "react-toastify";
 import {
   initializeAditor,
   initializeAditorCheckbox,
+  createAditorCheckbox,
   initializeAditorDate,
 } from "/src/lib/aditor.js";
 import "/src/lib/aditor.css";
@@ -224,7 +229,10 @@ function AddGoal({
             : null,
         };
 
-        await addDoc(collection(db, userID), goalData);
+        const docRef = await addDoc(collection(db, userID), goalData);
+        const goalId = docRef.id;
+
+        await createProjectTasks(goalId, updatedBreakdownContent);
       }
 
       toast.success(`Goal ${category} saved successfully!`, {
@@ -249,6 +257,188 @@ function AddGoal({
         position: "bottom-right",
         autoClose: 2000,
       });
+    }
+  };
+
+  const createProjectTasks = async (goalId, updatedBreakdownContent) => {
+    try {
+      const userID = getUser().uid;
+
+      const parser = new DOMParser();
+      const docRef = parser.parseFromString(
+        updatedBreakdownContent,
+        "text/html"
+      );
+
+      const lines = Array.from(docRef.querySelectorAll(".line")); // Get all .line elements
+
+      for (const line of lines) {
+        const subLine = line.querySelector(".sub-line");
+
+        if (subLine) {
+          const subItems = [];
+
+          const subHeads = subLine.querySelectorAll(".sub-Head");
+
+          for (const subHead of subHeads) {
+            const span = subHead.querySelector("span");
+            const state = span?.classList.contains("checked")
+              ? "checked"
+              : "unchecked";
+
+            const text =
+              subHead.querySelector(".inputSubContent")?.innerText.trim() || "";
+
+            subItems.push({ state, text });
+          }
+
+          const taskName = line
+            .querySelector(".inputContent")
+            ?.textContent?.trim();
+          const newBreakdownContent = createAditorCheckbox([subItems]);
+          const lineId = line.id;
+
+          const taskData = {
+            name: taskName,
+            priority: "",
+            category: "task",
+            size: "",
+            tags: "",
+            note: "",
+            status: "unchecked",
+            breakdown: newBreakdownContent,
+            createdAt: new Date().toISOString(),
+            doneDate: "",
+            goalId: goalId,
+          };
+
+          await setDoc(doc(db, userID, lineId), taskData);
+        } else {
+          const taskName = line
+            .querySelector(".inputContent")
+            ?.textContent?.trim();
+          const lineId = line.id;
+
+          const taskData = {
+            name: taskName,
+            priority: "",
+            category: "task",
+            size: "",
+            tags: "",
+            note: "",
+            status: "unchecked",
+            breakdown: "",
+            createdAt: new Date().toISOString(),
+            doneDate: "",
+            goalId: goalId,
+          };
+
+          await setDoc(doc(db, userID, lineId), taskData);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
+  };
+  const syncProjectTasks = async (userID, goalId, updatedBreakdownContent) => {
+    try {
+      const projectTasksQuery = query(
+        collection(db, userID),
+        where("category", "==", "task"),
+        where("goalId", "==", goalId)
+      );
+      const querySnapshot = await getDocs(projectTasksQuery);
+
+      const projectTasks = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const existingTaskIds = projectTasks.map((task) => task.id);
+
+      const parser = new DOMParser();
+      const docRef = parser.parseFromString(
+        updatedBreakdownContent,
+        "text/html"
+      );
+      const allLineElements = docRef.querySelectorAll(".line");
+      const currentLineIds = Array.from(allLineElements).map((line) =>
+        line.getAttribute("id")
+      );
+
+      //Delete tasks not in editor
+      for (const taskId of existingTaskIds) {
+        if (!currentLineIds.includes(taskId)) {
+          await deleteDoc(doc(db, userID, taskId));
+          // console.log(`❌ Deleted task: ${taskId}`);
+        }
+      }
+
+      // Iterate through all lines (create or update)
+      for (const line of allLineElements) {
+        const lineId = line.getAttribute("id");
+        const taskRef = doc(db, userID, lineId);
+        const taskName = line
+          .querySelector(".inputContent")
+          ?.textContent?.trim();
+        const status = line
+          .querySelector(".Head .checkboxLabel span")
+          ?.classList.contains("checked")
+          ? "checked"
+          : "unchecked";
+
+        const subLine = line.querySelector(".sub-line");
+        let breakdown = "";
+
+        if (subLine) {
+          const subItems = [];
+          const subHeads = subLine.querySelectorAll(".sub-Head");
+
+          for (const subHead of subHeads) {
+            const span = subHead.querySelector("span");
+            const state = span?.classList.contains("checked")
+              ? "checked"
+              : "unchecked";
+            const text =
+              subHead.querySelector(".inputSubContent")?.innerText.trim() || "";
+            subItems.push({ state, text });
+          }
+
+          breakdown = createAditorCheckbox([subItems]);
+        }
+
+        const today = dayjs().format("DD-MM-YY");
+
+        const taskData = {
+          name: taskName,
+          priority: "",
+          category: "task",
+          size: "",
+          tags: "",
+          note: "",
+          status: status,
+          doneDate: status === "checked" ? today : "",
+          breakdown: breakdown,
+          goalId: goalId,
+        };
+
+        if (existingTaskIds.includes(lineId)) {
+          // 🛠️ Update existing task
+          await updateDoc(taskRef, taskData);
+          //  console.log(`🔄 Updated task: ${lineId}`);
+        } else {
+          // ✅ Create new task
+          await setDoc(taskRef, {
+            ...taskData,
+            createdAt: new Date().toISOString(),
+            doneDate: "",
+          });
+        }
+      }
+
+      console.log("Synced tasks successfully.");
+    } catch (err) {
+      console.error("❌ Error syncing tasks:", err);
     }
   };
 
@@ -280,18 +470,16 @@ function AddGoal({
     try {
       const userID = getUser().uid;
       const goalRef = doc(db, userID, selectedItem.id);
-
-      // Get existing goal data to avoid erasing anything
       const goalSnap = await getDoc(goalRef);
-      if (!goalSnap.exists()) throw new Error("Goal not found.");
+      const goalId = goalSnap.id;
 
+      if (!goalSnap.exists()) throw new Error("Goal not found.");
       const existingData = goalSnap.data();
+
       const updatedNoteContent = Aditor_Goal.current?.innerHTML || "";
 
-      // Start with existing daily notes
+      // Collect updated daily notes
       const updatedDailyNotes = { ...(existingData.dailyNotes || {}) };
-
-      // Capture ALL edited daily notes from the refs
       if (allDailyNoteDivsRef.current) {
         Object.entries(allDailyNoteDivsRef.current).forEach(
           ([dateKey, element]) => {
@@ -302,31 +490,53 @@ function AddGoal({
         );
       }
 
-      // Capture today's note from DailyNoteRef (used in viewDailyTask mode)
       if (DailyNoteRef.current) {
         updatedDailyNotes[todayKey] = DailyNoteRef.current.innerHTML || "";
       }
 
-      // Prepare update data
-      const updatedGoalData = {
-        ...existingData, // Preserve all existing fields
-        goalName: goalName.trim(),
-        note: updatedNoteContent,
-        dailyNotes: updatedDailyNotes,
-        daily: status === "checked",
-        updatedAt: new Date().toISOString(),
-      };
+      const now = new Date().toISOString();
 
-      // Handle project-specific fields
+      // =========================
+      // ✅ For HABIT
+      // =========================
+      let updatedGoalData = null;
+
+      if (category === "habit") {
+        updatedGoalData = {
+          goalName: goalName.trim(),
+          note: updatedNoteContent,
+          dailyNotes: updatedDailyNotes,
+          daily: status === "checked",
+          updatedAt: now,
+        };
+      }
+
+      // =========================
+      // ✅ For PROJECT
+      // =========================
       if (category === "project") {
         const updatedBreakdownContent =
           Aditor_Goal_Checkbox.current?.innerHTML || "";
-        updatedGoalData.breakdown = updatedBreakdownContent;
-        updatedGoalData.estimatedTime = selectedDate
-          ? Timestamp.fromDate(new Date(selectedDate))
-          : existingData.estimatedTime; // Preserve existing if not changed
+        const breakdownChanged =
+          updatedBreakdownContent !== existingData.breakdown;
+
+        if (breakdownChanged) {
+          syncProjectTasks(userID, goalId, updatedBreakdownContent);
+        }
+
+        updatedGoalData = {
+          goalName: goalName.trim(),
+          note: updatedNoteContent,
+          breakdown: breakdownChanged
+            ? updatedBreakdownContent
+            : existingData.breakdown,
+          estimatedTime: selectedDate
+            ? Timestamp.fromDate(new Date(selectedDate))
+            : existingData.estimatedTime || null,
+        };
       }
 
+      // ✅ Update Firestore
       await updateDoc(goalRef, updatedGoalData);
 
       toast.success(`Goal ${category} updated successfully!`, {

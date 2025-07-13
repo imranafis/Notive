@@ -245,7 +245,7 @@ const AddTask = ({
       toast.error("Failed to update task. Please try again.", {
         position: "bottom-right",
       });
-     }
+    }
   };
 
   const deleteTask = async () => {
