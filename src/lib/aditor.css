@@ -377,6 +377,13 @@ input:checked ~ .bubble::after {
   opacity: 1;
 }
 
+.aditor .line .Head .actions .note {
+  font-size: 18px;
+  color: var(--dark);
+  color: #f32424;
+  color: #f76e11;
+  opacity: 1;
+}
 .aditor .line .Head .actions .expand {
   font-size: 25px;
   color: var(--dark);

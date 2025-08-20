@@ -1,8 +1,12 @@
 export function initializeAditorPoint(inputSection, defaultValue) {
+  function generateLineId() {
+    return `line_${Date.now()}`;
+  }
+
   if (defaultValue == "") {
     inputSection.innerHTML = `
   <div class="aditor">
-     <div class="line">
+           <div class="line" id="${generateLineId()}">
        <div class="Head">
        <label class="pointLabel">
        <input type="checkbox" /><span class="points"><i class="fa-solid fa-circle"></i></span
@@ -11,12 +15,15 @@ export function initializeAditorPoint(inputSection, defaultValue) {
        <ul class="inputContent" contenteditable="true"></ul>
      </div>
        <div class="actionsOff">
-           <button class="expand">
+            <button class="note">
+                <i class="fa-solid fa-note-sticky"></i>
+            </button>
+                <button class="expand">
              <i class="fa-solid fa-caret-down"></i>
            </button>
-       </div>
-     </div>
-     <div class="sub-line-off">
+          </div>
+        </div>
+      <div class="sub-line-off">
        <div class="sub-Head">
          <label class="textLabel"></label>
         <div class="sub-content">
@@ -133,7 +140,7 @@ export function initializeAditorPoint(inputSection, defaultValue) {
     activeOption();
 
     aditor.innerHTML = `
-<div class="line">
+    <div class="line" id="${generateLineId()}">
        <div class="Head">
        <label class="pointLabel">
        <input type="checkbox" /><span class="points"><i class="fa-solid fa-circle"></i></span
@@ -142,6 +149,9 @@ export function initializeAditorPoint(inputSection, defaultValue) {
            <ul class="inputContent" contenteditable="true"></ul>
          </div>
        <div class="actionsOff">
+          <button class="note">
+            <i class="fa-solid fa-note-sticky"></i>
+          </button>
            <button class="expand">
              <i class="fa-solid fa-caret-down"></i>
            </button>
@@ -366,21 +376,8 @@ export function initializeAditorPoint(inputSection, defaultValue) {
     }
 
     if (e.key == "Tab") {
-      if (e.shiftKey) {
-        e.preventDefault();
-        // if (current_Label == "headingLabel") {
-        headingCollapse_All();
-        // }
-      } else {
-        e.preventDefault();
-        if (current_Label == "headingLabel") {
-          const line = current_Editable.closest(".line");
-          headingActionBtn(line, "switch");
-          headingCollapse(line);
-        } else {
-          indentFunc();
-        }
-      }
+      e.preventDefault();
+      indentFunc();
     }
 
     if (e.key == "Enter") {
@@ -641,43 +638,55 @@ export function initializeAditorPoint(inputSection, defaultValue) {
   });
 
   aditor.addEventListener("click", (e) => {
-    // console.log(e.target.tagName);
-
+    //console.log(e.target);
     if (
       e.target.parentElement.className == "expand" ||
       e.target.parentElement.className == "collapse"
     ) {
-      const label = e.target.parentElement
+      let expandBtn = e.target.parentElement;
+      let expand = e.target.parentElement
         .closest(".line")
-        .querySelector("label").className;
-
-      if (label == "headingLabel") {
-        const line = e.target.parentElement.closest(".line");
-        headingActionBtn(line, "switch");
-        headingCollapse(line);
+        .querySelector(".sub-line");
+      if (expand != null) {
+        expand.classList.replace("sub-line", "sub-line-off");
+        expandBtn.classList.replace("expand", "collapse");
+        expandBtn.innerHTML = `<i class="fa-solid fa-caret-right"></i>`;
       } else {
-        let expandBtn = e.target.parentElement;
-        let expand = e.target.parentElement
-          .closest(".line")
-          .querySelector(".sub-line");
-        if (expand != null) {
-          expand.classList.replace("sub-line", "sub-line-off");
-          expandBtn.classList.replace("expand", "collapse");
-          expandBtn.innerHTML = `<i class="fa-solid fa-caret-right"></i>`;
-        } else {
-          expand = expandBtn.closest(".line").querySelector(".sub-line-off");
-          expand.classList.replace("sub-line-off", "sub-line");
-          expandBtn.classList.replace("collapse", "expand");
-          expandBtn.innerHTML = ` <i class="fa-solid fa-caret-down"></i>`;
-        }
+        expand = expandBtn.closest(".line").querySelector(".sub-line-off");
+        expand.classList.replace("sub-line-off", "sub-line");
+        expandBtn.classList.replace("collapse", "expand");
+        expandBtn.innerHTML = ` <i class="fa-solid fa-caret-down"></i>`;
       }
+    } else if (e.target.parentElement.className == "note") {
+      const noteBtn = e.target.parentElement;
+      const line = noteBtn.closest(".line");
+      const lineId = noteBtn.closest(".line").id;
+      const NoteName = line.querySelector(".inputContent").textContent;
+      const Aditor_NoteSection = createAditor(line);
+      const event = new CustomEvent("AddNote_fromBullet", {
+        detail: {
+          id: lineId,
+          NoteName: NoteName,
+          Aditor_NoteSection: Aditor_NoteSection,
+        },
+      });
+      window.dispatchEvent(event);
     } else if (e.target.parentElement.className == "actions") {
-      const label = e.target.closest(".line").querySelector("label").className;
-
-      if (label == "headingLabel") {
-        const line = e.target.closest(".line");
-        headingActionBtn(line, "switch");
-        headingCollapse(line);
+      const buttonLabel = e.target.closest("button").className;
+      if (buttonLabel == "note") {
+        const noteBtn = e.target;
+        const line = noteBtn.closest(".line");
+        const lineId = noteBtn.closest(".line").id;
+        const NoteName = line.querySelector(".inputContent").textContent;
+        const Aditor_NoteSection = createAditor(line);
+        const event = new CustomEvent("AddNote_fromBullet", {
+          detail: {
+            id: lineId,
+            NoteName: NoteName,
+            Aditor_NoteSection: Aditor_NoteSection,
+          },
+        });
+        window.dispatchEvent(event);
       } else {
         let expandBtn = e.target;
         let expand = e.target.closest(".line").querySelector(".sub-line");
@@ -723,6 +732,7 @@ export function initializeAditorPoint(inputSection, defaultValue) {
     } else if (e.target.classList == "inputSubContent") {
       subLineActive = true;
       current_subEditable = e.target;
+      updateElement();
       current_Editable = current_subEditable
         .closest(".sub-Head")
         .closest(".line")
@@ -913,21 +923,13 @@ export function initializeAditorPoint(inputSection, defaultValue) {
 
   function updateLine(label, current_EditableText, Div) {
     let newLabel = updateLabel(label, current_EditableText);
-
-    if (label == "headingLabel") {
-      Div.innerHTML = `<div class="Head">
-${newLabel}
-<div class="actionsOff">
- <button class="expand">
-   <i class="fa-solid fa-caret-down"></i>
- </button>
-</div>
-</div>
-`;
-    } else if (label == "checkboxLabel") {
+    if (label == "checkboxLabel") {
       Div.innerHTML = `<div class="Head">
    ${newLabel}
    <div class="actionsOff">
+        <button class="note">
+          <i class="fa-solid fa-note-sticky"></i>
+        </button>
        <button class="expand">
          <i class="fa-solid fa-caret-down"></i>
        </button>
@@ -947,6 +949,9 @@ ${newLabel}
       Div.innerHTML = `<div class="Head">
    ${newLabel}
    <div class="actionsOff">
+        <button class="note">
+          <i class="fa-solid fa-note-sticky"></i>
+       </button>
        <button class="expand">
          <i class="fa-solid fa-caret-down"></i>
        </button>
@@ -967,14 +972,17 @@ ${newLabel}
     let newLabel = updateLabel(label, current_EditableText);
 
     Div.innerHTML = `<div class="Head">
-  ${newLabel}
-  <div class="actions">
-      <button class="expand">
-        <i class="fa-solid fa-caret-down"></i>
-      </button>
-  </div>
- </div>
-${current_subContent}`;
+      ${newLabel}
+      <div class="actions">
+          <button class="note">
+            <i class="fa-solid fa-note-sticky"></i>
+          </button>
+          <button class="expand">
+            <i class="fa-solid fa-caret-down"></i>
+          </button>
+      </div>
+    </div>
+    ${current_subContent}`;
   }
 
   function updateSubLine(label, current_EditableText, Div) {
@@ -1018,6 +1026,7 @@ ${current_subContent}`;
       // Create new line when sub line is off
       const Div = document.createElement("div");
       Div.classList.add("line");
+      Div.id = generateLineId();
 
       updateLine(current_Label, "", Div);
 
@@ -1148,6 +1157,13 @@ ${current_subContent}`;
     const HeadContent = current_Line.querySelector(".inputContent").textContent;
 
     current_subLine = current_Line.querySelector(".sub-line-off");
+
+    if (current_subLine == null) {
+      current_subEditable = current_Line
+        .querySelector(".sub-line")
+        .querySelector(".inputSubContent");
+    }
+
     if (HeadContent == "") {
       current_Editable.focus();
     } else if (subLineActive) {
@@ -1278,6 +1294,9 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
             <ul class="inputContent" contenteditable="true"></ul>
           </div>
           <div class="actionsOff">
+           <button class="note">
+             <i class="fa-solid fa-note-sticky"></i>
+            </button>
             <button class="expand">
               <i class="fa-solid fa-caret-down"></i>
             </button>
@@ -2166,6 +2185,13 @@ export function initializeAditorCheckbox(inputSection, defaultValue) {
     const HeadContent = current_Line.querySelector(".inputContent").textContent;
 
     current_subLine = current_Line.querySelector(".sub-line-off");
+
+    if (current_subLine == null) {
+      current_subEditable = current_Line
+        .querySelector(".sub-line")
+        .querySelector(".inputSubContent");
+    }
+
     if (HeadContent == "") {
       current_Editable.focus();
     } else if (subLineActive) {
@@ -5998,6 +6024,13 @@ export function initializeAditor(inputSection, defaultValue) {
     const HeadContent = current_Line.querySelector(".inputContent").textContent;
 
     current_subLine = current_Line.querySelector(".sub-line-off");
+
+    if (current_subLine == null) {
+      current_subEditable = current_Line
+        .querySelector(".sub-line")
+        .querySelector(".inputSubContent");
+    }
+
     if (HeadContent == "") {
       current_Editable.focus();
     } else if (subLineActive) {
@@ -7766,6 +7799,119 @@ export function initializeAditorDate(inputSection) {
       indentFunc();
     }
   });
+}
+
+export function createAditor(line) {
+  let lines = "";
+  const subItems = line.querySelectorAll(".sub-Head");
+
+  subItems.forEach((item) => {
+    let label = item.querySelector("label").className;
+    let inputContent = item.querySelector(".inputSubContent").textContent;
+
+    if (label == "textLabel") {
+      lines += `<div class="line">
+                  <div class="Head">
+                    <label class="textLabel"></label>
+                    <div class="content">
+                      <ul class="inputContent" contenteditable="true">${inputContent}</ul>
+                    </div>
+                    <div class="actionsOff">
+                    <button class="expand">
+                      <i class="fa-solid fa-caret-down"></i>
+                    </button>
+                    </div>
+                  </div>
+                  <div class="sub-line-off">
+                    <div class="sub-Head">
+                      <label class="pointLabel">
+                        <input type="checkbox" /><span class="points"><i class="fa-solid fa-square"></i></span
+                      ></label>
+                      <div class="sub-content">
+                        <ul class="inputSubContent" contenteditable="true"></ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>`;
+    } else if (label == "pointLabel") {
+      lines += `<div class="line">
+                  <div class="Head">
+                  <label class="pointLabel">
+                    <input type="checkbox" /><span class="points"><i class="fa-solid fa-circle"></i></span
+                  ></label>
+                  <div class="content">
+                    <ul class="inputContent" contenteditable="true">${inputContent}</ul>
+                  </div>
+                  <div class="actionsOff">
+                      <button class="expand">
+                        <i class="fa-solid fa-caret-down"></i>
+                      </button>
+                      </div>
+                    </div>
+                    <div class="sub-line-off">
+                      <div class="sub-Head">
+                        <label class="pointLabel">
+                          <input type="checkbox" /><span class="points"><i class="fa-solid fa-square"></i></span
+                        ></label>
+                        <div class="sub-content">
+                          <ul class="inputSubContent" contenteditable="true"></ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>`;
+    } else if (label == "checkboxLabel") {
+      lines += `<div class="line">
+                  <div class="Head">
+                  <label class="checkboxLabel">
+                    <input type="checkbox"/><span class="unchecked"></span
+                  ></label>
+                  <div class="content">
+                    <ul class="inputContent" contenteditable="true">${inputContent}</ul>
+                  </div>
+                <div class="actionsOff">
+                    <button class="expand">
+                      <i class="fa-solid fa-caret-down"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="sub-line-off">
+                  <div class="sub-Head">
+                    <label class="checkboxLabel">
+                      <input type="checkbox"><span class="unchecked"></span></label>
+                    <div class="sub-content">
+                      <ul class="inputSubContent" contenteditable="true"></ul>
+                    </div>
+                  </div>
+                </div>
+              </div>`;
+    }
+  });
+
+  const finalAditor = `<div class="aditor">
+                        ${lines}
+                      </div>
+                      <div class="dropdownMenu" >
+                      <div class="icon headingBtn" tabindex="0">
+                        <span><i class="fa-solid fa-heading"></i></span>
+                      </div>
+                        <div class="icon textBtn active" tabindex="0">
+                          <span><i class="fa-solid fa-paragraph"></i></span>
+                        </div>
+                        <div class="icon pointBtn" tabindex="0">
+                          <span><i class="fa-solid fa-list"></i></span>
+                        </div>
+                        <div class="icon checkboxBtn" tabindex="0">
+                          <span><i class="fa-solid fa-square-check"></i></span>
+                        </div>
+                        <div class="icon dateBtn" tabindex="0">
+                            <span><i class="fa-solid fa-calendar"></i></span>
+                          </div>
+                        <div class="icon indentBtn" tabindex="0">
+                          <span><i class="fa-solid fa-indent"></i></span>
+                        </div>
+                      </div>`;
+
+  return finalAditor;
 }
 
 export function createAditorCheckbox(subItems) {

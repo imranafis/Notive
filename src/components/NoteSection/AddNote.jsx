@@ -22,10 +22,10 @@ import "/src/lib/aditor.css";
 import "./NoteSection.css";
 import Tag from "../Tag/Tag.jsx";
 
-function NoteSection() {
-  const Aditor_NoteSection = useRef(null);
+function AddNote() {
+  const Aditor_AddNote = useRef(null);
   const [NoteName, setNoteName] = useState("");
-  const [NoteSections, setNoteSections] = useState([]);
+  const [AddNotes, setAddNotes] = useState([]);
   const [ViewMode, setViewMode] = useState("currentNote");
   const [SelectedNote, setSelectedNote] = useState(null);
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -36,9 +36,9 @@ function NoteSection() {
     let storedContent = localStorage.getItem("noteContent") || "";
     setNoteName(localStorage.getItem("noteName") || "");
 
-    if (Aditor_NoteSection.current) {
-      initializeAditor(Aditor_NoteSection.current, storedContent);
-      Aditor_NoteSection.current.querySelector(".inputContent").focus();
+    if (Aditor_AddNote.current) {
+      initializeAditor(Aditor_AddNote.current, storedContent);
+      Aditor_AddNote.current.querySelector(".inputContent").focus();
     }
 
     setTagSuggestions([]);
@@ -49,8 +49,8 @@ function NoteSection() {
   }, [ViewMode]);
 
   useEffect(() => {
-    if (ViewMode !== "selected" && Aditor_NoteSection.current) {
-      const aditorElement = Aditor_NoteSection.current;
+    if (ViewMode !== "selected" && Aditor_AddNote.current) {
+      const aditorElement = Aditor_AddNote.current;
       const handleKeyUp = () => {
         const updatedContent = aditorElement.innerHTML;
         localStorage.setItem("noteContent", updatedContent);
@@ -62,10 +62,10 @@ function NoteSection() {
   }, [ViewMode]);
 
   useEffect(() => {
-    if (ViewMode === "selected" && SelectedNote && Aditor_NoteSection.current) {
+    if (ViewMode === "selected" && SelectedNote && Aditor_AddNote.current) {
       setNoteName(SelectedNote.noteName);
       setAddedTags(SelectedNote.tags || []);
-      initializeAditor(Aditor_NoteSection.current, SelectedNote.noteContent);
+      initializeAditor(Aditor_AddNote.current, SelectedNote.noteContent);
     }
   }, [SelectedNote]);
 
@@ -74,7 +74,7 @@ function NoteSection() {
       const userID = getUser().uid;
       const tagSuggestionsQuery = query(
         collection(db, userID),
-        where("category", "==", "NoteSection")
+        where("category", "==", "AddNote")
       );
 
       const snapshot = await getDocs(tagSuggestionsQuery);
@@ -99,7 +99,7 @@ function NoteSection() {
   };
 
   const saveNote = async () => {
-    const aditorElement = Aditor_NoteSection.current;
+    const aditorElement = Aditor_AddNote.current;
     const defaultValue =
       aditorElement?.querySelector(".inputContent")?.innerText;
 
@@ -116,7 +116,7 @@ function NoteSection() {
       const userID = getUser().uid;
 
       const NoteData = {
-        category: "NoteSection",
+        category: "AddNote",
         noteName:
           NoteName === "" ? truncateContent(updatedContent).trim() : NoteName,
         noteContent: updatedContent,
@@ -144,8 +144,8 @@ function NoteSection() {
         localStorage.setItem("noteName", "");
         setNoteName("");
         setAddedTags([]);
-        if (Aditor_NoteSection.current) {
-          initializeAditor(Aditor_NoteSection.current, "");
+        if (Aditor_AddNote.current) {
+          initializeAditor(Aditor_AddNote.current, "");
         }
       }
     } catch (e) {
@@ -161,13 +161,13 @@ function NoteSection() {
     try {
       const userID = getUser().uid;
       const userCollection = collection(db, userID);
-      const q = query(userCollection, where("category", "==", "NoteSection"));
+      const q = query(userCollection, where("category", "==", "AddNote"));
       const querySnapshot = await getDocs(q);
       const Notes = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setNoteSections(Notes);
+      setAddNotes(Notes);
     } catch (error) {
       toast.error("Failed to load Notes.", {
         position: "bottom-right",
@@ -211,9 +211,7 @@ function NoteSection() {
                 const NoteRef = doc(db, userID, NoteId);
                 await deleteDoc(NoteRef);
 
-                setNoteSections(
-                  NoteSections.filter((Note) => Note.id !== NoteId)
-                );
+                setAddNotes(AddNotes.filter((Note) => Note.id !== NoteId));
                 toast.dismiss(toastId);
                 toast.success("Note Journal deleted successfully!", {
                   position: "bottom-right",
@@ -279,8 +277,8 @@ function NoteSection() {
   };
 
   return (
-    <div className="NoteSection">
-      {ViewMode === "currentNote" && (
+    <div className="AddNote">
+      {(ViewMode === "currentNote" || ViewMode === "selected") && (
         <>
           <div className="NoteHeader">
             <input
@@ -297,9 +295,19 @@ function NoteSection() {
             >
               View All
             </button>
+            {ViewMode === "selected" && (
+              <button
+                onClick={() => {
+                  setViewMode("currentNote");
+                  setSelectedNote(null);
+                }}
+              >
+                Create new
+              </button>
+            )}
           </div>
 
-          <div ref={Aditor_NoteSection} className="Aditor_NoteSection"></div>
+          <div ref={Aditor_AddNote} className="Aditor_AddNote"></div>
           <div className="noteHeaderControls">
             <div className="tagContainer">
               <Tag
@@ -316,7 +324,7 @@ function NoteSection() {
       )}
 
       {ViewMode === "all" && (
-        <div className="NoteSection all">
+        <div className="AddNote all">
           <div className="NoteHeader">
             <button
               onClick={() => {
@@ -328,10 +336,10 @@ function NoteSection() {
           </div>
           <div className="NoteContainer">
             <div className="NoteGrid">
-              {NoteSections.length === 0 ? (
+              {AddNotes.length === 0 ? (
                 <p>No Note Journal added yet.</p>
               ) : (
-                NoteSections.map((Note) => (
+                AddNotes.map((Note) => (
                   <div
                     key={Note.id}
                     className="NoteCard"
@@ -387,49 +395,8 @@ function NoteSection() {
           </div>
         </div>
       )}
-
-      {/* ✅ Modal for Selected Note */}
-      {ViewMode === "selected" && SelectedNote && (
-        <div className="NoteModalOverlay" onClick={() => setViewMode("all")}>
-          <div
-            className="NoteModal"
-            onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
-          >
-            <div className="NoteHeader">
-              <input
-                type="text"
-                value={NoteName}
-                placeholder={"Note name"}
-                onChange={handleInputChange}
-              />
-              <button
-                onClick={() => {
-                  setViewMode("all");
-                  setSelectedNote(null);
-                }}
-              >
-                Close
-              </button>
-            </div>
-
-            <div ref={Aditor_NoteSection} className="Aditor_NoteSection"></div>
-            <div className="noteHeaderControls">
-              <div className="tagContainer">
-                <Tag
-                  tagSuggestions={tagSuggestions}
-                  onTagChange={handleTagChange}
-                  initialTags={addedTags}
-                />
-              </div>
-              <button className="saveNote" onClick={saveNote}>
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-export default NoteSection;
+export default AddNote;

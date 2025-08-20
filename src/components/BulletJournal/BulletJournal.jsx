@@ -10,7 +10,7 @@ import {
   Timestamp,
   deleteDoc,
 } from "firebase/firestore";
-import { db } from "/src/lib/firebase"; // Adjust the path to your firebase.js file
+import { db } from "/src/lib/firebase";
 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -20,9 +20,11 @@ import { getUser } from "/src/lib/user";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
 
-import { initializeAditorPoint } from "/src/lib/aditor.js";
+import { initializeAditor, initializeAditorPoint } from "/src/lib/aditor.js";
 import "/src/lib/aditor.css";
 import "./BulletJournal.css";
+
+import Tag from "../Tag/Tag.jsx"; // make sure it's imported
 
 function BulletJournal() {
   const Aditor_Point_BulletJournal = useRef(null);
@@ -32,6 +34,13 @@ function BulletJournal() {
   const [SelectedBullet, setSelectedBullet] = useState(null);
 
   const [activeDropdown, setActiveDropdown] = useState(null);
+
+  const [showNoteOverlay, setShowNoteOverlay] = useState(false);
+  const [notePayload, setNotePayload] = useState(null);
+  const overlayEditorRef = useRef(null);
+
+  const [addedTags, setAddedTags] = useState([]);
+  const [tagSuggestions, setTagSuggestions] = useState([]);
 
   // Get current date
   const currentDate = new Date();
@@ -48,6 +57,50 @@ function BulletJournal() {
       : `${monthDayYear} | ${weekday}`;
 
   // Load data from local storage
+
+  const fetchTagsSuggestions = async () => {
+    try {
+      const userID = getUser().uid;
+      const tagSuggestionsQuery = query(
+        collection(db, userID),
+        where("category", "==", "NoteSection")
+      );
+
+      const snapshot = await getDocs(tagSuggestionsQuery);
+      const defaults = ["Personal", "Work", "Others"];
+      const dynamic = snapshot.docs
+        .flatMap((doc) => doc.data().tags || [])
+        .filter(Boolean);
+      const combined = [...new Set([...defaults, ...dynamic])];
+      setTagSuggestions(combined);
+    } catch (error) {
+      console.error("Error fetching note tags:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (showNoteOverlay && overlayEditorRef.current) {
+      initializeAditor(overlayEditorRef.current, notePayload?.content || "");
+    }
+  }, [showNoteOverlay, notePayload]);
+
+  useEffect(() => {
+    const handler = (e) => {
+      setNotePayload({
+        id: e.detail.id,
+        noteName: e.detail.NoteName,
+        content: e.detail.Aditor_NoteSection,
+      });
+      setShowNoteOverlay(true);
+    };
+    fetchTagsSuggestions();
+    window.addEventListener("AddNote_fromBullet", handler);
+
+    return () => {
+      window.removeEventListener("AddNote_fromBullet", handler);
+    };
+  }, []);
+
   useEffect(() => {
     const storedDate = localStorage.getItem("bulletDate") || "";
     let storedContent = localStorage.getItem("bulletContent") || "";
@@ -310,8 +363,96 @@ function BulletJournal() {
     setActiveDropdown(null);
   };
 
+  const saveNote = async () => {
+    const updatedContent = overlayEditorRef.current.innerHTML;
+    const userID = getUser().uid;
+
+    const NoteData = {
+      category: "NoteSection",
+      noteName: notePayload.noteName,
+      noteContent: updatedContent,
+      tags: addedTags,
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      const userCollection = collection(db, userID);
+      await addDoc(userCollection, NoteData);
+      toast.success("Note saved successfully!", {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+
+      // ✅ Remove the div by lineID from BulletJournal editor
+      if (Aditor_Point_BulletJournal.current) {
+        const lineDiv = Aditor_Point_BulletJournal.current.querySelector(
+          `#${notePayload.id}`
+        );
+        if (lineDiv) {
+          lineDiv.remove();
+
+          // ✅ Update localStorage after removal
+          const newBulletContent = Aditor_Point_BulletJournal.current.innerHTML;
+          localStorage.setItem("bulletContent", newBulletContent);
+        }
+      }
+
+      const event = new CustomEvent("NoteSaved", {
+        detail: { id: notePayload.id },
+      });
+      window.dispatchEvent(event);
+
+      setShowNoteOverlay(false);
+    } catch (err) {
+      toast.error("Failed to save Note", {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+    }
+  };
+
   return (
     <div className="bulletJournal">
+      {showNoteOverlay && (
+        <div
+          className="NoteModalOverlay"
+          onClick={() => setShowNoteOverlay(false)}
+        >
+          <div
+            className="NoteModal"
+            onClick={(e) => e.stopPropagation()} // prevent closing on inner click
+          >
+            <div className="NoteHeader">
+              <input
+                type="text"
+                value={notePayload?.noteName || ""}
+                onChange={(e) =>
+                  setNotePayload({ ...notePayload, noteName: e.target.value })
+                }
+              />
+              <button onClick={() => setShowNoteOverlay(false)}>Close</button>
+            </div>
+
+            {/* ✅ Aditor */}
+            <div ref={overlayEditorRef} className="Aditor_NoteSection"></div>
+
+            <div className="noteHeaderControls">
+              <div className="tagContainer">
+                <Tag
+                  tagSuggestions={tagSuggestions}
+                  onTagChange={setAddedTags}
+                  initialTags={addedTags}
+                />
+              </div>
+
+              <button className="saveNote" onClick={saveNote}>
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {ViewMode == "today" && (
         <>
           <div className="bulletHeader">
