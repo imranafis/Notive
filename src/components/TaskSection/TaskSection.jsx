@@ -97,7 +97,7 @@ const TaskSection = ({
       }
 
       const newBreakdown = docRef.body.innerHTML;
-
+      console.log(newBreakdown);
       await updateDoc(breakdownRef, {
         breakdown: newBreakdown,
       });

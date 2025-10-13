@@ -26,9 +26,13 @@ function NoteSection() {
   const Aditor_NoteSection = useRef(null);
   const [NoteName, setNoteName] = useState("");
   const [NoteSections, setNoteSections] = useState([]);
-  const [ViewMode, setViewMode] = useState("currentNote");
+  const [TaskNotes, setTaskNotes] = useState([]);
+  const [ProjectNotes, setProjectNotes] = useState([]);
+  const [ViewMode, setViewMode] = useState("all");
+  const [FilterMode, setFilterMode] = useState("all"); // "all", "notes", "tasks", "projects"
   const [SelectedNote, setSelectedNote] = useState(null);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [addedTags, setAddedTags] = useState([]);
   const [tagSuggestions, setTagSuggestions] = useState([]);
 
@@ -44,8 +48,11 @@ function NoteSection() {
     setTagSuggestions([]);
     setAddedTags([]);
     fetchAllNotes();
+    fetchTaskNotes();
+    fetchProjectNotes();
     fetchTagsSuggestions();
     setActiveDropdown(null);
+    setFilterDropdownOpen(false);
   }, [ViewMode]);
 
   useEffect(() => {
@@ -89,6 +96,90 @@ function NoteSection() {
     }
   };
 
+  const fetchTaskNotes = async () => {
+    try {
+      const userID = getUser().uid;
+      const userCollection = collection(db, userID);
+      const q = query(userCollection, where("category", "==", "task"));
+      const querySnapshot = await getDocs(q);
+
+      // Filter tasks that have notes
+      const Tasks = querySnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter((task) => {
+          // Check if note exists and has content
+          if (!task.note) return false;
+          const parser = new DOMParser();
+          const docNote = parser.parseFromString(task.note, "text/html");
+          const noteContent = docNote.querySelector(".inputContent")?.innerText;
+          return noteContent && noteContent.trim() !== "";
+        })
+        .map((task) => ({
+          id: task.id,
+          noteName: task.name,
+          noteContent: task.note,
+          tags: task.tags || [],
+          createdAt: task.createdAt,
+          isTaskNote: true, // Flag to identify task notes
+        }));
+
+      setTaskNotes(Tasks);
+    } catch (error) {
+      console.error("Error fetching task notes:", error);
+      toast.error("Failed to load task notes.", {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+    }
+  };
+
+  const fetchProjectNotes = async () => {
+    try {
+      const userID = getUser().uid;
+      const userCollection = collection(db, userID);
+      const q = query(
+        userCollection,
+        where("category", "==", "goal"),
+        where("subCategory", "==", "project")
+      );
+      const querySnapshot = await getDocs(q);
+
+      // Filter projects that have notes
+      const Projects = querySnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter((project) => {
+          // Check if note exists and has content
+          if (!project.note) return false;
+          const parser = new DOMParser();
+          const docNote = parser.parseFromString(project.note, "text/html");
+          const noteContent = docNote.querySelector(".inputContent")?.innerText;
+          return noteContent && noteContent.trim() !== "";
+        })
+        .map((project) => ({
+          id: project.id,
+          noteName: project.goalName,
+          noteContent: project.note,
+          tags: project.tags || [],
+          createdAt: project.createdAt,
+          isProjectNote: true, // Flag to identify project notes
+        }));
+
+      setProjectNotes(Projects);
+    } catch (error) {
+      console.error("Error fetching project notes:", error);
+      toast.error("Failed to load project notes.", {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+    }
+  };
+
   const handleTagChange = (newTags) => {
     setAddedTags(newTags);
   };
@@ -115,37 +206,65 @@ function NoteSection() {
       const updatedContent = aditorElement.innerHTML;
       const userID = getUser().uid;
 
-      const NoteData = {
-        category: "NoteSection",
-        noteName:
-          NoteName === "" ? truncateContent(updatedContent).trim() : NoteName,
-        noteContent: updatedContent,
-        tags: addedTags,
-        createdAt: new Date().toISOString(),
-      };
-
-      if (SelectedNote) {
+      // Check if it's a task note
+      if (SelectedNote?.isTaskNote) {
+        // Update only the note field of the task
         const docRef = doc(db, userID, SelectedNote.id);
-        await updateDoc(docRef, NoteData);
-        toast.success("Note updated successfully!", {
+        await updateDoc(docRef, {
+          note: updatedContent,
+        });
+        toast.success("Task note updated successfully!", {
           position: "bottom-right",
           autoClose: 2000,
         });
         setSelectedNote(null);
-      } else {
-        const userCollection = collection(db, userID);
-        await addDoc(userCollection, NoteData);
-        toast.success("Note saved successfully!", {
+        fetchTaskNotes(); // Refresh task notes
+      } else if (SelectedNote?.isProjectNote) {
+        // Update only the note field of the project
+        const docRef = doc(db, userID, SelectedNote.id);
+        await updateDoc(docRef, {
+          note: updatedContent,
+        });
+        toast.success("Project note updated successfully!", {
           position: "bottom-right",
           autoClose: 2000,
         });
+        setSelectedNote(null);
+        fetchProjectNotes(); // Refresh project notes
+      } else {
+        // Regular note save/update logic
+        const NoteData = {
+          category: "NoteSection",
+          noteName:
+            NoteName === "" ? truncateContent(updatedContent).trim() : NoteName,
+          noteContent: updatedContent,
+          tags: addedTags,
+          createdAt: new Date().toISOString(),
+        };
 
-        localStorage.setItem("noteContent", "");
-        localStorage.setItem("noteName", "");
-        setNoteName("");
-        setAddedTags([]);
-        if (Aditor_NoteSection.current) {
-          initializeAditor(Aditor_NoteSection.current, "");
+        if (SelectedNote) {
+          const docRef = doc(db, userID, SelectedNote.id);
+          await updateDoc(docRef, NoteData);
+          toast.success("Note updated successfully!", {
+            position: "bottom-right",
+            autoClose: 2000,
+          });
+          setSelectedNote(null);
+        } else {
+          const userCollection = collection(db, userID);
+          await addDoc(userCollection, NoteData);
+          toast.success("Note saved successfully!", {
+            position: "bottom-right",
+            autoClose: 2000,
+          });
+
+          localStorage.setItem("noteContent", "");
+          localStorage.setItem("noteName", "");
+          setNoteName("");
+          setAddedTags([]);
+          if (Aditor_NoteSection.current) {
+            initializeAditor(Aditor_NoteSection.current, "");
+          }
         }
       }
     } catch (e) {
@@ -278,6 +397,20 @@ function NoteSection() {
     }
   };
 
+  // Get filtered notes based on FilterMode
+  const getFilteredNotes = () => {
+    if (FilterMode === "notes") {
+      return NoteSections;
+    } else if (FilterMode === "tasks") {
+      return TaskNotes;
+    } else if (FilterMode === "projects") {
+      return ProjectNotes;
+    } else {
+      // Return all notes combined
+      return [...NoteSections, ...TaskNotes, ...ProjectNotes];
+    }
+  };
+
   return (
     <div className="NoteSection">
       {ViewMode === "currentNote" && (
@@ -325,13 +458,79 @@ function NoteSection() {
             >
               Create new
             </button>
+            <div className="filterDropdownContainer">
+              <div
+                className="filterBtn"
+                onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
+              >
+                <i className="fa-solid fa-filter"></i>
+              </div>
+              {filterDropdownOpen && (
+                <div className="filterDropdown">
+                  <div
+                    className={`filterDropdownItem ${
+                      FilterMode === "all" ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setFilterMode("all");
+                      setFilterDropdownOpen(false);
+                    }}
+                  >
+                    All
+                  </div>
+                  <div
+                    className={`filterDropdownItem ${
+                      FilterMode === "notes" ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setFilterMode("notes");
+                      setFilterDropdownOpen(false);
+                    }}
+                  >
+                    Notes
+                  </div>
+                  <div
+                    className={`filterDropdownItem ${
+                      FilterMode === "tasks" ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setFilterMode("tasks");
+                      setFilterDropdownOpen(false);
+                    }}
+                  >
+                    Task Notes
+                  </div>
+                  <div
+                    className={`filterDropdownItem ${
+                      FilterMode === "projects" ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setFilterMode("projects");
+                      setFilterDropdownOpen(false);
+                    }}
+                  >
+                    Project Notes
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           <div className="NoteContainer">
             <div className="NoteGrid">
-              {NoteSections.length === 0 ? (
-                <p>No Note Journal added yet.</p>
+              {getFilteredNotes().length === 0 ? (
+                <p>
+                  No{" "}
+                  {FilterMode === "tasks"
+                    ? "Task Notes"
+                    : FilterMode === "projects"
+                    ? "Project Notes"
+                    : FilterMode === "notes"
+                    ? "Notes"
+                    : "Notes"}{" "}
+                  added yet.
+                </p>
               ) : (
-                NoteSections.map((Note) => (
+                getFilteredNotes().map((Note) => (
                   <div
                     key={Note.id}
                     className="NoteCard"
@@ -339,7 +538,15 @@ function NoteSection() {
                       handleSelectedNote(Note);
                     }}
                   >
-                    <div className="content">{Note.noteName}</div>
+                    <div className="content">
+                      {Note.noteName}
+                      {Note.isTaskNote && (
+                        <span className="taskBadge">Task</span>
+                      )}
+                      {Note.isProjectNote && (
+                        <span className="projectBadge">Project</span>
+                      )}
+                    </div>
                     <div
                       className="NoteActions"
                       onClick={(e) => e.stopPropagation()}
@@ -367,15 +574,17 @@ function NoteSection() {
                             >
                               View
                             </div>
-                            <div
-                              className="dropdown-item"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteNote(Note.id);
-                              }}
-                            >
-                              Delete
-                            </div>
+                            {!Note.isTaskNote && !Note.isProjectNote && (
+                              <div
+                                className="dropdown-item"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteNote(Note.id);
+                                }}
+                              >
+                                Delete
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -388,19 +597,17 @@ function NoteSection() {
         </div>
       )}
 
-      {/* ✅ Modal for Selected Note */}
+      {/* Modal for Selected Note */}
       {ViewMode === "selected" && SelectedNote && (
         <div className="NoteModalOverlay" onClick={() => setViewMode("all")}>
-          <div
-            className="NoteModal"
-            onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
-          >
+          <div className="NoteModal" onClick={(e) => e.stopPropagation()}>
             <div className="NoteHeader">
               <input
                 type="text"
                 value={NoteName}
                 placeholder={"Note name"}
                 onChange={handleInputChange}
+                disabled={SelectedNote.isTaskNote || SelectedNote.isProjectNote} // Disable name editing for task/project notes
               />
               <button
                 onClick={() => {
@@ -414,17 +621,26 @@ function NoteSection() {
 
             <div ref={Aditor_NoteSection} className="Aditor_NoteSection"></div>
             <div className="noteHeaderControls">
-              <div className="tagContainer">
-                <Tag
-                  tagSuggestions={tagSuggestions}
-                  onTagChange={handleTagChange}
-                  initialTags={addedTags}
-                />
-              </div>
+              {!SelectedNote.isTaskNote && !SelectedNote.isProjectNote && (
+                <div className="tagContainer">
+                  <Tag
+                    tagSuggestions={tagSuggestions}
+                    onTagChange={handleTagChange}
+                    initialTags={addedTags}
+                  />
+                </div>
+              )}
               <button className="saveNote" onClick={saveNote}>
                 Save
               </button>
             </div>
+            {(SelectedNote.isTaskNote || SelectedNote.isProjectNote) && (
+              <p className="taskNoteInfo">
+                Note: This is a {SelectedNote.isTaskNote ? "task" : "project"}{" "}
+                note. You can only update the content. To delete it, delete the{" "}
+                {SelectedNote.isTaskNote ? "task" : "project"}.
+              </p>
+            )}
           </div>
         </div>
       )}
