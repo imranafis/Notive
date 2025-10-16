@@ -389,7 +389,7 @@ function BulletJournal() {
           `#${notePayload.id}`
         );
         if (lineDiv) {
-          lineDiv.remove();
+          //lineDiv.remove();
 
           // ✅ Update localStorage after removal
           const newBulletContent = Aditor_Point_BulletJournal.current.innerHTML;

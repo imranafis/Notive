@@ -402,6 +402,7 @@ const DailySpace = ({
                 onStatusChange={(newStatus) =>
                   handleTaskStatusChange(goal.id, newStatus, "goal")
                 }
+                isNormalTask={true}
               />
               <span onClick={(e) => handleViewGoal(goal, false, e)}>
                 {goal.goalName}
@@ -482,6 +483,7 @@ const DailySpace = ({
                 onStatusChange={(newStatus) =>
                   handleTaskStatusChange(goal.id, newStatus, "goal")
                 }
+                isNormalTask={true}
               />
               <span onClick={(e) => handleViewGoal(goal, false, e)}>
                 {goal.goalName}

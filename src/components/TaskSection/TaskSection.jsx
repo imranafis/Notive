@@ -17,7 +17,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
 import TaskBox from "/src/components/others/TaskBox";
 
-// import AddTask from "./AddTask";
 import "./TaskSection.css";
 import { toast } from "react-toastify";
 
@@ -33,6 +32,8 @@ const TaskSection = ({
 }) => {
   const [tasks, setTasks] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
+  const [filterMode, setFilterMode] = useState("all"); // "all", "tasks", "projectTasks"
 
   const fetchTasks = async () => {
     try {
@@ -46,6 +47,7 @@ const TaskSection = ({
       const tasksList = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
+        isProjectTask: doc.data().goalId ? true : false,
       }));
       setTasks(tasksList);
     } catch (error) {
@@ -55,12 +57,7 @@ const TaskSection = ({
 
   useEffect(() => {
     fetchTasks();
-    //fetchProjectTasks();
   }, [addSection]);
-
-  // useEffect(() => {
-  //   fetchProjectTasks();
-  // }, []);
 
   const updateProjectTaskStatusChange = async (
     userID,
@@ -118,7 +115,7 @@ const TaskSection = ({
       const lineElement = docRef.querySelector(`#${lineId}`);
 
       if (lineElement && lineElement.parentNode) {
-        lineElement.parentNode.removeChild(lineElement); // ✅ REMOVE the line element
+        lineElement.parentNode.removeChild(lineElement);
       }
 
       const newBreakdown = docRef.body.innerHTML;
@@ -190,6 +187,7 @@ const TaskSection = ({
                 }
 
                 setTasks(tasks.filter((task) => task.id !== taskId));
+
                 toast.dismiss(toastId);
                 toast.success("Task deleted successfully!", {
                   position: "bottom-right",
@@ -253,16 +251,84 @@ const TaskSection = ({
     setFullScreenMode(fullScreen);
   };
 
+  const getFilteredTasks = () => {
+    if (filterMode === "tasks") {
+      return tasks.filter((task) => !task.isProjectTask);
+    } else if (filterMode === "projectTasks") {
+      return tasks.filter((task) => task.isProjectTask);
+    } else {
+      return tasks;
+    }
+  };
+
+  const filteredTasks = getFilteredTasks();
+
   return (
     <>
       <div className="taskSection">
-        <h2>Tasks</h2>
+        <div className="taskHeader">
+          <h2>Tasks</h2>
+          <div className="filterDropdownContainer">
+            <div
+              className="filterBtn"
+              onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
+            >
+              <i className="fa-solid fa-filter"></i>
+            </div>
+            {filterDropdownOpen && (
+              <div className="filterDropdown">
+                <div
+                  className={`filterDropdownItem ${
+                    filterMode === "all" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setFilterMode("all");
+                    setFilterDropdownOpen(false);
+                  }}
+                >
+                  All
+                </div>
+                <div
+                  className={`filterDropdownItem ${
+                    filterMode === "tasks" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setFilterMode("tasks");
+                    setFilterDropdownOpen(false);
+                  }}
+                >
+                  Tasks
+                </div>
+                <div
+                  className={`filterDropdownItem ${
+                    filterMode === "projectTasks" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setFilterMode("projectTasks");
+                    setFilterDropdownOpen(false);
+                  }}
+                >
+                  Project Tasks
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="taskContainer">
           <div className="taskGrid">
-            {tasks.length === 0 ? (
-              <p>No tasks available</p>
+            {filteredTasks.length === 0 ? (
+              <p>
+                No{" "}
+                {filterMode === "tasks"
+                  ? "Tasks"
+                  : filterMode === "projectTasks"
+                  ? "Project Tasks"
+                  : "Tasks"}{" "}
+                available
+              </p>
             ) : (
-              tasks.map((task) => (
+              filteredTasks.map((task) => (
                 <div key={task.id} className="taskItem">
                   <TaskBox
                     status={task.status}
@@ -272,6 +338,9 @@ const TaskSection = ({
                   />
                   <span onClick={(e) => handleViewTask(task, false, e)}>
                     {task.name}
+                    {task.isProjectTask && (
+                      <span className="projectTaskBadge">Project</span>
+                    )}
                   </span>
 
                   <div className="dropdown-container">
@@ -333,20 +402,6 @@ const TaskSection = ({
           </div>
         </div>
       </div>
-      {/* 
-      {addSection && (
-        <AddTask
-          setAddSection={setAddSection}
-          selectedItem={selectedItem}
-          setSelectedItem={setSelectedItem}
-          fullScreenMode={fullScreenMode}
-          onClose={() => {
-            setAddSection("");
-            setSelectedItem(null);
-            setFullScreenMode(false);
-          }}
-        />
-      )} */}
     </>
   );
 };
