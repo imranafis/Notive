@@ -31,10 +31,8 @@ const TaskBox = ({
           if (status === "unchecked") {
             newStatus = "working";
           } else if (status === "working") {
-            newStatus = "unchecked";
+            newStatus = "checked";
           } else if (status === "checked") {
-            newStatus = "unchecked";
-          } else {
             newStatus = "unchecked";
           }
         }
@@ -46,8 +44,23 @@ const TaskBox = ({
     } else if (clickCountRef.current === 2) {
       clearTimeout(clickTimeoutRef.current);
       // Double click logic
-      setStatus("checked");
-      onStatusChange("checked");
+
+      let newStatus;
+
+      if (isNormalTask) {
+        newStatus = status === "checked" ? "unchecked" : "checked";
+      } else {
+        if (status === "unchecked") {
+          newStatus = "checked";
+        } else if (status === "working") {
+          newStatus = "unchecked";
+        } else if (status === "checked") {
+          newStatus = "working";
+        }
+      }
+
+      setStatus(newStatus);
+      onStatusChange(newStatus);
       clickCountRef.current = 0;
     }
   };

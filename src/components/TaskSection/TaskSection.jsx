@@ -33,7 +33,9 @@ const TaskSection = ({
   const [tasks, setTasks] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
-  const [filterMode, setFilterMode] = useState("all"); // "all", "tasks", "projectTasks"
+  const [filterMode, setFilterMode] = useState("all"); // "all", "tasks", or goalId
+  const [goalNames, setGoalNames] = useState({}); // Map of goalId to goalName
+  const [uniqueGoals, setUniqueGoals] = useState([]); // Array of unique goalIds with their names
 
   const fetchTasks = async () => {
     try {
@@ -50,8 +52,51 @@ const TaskSection = ({
         isProjectTask: doc.data().goalId ? true : false,
       }));
       setTasks(tasksList);
+
+      // Fetch goal names for all project tasks
+      await fetchGoalNames(tasksList, userID);
     } catch (error) {
       console.error("Error fetching tasks:", error);
+    }
+  };
+
+  const fetchGoalNames = async (tasksList, userID) => {
+    try {
+      const goalMap = {};
+      const goalsSet = new Set();
+
+      // Collect unique goalIds from project tasks
+      for (const task of tasksList) {
+        if (task.isProjectTask && task.goalId) {
+          goalsSet.add(task.goalId);
+        }
+      }
+
+      // Fetch goal documents to get goalName
+      for (const goalId of goalsSet) {
+        try {
+          const goalRef = doc(db, userID, goalId);
+          const goalSnap = await getDoc(goalRef);
+          if (goalSnap.exists()) {
+            const goalName = goalSnap.data().goalName || "Unnamed Goal";
+            goalMap[goalId] = goalName;
+          }
+        } catch (error) {
+          console.error(`Error fetching goal ${goalId}:`, error);
+          goalMap[goalId] = "Unknown Goal";
+        }
+      }
+
+      setGoalNames(goalMap);
+
+      // Create array of unique goals with their names
+      const goals = Array.from(goalsSet).map((goalId) => ({
+        goalId,
+        goalName: goalMap[goalId],
+      }));
+      setUniqueGoals(goals);
+    } catch (error) {
+      console.error("Error fetching goal names:", error);
     }
   };
 
@@ -254,8 +299,9 @@ const TaskSection = ({
   const getFilteredTasks = () => {
     if (filterMode === "tasks") {
       return tasks.filter((task) => !task.isProjectTask);
-    } else if (filterMode === "projectTasks") {
-      return tasks.filter((task) => task.isProjectTask);
+    } else if (filterMode !== "all") {
+      // filterMode is a goalId
+      return tasks.filter((task) => task.goalId === filterMode);
     } else {
       return tasks;
     }
@@ -297,19 +343,22 @@ const TaskSection = ({
                     setFilterDropdownOpen(false);
                   }}
                 >
-                  Tasks
+                  Undefined Projects
                 </div>
-                <div
-                  className={`filterDropdownItem ${
-                    filterMode === "projectTasks" ? "active" : ""
-                  }`}
-                  onClick={() => {
-                    setFilterMode("projectTasks");
-                    setFilterDropdownOpen(false);
-                  }}
-                >
-                  Project Tasks
-                </div>
+                {uniqueGoals.map((goal) => (
+                  <div
+                    key={goal.goalId}
+                    className={`filterDropdownItem ${
+                      filterMode === goal.goalId ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setFilterMode(goal.goalId);
+                      setFilterDropdownOpen(false);
+                    }}
+                  >
+                    {goal.goalName}
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -322,9 +371,9 @@ const TaskSection = ({
                 No{" "}
                 {filterMode === "tasks"
                   ? "Tasks"
-                  : filterMode === "projectTasks"
-                  ? "Project Tasks"
-                  : "Tasks"}{" "}
+                  : filterMode === "all"
+                  ? "Tasks"
+                  : `${goalNames[filterMode]} Tasks`}{" "}
                 available
               </p>
             ) : (
