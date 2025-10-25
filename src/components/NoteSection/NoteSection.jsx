@@ -9,6 +9,7 @@ import {
   doc,
   Timestamp,
   deleteDoc,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "/src/lib/firebase";
 import { toast } from "react-toastify";
@@ -22,19 +23,27 @@ import "/src/lib/aditor.css";
 import "./NoteSection.css";
 import Tag from "../Tag/Tag.jsx";
 
-function NoteSection() {
+function NoteSection({ addSection, setAddSection }) {
   const Aditor_NoteSection = useRef(null);
   const [NoteName, setNoteName] = useState("");
   const [NoteSections, setNoteSections] = useState([]);
   const [TaskNotes, setTaskNotes] = useState([]);
   const [ProjectNotes, setProjectNotes] = useState([]);
+  const [HabitDailyNotes, setHabitDailyNotes] = useState([]);
   const [ViewMode, setViewMode] = useState("all");
-  const [FilterMode, setFilterMode] = useState("all"); // "all", "notes", "tasks", "projects"
+  const [FilterMode, setFilterMode] = useState("all"); // "all", "notes", "tasks", "projects", "habits"
   const [SelectedNote, setSelectedNote] = useState(null);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [addedTags, setAddedTags] = useState([]);
   const [tagSuggestions, setTagSuggestions] = useState([]);
+
+  useEffect(() => {
+    if (addSection === "noteSection") {
+      setViewMode("currentNote");
+      setAddSection(""); // Reset addSection after handling
+    }
+  }, [addSection, setAddSection]);
 
   useEffect(() => {
     let storedContent = localStorage.getItem("noteContent") || "";
@@ -50,6 +59,7 @@ function NoteSection() {
     fetchAllNotes();
     fetchTaskNotes();
     fetchProjectNotes();
+    fetchHabitDailyNotes();
     fetchTagsSuggestions();
     setActiveDropdown(null);
     setFilterDropdownOpen(false);
@@ -72,7 +82,25 @@ function NoteSection() {
     if (ViewMode === "selected" && SelectedNote && Aditor_NoteSection.current) {
       setNoteName(SelectedNote.noteName);
       setAddedTags(SelectedNote.tags || []);
-      initializeAditor(Aditor_NoteSection.current, SelectedNote.noteContent);
+
+      // Handle habit Daily notes differently - display all daily notes
+      if (SelectedNote.isHabitNote) {
+        const dailyNotesHTML = Object.entries(SelectedNote.dailyNotes)
+          .sort(([dateA], [dateB]) => new Date(dateB) - new Date(dateA)) // Sort by date descending
+          .map(
+            ([date, content]) => `
+            <div class="habitDailyNoteEntry" data-date="${date}">
+              <div class="habitDateHeader">${date}</div>
+              <div class="dailyNoteContent" contenteditable="true">${content}</div>
+            </div>
+          `
+          )
+          .join("");
+
+        Aditor_NoteSection.current.innerHTML = dailyNotesHTML;
+      } else {
+        initializeAditor(Aditor_NoteSection.current, SelectedNote.noteContent);
+      }
     }
   }, [SelectedNote]);
 
@@ -180,34 +208,126 @@ function NoteSection() {
     }
   };
 
-  const handleTagChange = (newTags) => {
-    setAddedTags(newTags);
+  const fetchHabitDailyNotes = async () => {
+    try {
+      const userID = getUser().uid;
+      const userCollection = collection(db, userID);
+      const q = query(
+        userCollection,
+        where("category", "==", "goal"),
+        where("subCategory", "==", "habit")
+      );
+      const querySnapshot = await getDocs(q);
+
+      // Filter habits that have daily notes - keep as one card per habit
+      const Habits = querySnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter((habit) => {
+          // Check if dailyNotes exists and has at least one entry
+          return habit.dailyNotes && Object.keys(habit.dailyNotes).length > 0;
+        })
+        .map((habit) => ({
+          id: habit.id,
+          habitId: habit.id,
+          noteName: habit.goalName,
+          dailyNotes: habit.dailyNotes, // Keep all daily notes together
+          tags: habit.tags || [],
+          createdAt: habit.createdAt,
+          isHabitNote: true,
+        }));
+
+      setHabitDailyNotes(Habits);
+    } catch (error) {
+      console.error("Error fetching habit Daily notes:", error);
+      toast.error("Failed to load habit Daily notes.", {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+    }
   };
 
-  const handleSelectedNote = (Note) => {
-    setSelectedNote(Note);
-    setViewMode("selected");
+  const fetchAllNotes = async () => {
+    try {
+      const userID = getUser().uid;
+      const userCollection = collection(db, userID);
+      const q = query(userCollection, where("category", "==", "NoteSection"));
+      const querySnapshot = await getDocs(q);
+      const Notes = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setNoteSections(Notes);
+    } catch (error) {
+      toast.error("Failed to load Notes.", {
+        position: "bottom-right",
+        autoClose: 2000,
+      });
+    }
   };
 
   const saveNote = async () => {
     const aditorElement = Aditor_NoteSection.current;
-    const defaultValue =
-      aditorElement?.querySelector(".inputContent")?.innerText;
-
-    if (!defaultValue || defaultValue.trim() === "") {
-      toast.error("Note is required!", {
-        position: "bottom-right",
-        autoClose: 1000,
-      });
-      return;
-    }
 
     try {
       const updatedContent = aditorElement.innerHTML;
       const userID = getUser().uid;
 
+      // Check if it's a habit note
+      if (SelectedNote?.isHabitNote) {
+        // Collect all daily notes from the editor
+        const allDailyNoteDivsRef = {};
+        const dailyNoteSections = Aditor_NoteSection.current.querySelectorAll(
+          ".habitDailyNoteEntry"
+        );
+
+        if (dailyNoteSections.length === 0) {
+          toast.error("No daily notes found!", {
+            position: "bottom-right",
+            autoClose: 1000,
+          });
+          return;
+        }
+
+        dailyNoteSections.forEach((section) => {
+          const dateKey = section.getAttribute("data-date");
+          const contentDiv = section.querySelector(".dailyNoteContent");
+          if (dateKey && contentDiv) {
+            allDailyNoteDivsRef[dateKey] = contentDiv.innerHTML;
+          }
+        });
+
+        // Update all daily notes in the habit
+        const docRef = doc(db, userID, SelectedNote.habitId);
+
+        await updateDoc(docRef, {
+          dailyNotes: allDailyNoteDivsRef,
+        });
+
+        toast.success("Habit Daily notes updated successfully!", {
+          position: "bottom-right",
+          autoClose: 2000,
+        });
+        setSelectedNote(null);
+        fetchHabitDailyNotes(); // Refresh habit Daily notes
+        return;
+      }
       // Check if it's a task note
-      if (SelectedNote?.isTaskNote) {
+      else if (SelectedNote?.isTaskNote) {
+        const defaultValue =
+          aditorElement?.querySelector(".inputContent")?.innerText;
+
+        if (!defaultValue || defaultValue.trim() === "") {
+          toast.error("Note is required!", {
+            position: "bottom-right",
+            autoClose: 1000,
+          });
+          return;
+        }
+
+        const updatedContent = aditorElement.innerHTML;
         // Update only the note field of the task
         const docRef = doc(db, userID, SelectedNote.id);
         await updateDoc(docRef, {
@@ -220,6 +340,18 @@ function NoteSection() {
         setSelectedNote(null);
         fetchTaskNotes(); // Refresh task notes
       } else if (SelectedNote?.isProjectNote) {
+        const defaultValue =
+          aditorElement?.querySelector(".inputContent")?.innerText;
+
+        if (!defaultValue || defaultValue.trim() === "") {
+          toast.error("Note is required!", {
+            position: "bottom-right",
+            autoClose: 1000,
+          });
+          return;
+        }
+
+        const updatedContent = aditorElement.innerHTML;
         // Update only the note field of the project
         const docRef = doc(db, userID, SelectedNote.id);
         await updateDoc(docRef, {
@@ -232,6 +364,18 @@ function NoteSection() {
         setSelectedNote(null);
         fetchProjectNotes(); // Refresh project notes
       } else {
+        const defaultValue =
+          aditorElement?.querySelector(".inputContent")?.innerText;
+
+        if (!defaultValue || defaultValue.trim() === "") {
+          toast.error("Note is required!", {
+            position: "bottom-right",
+            autoClose: 1000,
+          });
+          return;
+        }
+
+        const updatedContent = aditorElement.innerHTML;
         // Regular note save/update logic
         const NoteData = {
           category: "NoteSection",
@@ -276,23 +420,13 @@ function NoteSection() {
     }
   };
 
-  const fetchAllNotes = async () => {
-    try {
-      const userID = getUser().uid;
-      const userCollection = collection(db, userID);
-      const q = query(userCollection, where("category", "==", "NoteSection"));
-      const querySnapshot = await getDocs(q);
-      const Notes = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setNoteSections(Notes);
-    } catch (error) {
-      toast.error("Failed to load Notes.", {
-        position: "bottom-right",
-        autoClose: 2000,
-      });
-    }
+  const handleTagChange = (newTags) => {
+    setAddedTags(newTags);
+  };
+
+  const handleSelectedNote = (Note) => {
+    setSelectedNote(Note);
+    setViewMode("selected");
   };
 
   const truncateContent = (content) => {
@@ -397,18 +531,32 @@ function NoteSection() {
     }
   };
 
-  // Get filtered notes based on FilterMode
   const getFilteredNotes = () => {
+    let notes = [];
     if (FilterMode === "notes") {
-      return NoteSections;
+      notes = NoteSections;
     } else if (FilterMode === "tasks") {
-      return TaskNotes;
+      notes = TaskNotes;
     } else if (FilterMode === "projects") {
-      return ProjectNotes;
+      notes = ProjectNotes;
+    } else if (FilterMode === "habits") {
+      notes = HabitDailyNotes;
     } else {
       // Return all notes combined
-      return [...NoteSections, ...TaskNotes, ...ProjectNotes];
+      notes = [
+        ...NoteSections,
+        ...TaskNotes,
+        ...ProjectNotes,
+        ...HabitDailyNotes,
+      ];
     }
+
+    // Sort by createdAt in descending order (newest first)
+    return notes.sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return dateB - dateA;
+    });
   };
 
   return (
@@ -511,6 +659,17 @@ function NoteSection() {
                   >
                     Project Notes
                   </div>
+                  <div
+                    className={`filterDropdownItem ${
+                      FilterMode === "habits" ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setFilterMode("habits");
+                      setFilterDropdownOpen(false);
+                    }}
+                  >
+                    Habit Daily Notes
+                  </div>
                 </div>
               )}
             </div>
@@ -524,6 +683,8 @@ function NoteSection() {
                     ? "Task Notes"
                     : FilterMode === "projects"
                     ? "Project Notes"
+                    : FilterMode === "habits"
+                    ? "Habit Daily Notes"
                     : FilterMode === "notes"
                     ? "Notes"
                     : "Notes"}{" "}
@@ -545,6 +706,9 @@ function NoteSection() {
                       )}
                       {Note.isProjectNote && (
                         <span className="projectBadge">Project</span>
+                      )}
+                      {Note.isHabitNote && (
+                        <span className="habitBadge">Habit</span>
                       )}
                     </div>
                     <div
@@ -574,17 +738,19 @@ function NoteSection() {
                             >
                               View
                             </div>
-                            {!Note.isTaskNote && !Note.isProjectNote && (
-                              <div
-                                className="dropdown-item"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteNote(Note.id);
-                                }}
-                              >
-                                Delete
-                              </div>
-                            )}
+                            {!Note.isTaskNote &&
+                              !Note.isProjectNote &&
+                              !Note.isHabitNote && (
+                                <div
+                                  className="dropdown-item"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteNote(Note.id);
+                                  }}
+                                >
+                                  Delete
+                                </div>
+                              )}
                           </div>
                         )}
                       </div>
@@ -607,7 +773,11 @@ function NoteSection() {
                 value={NoteName}
                 placeholder={"Note name"}
                 onChange={handleInputChange}
-                disabled={SelectedNote.isTaskNote || SelectedNote.isProjectNote} // Disable name editing for task/project notes
+                disabled={
+                  SelectedNote.isTaskNote ||
+                  SelectedNote.isProjectNote ||
+                  SelectedNote.isHabitNote
+                }
               />
               <button
                 onClick={() => {
@@ -621,24 +791,38 @@ function NoteSection() {
 
             <div ref={Aditor_NoteSection} className="Aditor_NoteSection"></div>
             <div className="noteHeaderControls">
-              {!SelectedNote.isTaskNote && !SelectedNote.isProjectNote && (
-                <div className="tagContainer">
-                  <Tag
-                    tagSuggestions={tagSuggestions}
-                    onTagChange={handleTagChange}
-                    initialTags={addedTags}
-                  />
-                </div>
-              )}
+              {!SelectedNote.isTaskNote &&
+                !SelectedNote.isProjectNote &&
+                !SelectedNote.isHabitNote && (
+                  <div className="tagContainer">
+                    <Tag
+                      tagSuggestions={tagSuggestions}
+                      onTagChange={handleTagChange}
+                      initialTags={addedTags}
+                    />
+                  </div>
+                )}
               <button className="saveNote" onClick={saveNote}>
                 Save
               </button>
             </div>
-            {(SelectedNote.isTaskNote || SelectedNote.isProjectNote) && (
+            {(SelectedNote.isTaskNote ||
+              SelectedNote.isProjectNote ||
+              SelectedNote.isHabitNote) && (
               <p className="taskNoteInfo">
-                Note: This is a {SelectedNote.isTaskNote ? "task" : "project"}{" "}
+                Note: This is a{" "}
+                {SelectedNote.isTaskNote
+                  ? "task"
+                  : SelectedNote.isProjectNote
+                  ? "project"
+                  : "habit"}{" "}
                 note. You can only update the content. To delete it, delete the{" "}
-                {SelectedNote.isTaskNote ? "task" : "project"}.
+                {SelectedNote.isTaskNote
+                  ? "task"
+                  : SelectedNote.isProjectNote
+                  ? "project"
+                  : "habit"}
+                .
               </p>
             )}
           </div>

@@ -49,7 +49,9 @@ function DisplayPanel({
           )}
         </>
       )}
-      {activeSection === "bulletJournal" && <BulletJournal />}
+      {activeSection === "bulletJournal" && (
+        <BulletJournal addSection={addSection} setAddSection={setAddSection} />
+      )}
       {activeSection === "dailyspace" && (
         <>
           <DailySpace
@@ -119,8 +121,9 @@ function DisplayPanel({
         </>
       )}
 
-      {activeSection === "noteSection" && <NoteSection />}
-      {/* {activeSection === "journal" && <JournalSection />} */}
+      {activeSection === "noteSection" && (
+        <NoteSection addSection={addSection} setAddSection={setAddSection} />
+      )}
     </>
   );
 }

@@ -42,6 +42,17 @@ const DailySpace = ({
   const [dailyTasks, setDailyTasks] = useState([]);
   const [doneDailyTasks, setDoneDailyTasks] = useState([]);
 
+  // Format date
+  const currentDate = new Date();
+  const weekday = currentDate.toLocaleDateString("en-US", { weekday: "long" });
+  const monthDayYear = currentDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const displayDate = `${monthDayYear} | ${weekday}`;
+  const today = dayjs().format("DD-MM-YY");
+
   const updateProjectTaskStatusChange = async (
     userID,
     goalId,
@@ -112,8 +123,6 @@ const DailySpace = ({
   };
 
   const handleTaskStatusChange = async (itemId, newStatus, itemCategory) => {
-    const today = dayjs().format("DD-MM-YY");
-
     try {
       const userID = getUser().uid;
       const taskRef = doc(db, userID, itemId);
@@ -135,6 +144,7 @@ const DailySpace = ({
         await updateDoc(taskRef, {
           status: newStatus,
           doneDate: newStatus === "checked" ? today : "",
+          done: newStatus === "checked" ? true : false,
         });
         fetchDailyTasks();
       }
@@ -161,6 +171,7 @@ const DailySpace = ({
       console.error("Error fetching working tasks:", error);
     }
   };
+
   const fetchDailyTasks = async () => {
     try {
       const userID = getUser().uid;
@@ -172,22 +183,123 @@ const DailySpace = ({
       const snapshot = await getDocs(tasksQuery);
 
       const tasks = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setDailyTasks(tasks.filter((t) => t.daily && t.doneDate == ""));
-      setDoneDailyTasks(tasks.filter((t) => t.daily && t.doneDate !== ""));
+
+      // Reset tasks that were completed on a different day and store completion date
+      const resetPromises = tasks
+        .filter((t) => t.daily && t.doneDate !== "" && t.doneDate !== today)
+        .map((task) => {
+          // Get existing completion history or initialize empty array
+          const completionHistory = task.completionHistory || [];
+
+          // Add the completion date if not already in history
+          if (!completionHistory.includes(task.doneDate)) {
+            completionHistory.push(task.doneDate);
+          }
+
+          return updateDoc(doc(db, userID, task.id), {
+            doneDate: "",
+            done: false,
+            status: "unchecked",
+            completionHistory: completionHistory,
+          });
+        });
+
+      await Promise.all(resetPromises);
+
+      // Refetch after reset to get updated data
+      const updatedSnapshot = await getDocs(tasksQuery);
+      const updatedTasks = updatedSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setDailyTasks(updatedTasks.filter((t) => t.daily && t.doneDate === ""));
+      setDoneDailyTasks(
+        updatedTasks.filter((t) => t.daily && t.doneDate !== "")
+      );
     } catch (error) {
       console.error("Error fetching daily tasks:", error);
     }
   };
 
-  // Format date
-  const currentDate = new Date();
-  const weekday = currentDate.toLocaleDateString("en-US", { weekday: "long" });
-  const monthDayYear = currentDate.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-  const displayDate = `${monthDayYear} | ${weekday}`;
+  const calculateCompletionStats = (goal) => {
+    const completionHistory = goal.completionHistory || [];
+    const createdAt = goal.createdAt;
+
+    // Get last 7 days dates (excluding today)
+    const last7Days = [];
+    for (let i = 1; i <= 7; i++) {
+      const date = dayjs().subtract(i, "day").format("DD-MM-YY");
+      last7Days.push(date);
+    }
+
+    // Count completions in last 7 days
+    const completionsInLast7Days = completionHistory.filter((date) =>
+      last7Days.includes(date)
+    ).length;
+
+    // If task is done today, add 1
+    const totalCompletions =
+      goal.doneDate === today
+        ? completionsInLast7Days + 1
+        : completionsInLast7Days;
+
+    // Format createdAt date - handle different formats
+    let formattedCreatedAt = "N/A";
+    if (createdAt) {
+      try {
+        // Check if it's a Firestore Timestamp
+        if (createdAt.toDate && typeof createdAt.toDate === "function") {
+          formattedCreatedAt = dayjs(createdAt.toDate()).format("MMM DD, YYYY");
+        }
+        // Check if it's already a Date object
+        else if (createdAt instanceof Date) {
+          formattedCreatedAt = dayjs(createdAt).format("MMM DD, YYYY");
+        }
+        // Check if it's a string or timestamp number
+        else {
+          formattedCreatedAt = dayjs(createdAt).format("MMM DD, YYYY");
+        }
+      } catch (error) {
+        console.error("Error formatting createdAt date:", error);
+        formattedCreatedAt = "N/A";
+      }
+    }
+
+    return {
+      createdAt: formattedCreatedAt,
+      completionCount: totalCompletions,
+      completionMessage:
+        totalCompletions > 0
+          ? `${totalCompletions} of 7 days completed`
+          : "0 of 7 days completed",
+    };
+  };
+
+  const handleShowGoalInfo = (goal, e) => {
+    e.stopPropagation();
+    const stats = calculateCompletionStats(goal);
+
+    toast.info(
+      <div style={{ lineHeight: "1.6" }}>
+        <div style={{ marginTop: "10px" }}>
+          <div>
+            <strong>Created:</strong> {stats.createdAt}
+          </div>
+          <div style={{ marginTop: "5px" }}>
+            <strong>Progress:</strong> {stats.completionMessage}
+          </div>
+        </div>
+      </div>,
+      {
+        position: "bottom-right",
+        autoClose: 5000,
+        closeOnClick: true,
+      }
+    );
+
+    setActiveDropdown(null);
+  };
 
   const handleDeleteTask = async (taskId) => {
     const toastId = toast.warn(
@@ -370,6 +482,7 @@ const DailySpace = ({
     setAddSection("viewTask");
     //setFullScreenMode(fullScreen);
   };
+
   const toggleDropdown = (itemId, e) => {
     e.stopPropagation();
     setActiveDropdown(activeDropdown === itemId ? null : itemId);
@@ -462,7 +575,7 @@ const DailySpace = ({
                       className="dropdown-item"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // handleDeleteGoal(goal.id);
+                        handleShowGoalInfo(goal, e);
                       }}
                     >
                       Info
@@ -543,7 +656,7 @@ const DailySpace = ({
                       className="dropdown-item"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // handleDeleteGoal(goal.id);
+                        handleShowGoalInfo(goal, e);
                       }}
                     >
                       Info

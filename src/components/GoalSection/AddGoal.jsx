@@ -208,6 +208,7 @@ function AddGoal({
           status: "unchecked",
           doneDate: "",
           note: updatedNoteContent,
+          completionHistory: [],
           createdAt: new Date().toISOString(),
         };
         await addDoc(collection(db, userID), goalData);
@@ -874,11 +875,9 @@ function AddGoal({
                       Object.entries(selectedItem.dailyNotes).map(
                         ([date, note]) => (
                           <div key={date}>
-                            <p>
-                              <strong>{date}</strong>
-                            </p>
+                            <p className="dateHeader">{date}</p>
                             <div
-                              className="dailyNoteDisplay"
+                              className="dailyNoteContent"
                               contentEditable={true}
                               ref={(el) => {
                                 if (el) {

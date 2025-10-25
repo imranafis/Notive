@@ -26,7 +26,7 @@ import "./BulletJournal.css";
 
 import Tag from "../Tag/Tag.jsx"; // make sure it's imported
 
-function BulletJournal() {
+function BulletJournal({ addSection, setAddSection }) {
   const Aditor_Point_BulletJournal = useRef(null);
   // const [BulletContent, setBulletContent] = useState("");
   const [BulletJournals, setBulletJournals] = useState([]);
@@ -56,27 +56,12 @@ function BulletJournal() {
       ? SelectedBullet.bulletDate
       : `${monthDayYear} | ${weekday}`;
 
-  // Load data from local storage
-
-  const fetchTagsSuggestions = async () => {
-    try {
-      const userID = getUser().uid;
-      const tagSuggestionsQuery = query(
-        collection(db, userID),
-        where("category", "==", "NoteSection")
-      );
-
-      const snapshot = await getDocs(tagSuggestionsQuery);
-      const defaults = ["Personal", "Work", "Others"];
-      const dynamic = snapshot.docs
-        .flatMap((doc) => doc.data().tags || [])
-        .filter(Boolean);
-      const combined = [...new Set([...defaults, ...dynamic])];
-      setTagSuggestions(combined);
-    } catch (error) {
-      console.error("Error fetching note tags:", error);
+  useEffect(() => {
+    if (addSection === "bulletJournal") {
+      setViewMode("today");
+      setAddSection(""); // Reset addSection after handling
     }
-  };
+  }, [addSection, setAddSection]);
 
   useEffect(() => {
     if (showNoteOverlay && overlayEditorRef.current) {
@@ -155,6 +140,26 @@ function BulletJournal() {
     }
   }, [SelectedBullet]);
 
+  const fetchTagsSuggestions = async () => {
+    try {
+      const userID = getUser().uid;
+      const tagSuggestionsQuery = query(
+        collection(db, userID),
+        where("category", "==", "NoteSection")
+      );
+
+      const snapshot = await getDocs(tagSuggestionsQuery);
+      const defaults = ["Personal", "Work", "Others"];
+      const dynamic = snapshot.docs
+        .flatMap((doc) => doc.data().tags || [])
+        .filter(Boolean);
+      const combined = [...new Set([...defaults, ...dynamic])];
+      setTagSuggestions(combined);
+    } catch (error) {
+      console.error("Error fetching note tags:", error);
+    }
+  };
+
   const handleSelectedBullet = (bullet) => {
     setSelectedBullet(bullet);
     setViewMode(bullet.bulletDate === todayDate ? "today" : "selected");
@@ -167,6 +172,7 @@ function BulletJournal() {
         bulletDate: storedDate,
         category: "bulletJournal",
         bulletContent: storedContent,
+        createdAt: new Date().toISOString(),
       };
 
       const userCollection = collection(db, userID);
@@ -221,6 +227,7 @@ function BulletJournal() {
         bulletDate: displayDate,
         category: "bulletJournal",
         bulletContent: updatedContent,
+        createdAt: new Date().toISOString(),
       };
 
       const userCollection = collection(db, userID);
@@ -263,6 +270,14 @@ function BulletJournal() {
         id: doc.id,
         ...doc.data(),
       }));
+
+      // Sort by bulletDate in descending order (newest first)
+      bullets.sort((a, b) => {
+        const dateA = new Date(a.bulletDate);
+        const dateB = new Date(b.bulletDate);
+        return dateB - dateA;
+      });
+
       setBulletJournals(bullets);
       // setViewAll(true);
     } catch (error) {
@@ -390,8 +405,6 @@ function BulletJournal() {
         );
         if (lineDiv) {
           //lineDiv.remove();
-
-          // ✅ Update localStorage after removal
           const newBulletContent = Aditor_Point_BulletJournal.current.innerHTML;
           localStorage.setItem("bulletContent", newBulletContent);
         }
