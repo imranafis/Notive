@@ -5259,7 +5259,8 @@ export function initializeAditor(inputSection, defaultValue) {
   // Add this after your aditor.addEventListener("keydown", ...) block
   aditor.addEventListener('input', (e) => {
   const target = e.target;
-
+  console.log(target)
+  
   if (target.classList.contains('inputContent') || 
       target.classList.contains('inputSubContent')) {
     
