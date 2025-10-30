@@ -5256,6 +5256,82 @@ export function initializeAditor(inputSection, defaultValue) {
     }
   });
 
+  // Add this after your aditor.addEventListener("keydown", ...) block
+  aditor.addEventListener('input', (e) => {
+  const target = e.target;
+
+  if (target.classList.contains('inputContent') || 
+      target.classList.contains('inputSubContent')) {
+    
+    const text = target.textContent;
+    const isSubLine = target.classList.contains('inputSubContent');
+    
+    // Update current editable
+    if (isSubLine) {
+      subLineActive = true;
+      current_subEditable = target;
+      current_Editable = target.closest('.line').querySelector('.inputContent');
+      updateElement();
+    } else {
+      subLineActive = false;
+      current_Editable = target;
+      updateElement();
+    }
+    
+    // Check for shortcuts followed by space
+    if (text.endsWith(' ')) {
+      const trimmed = text.trim();
+      
+      if (!isSubLine) {
+        if (trimmed === '#') {
+          target.textContent = '';
+          current_Label = "headingLabel";
+          headingFunc(current_Label);
+        } else if (trimmed === '>') {
+          target.textContent = '';
+          current_Label = "textLabel";
+          elementFunc(current_Label);
+        } else if (trimmed === '-') {
+          target.textContent = '';
+          current_Label = "pointLabel";
+          elementFunc(current_Label);
+        } else if (trimmed === '*') {
+          target.textContent = '';
+          current_Label = "checkboxLabel";
+          elementFunc(current_Label);
+        } else if (trimmed === '_') {
+          target.textContent = '';
+          if (current_Label == "headingLabel") {
+            const line = current_Editable.closest(".line");
+            headingActionBtn(line, "switch");
+            headingCollapse(line);
+          } else {
+            indentFunc();
+          }
+        }
+      } else {
+        // Sub-editable
+        if (trimmed === '>') {
+          target.textContent = '';
+          current_Label = "textLabel";
+          elementFunc(current_Label);
+        } else if (trimmed === '-') {
+          target.textContent = '';
+          current_Label = "pointLabel";
+          elementFunc(current_Label);
+        } else if (trimmed === '*') {
+          target.textContent = '';
+          current_Label = "checkboxLabel";
+          elementFunc(current_Label);
+        } else if (trimmed === '_') {
+          target.textContent = '';
+          indentFunc();
+        }
+      }
+    }
+  }
+  });
+
   // let oneTime = true;
 
   // if (defaultValue == "") {
