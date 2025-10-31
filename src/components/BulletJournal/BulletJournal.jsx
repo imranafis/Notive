@@ -476,7 +476,7 @@ function BulletJournal({ addSection, setAddSection }) {
                 setSelectedBullet(null);
               }}
             >
-              View All
+              View Allll
             </button>
           </div>
           <div
