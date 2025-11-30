@@ -5,7 +5,7 @@ import "./aditor.css";
 const Aditor_Checkbox = forwardRef(({ className, defaultValue = "" }, ref) => {
   useEffect(() => {
     if (ref && ref.current) {
-      initializeAditorCheckbox(ref.current, defaultValue); // Initialize with HTML structure
+      initializeAditorCheckbox(ref.current, defaultValue); // Initializec with HTML structure
     }
   }, [ref, defaultValue]);
 
