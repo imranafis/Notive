@@ -2,7 +2,7 @@
   "homepage": "https://imranafis.github.io/Notive/",
   "name": "notive",
   "private": false,
-  "version": "1.8.7",
+  "version": "1.8.8",
   "type": "module",
   "scripts": {
     "dev": "vite",
