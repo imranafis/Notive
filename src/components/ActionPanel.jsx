@@ -9,6 +9,8 @@ import {
   faListCheck,
   faBook,
   faPlus,
+  faCompress,
+  faExpand,
 } from "@fortawesome/free-solid-svg-icons";
 
 function ActionPanel({
@@ -22,11 +24,11 @@ function ActionPanel({
   const handleSectionChange = (panel) => {
     if (isFullScreen) {
       toggleFullScreen();
-      //console
     }
     setActiveSection(panel);
     setAddSection("");
   };
+
   const handleAddChange = () => {
     console.log(addSection);
     console.log(activeSection);
@@ -44,21 +46,18 @@ function ActionPanel({
       </div>
 
       <div className="sectionBtn" onClick={() => handleSectionChange("goal")}>
-        {/* <img src={goalBtn}/> */}
         <FontAwesomeIcon icon={faBullseye} />
       </div>
       <div
         className="sectionBtn"
         onClick={() => handleSectionChange("bulletJournal")}
       >
-        {/* <img src={noteBtn}/> */}
         <FontAwesomeIcon icon={faListUl} />
       </div>
       <div
         className="sectionBtn"
         onClick={() => handleSectionChange("taskSection")}
       >
-        {/* <img src={taskBtn}/> */}
         <FontAwesomeIcon icon={faListCheck} />
       </div>
       <div
@@ -66,21 +65,24 @@ function ActionPanel({
         onClick={() => handleSectionChange("dailyspace")}
       >
         <FontAwesomeIcon icon={faClock} />
-        {/* <img src={dailyBtn}/> */}
       </div>
       <div
         className="sectionBtn"
         onClick={() => handleSectionChange("noteSection")}
       >
         <FontAwesomeIcon icon={faBook} />
-        {/* <img src={journalBtn}/> */}
       </div>
       <div className="sectionBtn" onClick={() => handleAddChange()}>
         <FontAwesomeIcon className="addBtn" icon={faPlus} />
-        {/* <img src={dailyBtn}/> */}
       </div>
 
-      {/* <img src={spaceBtn} className="spaceBtn" /> */}
+      {/* Minimize/Maximize Button */}
+      <div className="sectionBtn" onClick={toggleFullScreen}>
+        <FontAwesomeIcon
+          icon={isFullScreen ? faCompress : faExpand}
+          title={isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+        />
+      </div>
     </>
   );
 }

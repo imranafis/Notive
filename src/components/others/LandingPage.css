@@ -212,6 +212,16 @@ h4 {
     }
      */
 
+.minimizeBtn {
+  font-size: 1.5rem;
+  opacity: 0.75;
+  transition: opacity 0.2s;
+}
+
+.minimizeBtn:hover {
+  opacity: 1;
+}
+
 .actionPanel {
   display: flex;
   flex-direction: column;
@@ -225,7 +235,7 @@ h4 {
 
   &.active {
     left: 0;
-    width: 10%;
+    width: 5%;
     height: 100%;
   }
 
@@ -272,8 +282,8 @@ h4 {
 
 .contentPanel.active {
   /* top: 7%;  */
-  left: 10%;
-  width: 90%;
+  left: 5%;
+  width: 95%;
   height: 100%;
 }
 /* 
