@@ -13,6 +13,14 @@ import {
   faExpand,
 } from "@fortawesome/free-solid-svg-icons";
 
+const NAV_ITEMS = [
+  { id: "dailyspace", icon: faClock, label: "Daily Space" },
+  { id: "goal", icon: faBullseye, label: "Goals" },
+  { id: "bulletJournal", icon: faListUl, label: "Bullet Journal" },
+  { id: "taskSection", icon: faListCheck, label: "Tasks" },
+  { id: "noteSection", icon: faBook, label: "Notes" },
+];
+
 function ActionPanel({
   activeSection,
   setActiveSection,
@@ -22,68 +30,47 @@ function ActionPanel({
   const { isFullScreen, toggleFullScreen } = useFullScreen();
 
   const handleSectionChange = (panel) => {
-    if (isFullScreen) {
-      toggleFullScreen();
-    }
+    if (isFullScreen) toggleFullScreen();
     setActiveSection(panel);
     setAddSection("");
   };
 
   const handleAddChange = () => {
-    console.log(addSection);
-    console.log(activeSection);
-    if (addSection != activeSection) {
-      setAddSection(activeSection);
-    } else {
-      setAddSection("");
-    }
+    setAddSection(addSection !== activeSection ? activeSection : "");
   };
 
   return (
     <>
+      {/* Logo / Home */}
       <div className="sectionBtn" onClick={() => handleSectionChange("")}>
-        <img src={Logo} />
+        <img src={Logo} alt="Home" />
       </div>
 
-      <div className="sectionBtn" onClick={() => handleSectionChange("goal")}>
-        <FontAwesomeIcon icon={faBullseye} />
+      <div className="actionBtns">
+        {/* Nav items */}
+        {NAV_ITEMS.map(({ id, icon, label }) => (
+          <div
+            key={id}
+            className={`sectionBtn ${activeSection === id ? "active" : ""}`}
+            onClick={() => handleSectionChange(id)}
+          >
+            <FontAwesomeIcon icon={icon} />
+            {!isFullScreen && <span className="sectionLabel">{label}</span>}
+          </div>
+        ))}
       </div>
-      <div
-        className="sectionBtn"
-        onClick={() => handleSectionChange("bulletJournal")}
-      >
-        <FontAwesomeIcon icon={faListUl} />
-      </div>
-      <div
-        className="sectionBtn"
-        onClick={() => handleSectionChange("taskSection")}
-      >
-        <FontAwesomeIcon icon={faListCheck} />
-      </div>
-      <div
-        className="sectionBtn"
-        onClick={() => handleSectionChange("dailyspace")}
-      >
-        <FontAwesomeIcon icon={faClock} />
-      </div>
-      <div
-        className="sectionBtn"
-        onClick={() => handleSectionChange("noteSection")}
-      >
-        <FontAwesomeIcon icon={faBook} />
-      </div>
-      <div className="sectionBtn" onClick={() => handleAddChange()}>
+
+      {/* Add button */}
+      <div className="sectionBtn" onClick={handleAddChange}>
         <FontAwesomeIcon className="addBtn" icon={faPlus} />
       </div>
 
-      {/* Minimize/Maximize Button */}
+      {/* Fullscreen toggle */}
       <div className="sectionBtn" onClick={toggleFullScreen}>
-        <FontAwesomeIcon
-          icon={isFullScreen ? faCompress : faExpand}
-          title={isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-        />
+        <FontAwesomeIcon icon={isFullScreen ? faCompress : faExpand} />
       </div>
     </>
   );
 }
+
 export default ActionPanel;
