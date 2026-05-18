@@ -171,6 +171,7 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
     z-index: 99;
     display: flex;
     justify-content: center;
@@ -178,6 +179,7 @@
   }
 
   .popupContent {
+    position: relative;
     background-color: #fff;
     padding: 2rem;
     border-radius: 12px;
@@ -190,12 +192,49 @@
     flex-direction: column;
     align-items: center;
 
+    .closeBtn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: none;
+      border: none;
+      color: #333;
+      cursor: pointer;
+      font-size: 1.4rem;
+      line-height: 1;
+      padding: 0.25rem;
+
+      &:hover {
+        color: red;
+      }
+    }
+
     .selectTask .selectTaskBar {
       display: flex;
       align-items: center;
       gap: 20px;
 
       margin-bottom: 2rem;
+    }
+
+    .selectTask .addTaskBtn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--primary);
+      border: none;
+      border-radius: 0.5rem;
+      box-shadow: var(--gray);
+      color: #fff;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 10px 12px;
+      opacity: 0.75;
+
+      &:hover {
+        opacity: 1;
+      }
     }
 
     .taskItem {

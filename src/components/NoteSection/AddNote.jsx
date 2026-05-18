@@ -62,6 +62,18 @@ function AddNote() {
   }, [ViewMode]);
 
   useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (e.target.closest(".dropdown-container")) return;
+      setActiveDropdown(null);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
     if (ViewMode === "selected" && SelectedNote && Aditor_AddNote.current) {
       setNoteName(SelectedNote.noteName);
       setAddedTags(SelectedNote.tags || []);

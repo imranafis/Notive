@@ -1,10 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "./TaskBox.css";
 
 const TaskBox = ({
   status: initialStatus,
   onStatusChange,
   isNormalTask = false,
+  disabled = false,
 }) => {
   const [status, setStatus] = useState(initialStatus ?? "unchecked");
   const timerRef = useRef(null);
@@ -12,7 +13,13 @@ const TaskBox = ({
   const clickTimeoutRef = useRef(null);
   const clickCountRef = useRef(0);
 
+  useEffect(() => {
+    setStatus(initialStatus ?? "unchecked");
+  }, [initialStatus]);
+
   const handleClick = () => {
+    if (disabled || !onStatusChange) return;
+
     if (longPressTriggeredRef.current) {
       longPressTriggeredRef.current = false;
       return;
@@ -66,6 +73,8 @@ const TaskBox = ({
   };
 
   const handleLongPressStart = () => {
+    if (disabled || !onStatusChange) return;
+
     timerRef.current = setTimeout(() => {
       setStatus("checked");
       onStatusChange("checked");
@@ -74,6 +83,8 @@ const TaskBox = ({
   };
 
   const handleLongPressEnd = () => {
+    if (disabled) return;
+
     clearTimeout(timerRef.current);
   };
 

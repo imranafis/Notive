@@ -8,6 +8,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   deleteDoc,
 } from "firebase/firestore";
 import { db } from "/src/lib/firebase";
@@ -44,6 +45,7 @@ const AddTask = ({
   const [Note, setNote] = useState("");
   const [BreakdownContent, setBreakdownContent] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState("unchecked");
 
   useEffect(() => {
     if (selectedItem) {
@@ -55,6 +57,7 @@ const AddTask = ({
       setAddedTags(selectedItem.tags || []);
       setNote(selectedItem.note || "");
       setBreakdownContent(selectedItem.breakdown || "");
+      setSelectedStatus(selectedItem.status || "unchecked");
       setSelectedDate(
         selectedItem.deadline ? dayjs(selectedItem.deadline.toDate()) : null
       );
@@ -90,14 +93,6 @@ const AddTask = ({
       }
       if (selectedItem.breakdown && breakdownContent) {
         newActiveSections.push("breakdown");
-      }
-      if (
-        selectedItem.priority ||
-        selectedItem.size ||
-        selectedItem.tags ||
-        selectedItem.deadline
-      ) {
-        newActiveSections.push("details");
       }
       setActiveSection(newActiveSections);
     } else {
@@ -160,6 +155,93 @@ const AddTask = ({
     setInputValue(e.target.value);
   };
 
+  const updateProjectTaskStatusChange = async (
+    userID,
+    goalId,
+    lineId,
+    newStatus
+  ) => {
+    try {
+      const breakdownRef = doc(db, userID, goalId);
+      const breakdownSnap = await getDoc(breakdownRef);
+      const breakdown = breakdownSnap.data().breakdown;
+
+      const parser = new DOMParser();
+      const docRef = parser.parseFromString(breakdown, "text/html");
+      const lineElement = docRef.querySelector(`#${lineId}`);
+
+      if (!lineElement) return;
+
+      const mainSpan = lineElement.querySelector(".Head .checkboxLabel span");
+      if (mainSpan) {
+        mainSpan.classList.remove("checked", "unchecked");
+        mainSpan.classList.add(newStatus);
+      }
+
+      const subLine = lineElement.querySelector(".sub-line");
+      if (subLine) {
+        const subSpans = lineElement.querySelectorAll(
+          ".sub-Head .checkboxLabel span"
+        );
+        subSpans.forEach((span) => {
+          span.classList.remove("checked", "unchecked");
+          span.classList.add(newStatus);
+        });
+      }
+
+      await updateDoc(breakdownRef, {
+        breakdown: docRef.body.innerHTML,
+      });
+    } catch (error) {
+      console.error("Error updating task status in breakdown:", error);
+    }
+  };
+
+  const updateTaskStatus = async (newStatus) => {
+    if (!selectedItem) return;
+
+    try {
+      const userID = getUser().uid;
+      const taskRef = doc(db, userID, selectedItem.id);
+      const doneDate = newStatus === "checked" ? dayjs().format("DD-MM-YY") : "";
+
+      if (
+        selectedItem.goalId &&
+        (newStatus === "checked" || newStatus === "unchecked")
+      ) {
+        updateProjectTaskStatusChange(
+          userID,
+          selectedItem.goalId,
+          selectedItem.id,
+          newStatus
+        );
+      }
+
+      await updateDoc(taskRef, {
+        status: newStatus,
+        doneDate,
+        dailySpaceDate: dayjs().format("DD-MM-YY"),
+      });
+
+      setSelectedStatus(newStatus);
+      setSelectedItem((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: newStatus,
+              doneDate,
+              dailySpaceDate: dayjs().format("DD-MM-YY"),
+            }
+          : prev
+      );
+    } catch (error) {
+      console.error("Failed to update task status:", error);
+      toast.error("Failed to update status. Please try again.", {
+        position: "bottom-right",
+      });
+    }
+  };
+
   const addTask = async () => {
     if (!inputValue.trim()) {
       toast.error("Task name is required!", { position: "bottom-right" });
@@ -179,13 +261,15 @@ const AddTask = ({
         size: selectedLevel,
         tags: addedTags,
         note: updatedNoteContent,
-        status: addSection == "viewTask" ? "working" : "unchecked",
+        status: "unchecked",
         breakdown: updatedBreakdownContent,
         deadline: selectedDate
           ? Timestamp.fromDate(new Date(selectedDate))
           : null,
         createdAt: new Date().toISOString(),
         doneDate: "",
+        dailySpaceDate:
+          addSection == "viewTask" ? dayjs().format("DD-MM-YY") : "",
       };
 
       await addDoc(collection(db, userID), taskData);
@@ -328,6 +412,7 @@ const AddTask = ({
     setSelectedLevel("");
     setNote("");
     setBreakdownContent("");
+    setSelectedStatus("unchecked");
     setActiveSection([]);
     setSelectedDate(null);
     setSelectedItem(null);
@@ -338,8 +423,11 @@ const AddTask = ({
   };
 
   return (
-    <div className={`AddTask${fullScreenMode ? "fullScreen" : ""}`}>
-      <div className="panel">
+    <div
+      className={`AddTask${fullScreenMode ? "fullScreen" : ""}`}
+      onClick={handleCloseTask}
+    >
+      <div className="panel" onClick={(e) => e.stopPropagation()}>
         <button className="closeBtn" onClick={handleCloseTask}>
           <FontAwesomeIcon icon={faTimes} />
         </button>
@@ -481,6 +569,23 @@ const AddTask = ({
             </>
           )}
         </div>
+
+        {selectedItem && (
+          <div className="taskStatusControls">
+            {selectedStatus === "working" ? (
+              <button type="button" onClick={() => updateTaskStatus("unchecked")}>
+                Pause
+              </button>
+            ) : (
+              <button type="button" onClick={() => updateTaskStatus("working")}>
+                Start
+              </button>
+            )}
+            <button type="button" onClick={() => updateTaskStatus("checked")}>
+              Done
+            </button>
+          </div>
+        )}
 
         <div className="controlBtn">
           {selectedItem ? (

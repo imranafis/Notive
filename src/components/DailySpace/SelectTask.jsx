@@ -13,14 +13,16 @@ import {
 import { db } from "/src/lib/firebase"; // Adjust path if needed
 import { getUser } from "/src/lib/user";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBackward } from "@fortawesome/free-solid-svg-icons";
+import { faBackward, faPlus } from "@fortawesome/free-solid-svg-icons";
 import TaskBox from "/src/components/others/TaskBox";
 import { toast } from "react-toastify";
+import dayjs from "dayjs";
 
 import "./dailySpace.css";
 
-const SelectTask = ({ setActivePanel }) => {
+const SelectTask = ({ setActivePanel, setAddSection }) => {
   const [tasks, setTasks] = useState([]);
+  const today = dayjs().format("DD-MM-YY");
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -39,7 +41,9 @@ const SelectTask = ({ setActivePanel }) => {
             id: doc.id,
             ...doc.data(),
           }))
-          .filter((doc) => doc.status === "unchecked");
+          .filter(
+            (doc) => doc.status === "unchecked" && doc.dailySpaceDate !== today
+          );
         setTasks(tasksList);
       } catch (error) {
         console.error("Error fetching tasks:", error);
@@ -48,7 +52,7 @@ const SelectTask = ({ setActivePanel }) => {
 
     fetchTasks();
   }, []);
-  const handleTaskStatusChange = async (taskId, newStatus) => {
+  const handleTaskStatusChange = async (taskId) => {
     // setTaskStatuses((prevStatuses) => ({
     //   ...prevStatuses,
     //   [taskId]: newStatus,
@@ -57,11 +61,22 @@ const SelectTask = ({ setActivePanel }) => {
     try {
       const userID = getUser().uid;
       const taskRef = doc(db, userID, taskId);
-      await updateDoc(taskRef, { status: newStatus });
+      await updateDoc(taskRef, {
+        status: "unchecked",
+        doneDate: "",
+        dailySpaceDate: today,
+      });
+      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+      setActivePanel("");
     } catch (error) {
       console.error("Failed to update task status:", error);
       toast.error("Failed to update status. Please try again.");
     }
+  };
+
+  const handleAddTask = () => {
+    setActivePanel("");
+    setAddSection("viewTask");
   };
 
   return (
@@ -75,6 +90,10 @@ const SelectTask = ({ setActivePanel }) => {
         </div>
 
         <h2>Select Tasks</h2>
+        <button className="addTaskBtn" onClick={handleAddTask}>
+          <FontAwesomeIcon icon={faPlus} />
+          Add Task
+        </button>
       </div>
       <div className="taskGrid">
         {tasks.length > 0 ? (
@@ -83,11 +102,11 @@ const SelectTask = ({ setActivePanel }) => {
               {/* TaskBox Component to Handle State */}
               <TaskBox
                 status={task.status}
-                onStatusChange={(newStatus) =>
-                  handleTaskStatusChange(task.id, newStatus)
-                }
+                onStatusChange={() => handleTaskStatusChange(task.id)}
               />
-              <span>{task.name}</span>
+              <span onClick={() => handleTaskStatusChange(task.id)}>
+                {task.name}
+              </span>
             </li>
           ))
         ) : (

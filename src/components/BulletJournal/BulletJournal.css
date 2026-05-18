@@ -216,6 +216,7 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -233,6 +234,7 @@
 }
 
 .NoteModal {
+  position: relative;
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
@@ -243,6 +245,24 @@
   flex-direction: column;
   animation: slideUp 0.3s ease-in-out;
   overflow: hidden;
+}
+
+.NoteModal .closeBtn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: 0.25rem;
+}
+
+.NoteModal .closeBtn:hover {
+  color: red;
 }
 
 @keyframes slideUp {
@@ -261,7 +281,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 20px 3rem 20px 20px;
   /* border-bottom: 1px solid #e0e0e0; */
   background-color: #f8f9fa;
   gap: 10px;

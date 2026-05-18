@@ -739,9 +739,10 @@ function AddGoal({
     <div
       className={`addGoal ${fullScreenMode ? "fullScreen" : ""}`}
       ref={addGoalRef}
+      onClick={handleCloseGoal}
     >
       {addSection == "viewDailyTask" && (
-        <div className="panel">
+        <div className="panel" onClick={(e) => e.stopPropagation()}>
           <button className="closeBtn" onClick={() => handleCloseGoal()}>
             <FontAwesomeIcon icon={faTimes} />
           </button>
@@ -789,7 +790,7 @@ function AddGoal({
         </div>
       )}
       {addSection != "viewDailyTask" && (
-        <div className="panel">
+        <div className="panel" onClick={(e) => e.stopPropagation()}>
           <button className="closeBtn" onClick={() => handleCloseGoal()}>
             <FontAwesomeIcon icon={faTimes} />
           </button>

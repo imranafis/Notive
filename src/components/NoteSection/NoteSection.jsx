@@ -17,7 +17,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { getUser } from "/src/lib/user";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import { faEllipsisV, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { initializeAditor } from "/src/lib/aditor.js";
 import "/src/lib/aditor.css";
 import "./NoteSection.css";
@@ -77,6 +77,25 @@ function NoteSection({ addSection, setAddSection }) {
       return () => aditorElement.removeEventListener("keyup", handleKeyUp);
     }
   }, [ViewMode]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        e.target.closest(".dropdown-container") ||
+        e.target.closest(".filterDropdownContainer")
+      ) {
+        return;
+      }
+
+      setActiveDropdown(null);
+      setFilterDropdownOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (ViewMode === "selected" && SelectedNote && Aditor_NoteSection.current) {
@@ -765,8 +784,24 @@ function NoteSection({ addSection, setAddSection }) {
 
       {/* Modal for Selected Note */}
       {ViewMode === "selected" && SelectedNote && (
-        <div className="NoteModalOverlay" onClick={() => setViewMode("all")}>
+        <div
+          className="NoteModalOverlay"
+          onClick={() => {
+            setViewMode("all");
+            setSelectedNote(null);
+          }}
+        >
           <div className="NoteModal" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="closeBtn"
+              onClick={() => {
+                setViewMode("all");
+                setSelectedNote(null);
+              }}
+              aria-label="Close popup"
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
             <div className="NoteHeader">
               <input
                 type="text"
@@ -779,14 +814,6 @@ function NoteSection({ addSection, setAddSection }) {
                   SelectedNote.isHabitNote
                 }
               />
-              <button
-                onClick={() => {
-                  setViewMode("all");
-                  setSelectedNote(null);
-                }}
-              >
-                Close
-              </button>
             </div>
 
             <div ref={Aditor_NoteSection} className="Aditor_NoteSection"></div>

@@ -135,16 +135,17 @@ const GoalSection = ({
     setActiveDropdown(activeDropdown === goalId ? null : goalId);
   };
 
-  // useEffect(() => {
-  //   const handleClickOutside = () => {
-  //     setActiveDropdown(null);
-  //   };
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (e.target.closest(".dropdown-container")) return;
+      setActiveDropdown(null);
+    };
 
-  //   document.addEventListener("click", handleClickOutside);
-  //   return () => {
-  //     document.removeEventListener("click", handleClickOutside);
-  //   };
-  // }, []);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const toggleStar = async (goal, e) => {
     e.stopPropagation();

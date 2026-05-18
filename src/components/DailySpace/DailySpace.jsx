@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
-import { faPlus, faAnglesRight } from "@fortawesome/free-solid-svg-icons";
+import { faEllipsisV, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faAnglesRight } from "@fortawesome/free-solid-svg-icons";
 import {
   collection,
   addDoc,
@@ -135,10 +135,13 @@ const DailySpace = ({
       }
 
       if (itemCategory === "task") {
-        await updateDoc(taskRef, {
+        const updateData = {
           status: newStatus,
           doneDate: newStatus === "checked" ? today : "",
-        });
+          dailySpaceDate: today,
+        };
+
+        await updateDoc(taskRef, updateData);
         fetchTasks();
       } else if (itemCategory === "goal") {
         await updateDoc(taskRef, {
@@ -165,7 +168,14 @@ const DailySpace = ({
 
       const today = dayjs().format("DD-MM-YY");
       const tasks = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setWorkingTasks(tasks.filter((t) => t.status === "working"));
+      setWorkingTasks(
+        tasks.filter(
+          (t) =>
+            t.dailySpaceDate === today ||
+            t.status === "working" ||
+            t.doneDate === today
+        )
+      );
       setDoneTasks(tasks.filter((t) => t.doneDate === today));
     } catch (error) {
       console.error("Error fetching working tasks:", error);
@@ -493,8 +503,31 @@ const DailySpace = ({
     fetchTasks();
   }, [addSection, activePanel]);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        e.target.closest(".dropdown-container") ||
+        e.target.closest(".taskBarMenu")
+      ) {
+        return;
+      }
+
+      setActiveDropdown(null);
+      setTaskMenuOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   // useEffect(() => {
   // }, [activePanel]);
+
+  const activeTodayTasks = workingTasks.filter(
+    (task) => task.doneDate !== today
+  );
 
   return (
     <div className="dailySpace">
@@ -705,17 +738,12 @@ const DailySpace = ({
       </div>
 
       <div className="taskContainer">
-        {workingTasks.length === 0 ? (
+        {activeTodayTasks.length === 0 ? (
           <p>No daily tasks available</p>
         ) : (
-          workingTasks.map((task) => (
+          activeTodayTasks.map((task) => (
             <div key={task.id} className="taskItem">
-              <TaskBox
-                status={task.status}
-                onStatusChange={(newStatus) =>
-                  handleTaskStatusChange(task.id, newStatus, "task")
-                }
-              />
+              <TaskBox status={task.status} disabled={true} />
               <span onClick={(e) => handleViewTask(task, false, e)}>
                 {task.name}
               </span>
@@ -850,9 +878,19 @@ const DailySpace = ({
 
       {/* Modal popup */}
       {activePanel === "SelectTask" && (
-        <div className="popupOverlay">
-          <div className="popupContent">
-            <SelectTask setActivePanel={setActivePanel} />
+        <div className="popupOverlay" onClick={() => setActivePanel("")}>
+          <div className="popupContent" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="closeBtn"
+              onClick={() => setActivePanel("")}
+              aria-label="Close popup"
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+            <SelectTask
+              setActivePanel={setActivePanel}
+              setAddSection={setAddSection}
+            />
           </div>
         </div>
       )}

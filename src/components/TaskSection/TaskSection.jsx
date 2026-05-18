@@ -104,6 +104,25 @@ const TaskSection = ({
     fetchTasks();
   }, [addSection]);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        e.target.closest(".dropdown-container") ||
+        e.target.closest(".filterDropdownContainer")
+      ) {
+        return;
+      }
+
+      setActiveDropdown(null);
+      setFilterDropdownOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const updateProjectTaskStatusChange = async (
     userID,
     goalId,

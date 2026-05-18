@@ -18,7 +18,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { getUser } from "/src/lib/user";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import { faEllipsisV, faTimes } from "@fortawesome/free-solid-svg-icons";
 
 import { initializeAditor, initializeAditorPoint } from "/src/lib/aditor.js";
 import "/src/lib/aditor.css";
@@ -68,6 +68,18 @@ function BulletJournal({ addSection, setAddSection }) {
       initializeAditor(overlayEditorRef.current, notePayload?.content || "");
     }
   }, [showNoteOverlay, notePayload]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (e.target.closest(".dropdown-container")) return;
+      setActiveDropdown(null);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     const handler = (e) => {
@@ -435,6 +447,13 @@ function BulletJournal({ addSection, setAddSection }) {
             className="NoteModal"
             onClick={(e) => e.stopPropagation()} // prevent closing on inner click
           >
+            <button
+              className="closeBtn"
+              onClick={() => setShowNoteOverlay(false)}
+              aria-label="Close popup"
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
             <div className="NoteHeader">
               <input
                 type="text"
@@ -443,7 +462,6 @@ function BulletJournal({ addSection, setAddSection }) {
                   setNotePayload({ ...notePayload, noteName: e.target.value })
                 }
               />
-              <button onClick={() => setShowNoteOverlay(false)}>Close</button>
             </div>
 
             {/* ✅ Aditor */}
